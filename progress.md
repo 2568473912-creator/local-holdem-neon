@@ -280,3 +280,43 @@ TODO / Suggestions for next agent:
     - 产物：`output/web-game-nav-check/*`
     - 结果：无 errors 文件，状态恢复正常
 - 结论：当前未发现可复现的崩溃/报错问题；功能流与关键新特性均可正常工作。
+- UI 修复（本轮）：解决玩家手牌与公共牌/信息层遮挡。
+  - 座位布局算法重算（`TableScene` / `ReplayViewer`）：
+    - 扩大椭圆半径
+    - 上半区座位上移、侧边座位避开中轴线
+    - 7+ 人自动缩放 seat panel（10 人最小约 0.78）
+  - 公共牌与底池区整体下移：
+    - `.board-area top` 54% -> 58%
+    - `.pot-display top` 56% -> 63%
+    - `.side-pot-list top` 62% -> 70%
+  - 玩家面板紧凑化（减少遮挡面积）：
+    - `.seat-panel` 172x108 -> 160x98
+    - 字号和元信息微缩
+    - 小手牌尺寸 42x62 -> 38x56
+  - 二次微调：将上半区位移从 -24 收敛到 -18，减少对阶段条区域压占。
+- 验证：
+  - `npm run test` 通过（22/22）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright 截图：
+    - `output/web-game-overlap-fix-v2/ai5.png`
+    - `output/web-game-overlap-fix-v2/ai10.png`
+    - 无 errors 文件
+  - 观察结果：玩家手牌与公共牌区域已分离，未出现互相遮挡。
+- UI 布局修复（按用户反馈）：
+  - 修复“玩家自己手牌被下方栏遮挡”：
+    - `.table-wrap` 增加下边距留白（padding-bottom）承接溢出手牌
+    - Seat panel/card 尺寸缩小，减少纵向占用
+  - 下方显示栏整体压缩：
+    - 控件字体/按钮/提示/策略卡等字号下调
+    - `controls-panel`/`hint-box`/`action-log`/`session-insights` 紧凑化
+  - 右侧两个模块（行动时间线/牌桌态势）显示不完整与不对齐：
+    - `bottom-row` 改为 `align-items: stretch`
+    - 右侧两模块取消 max-height 限制，改为高度拉伸对齐并滚动
+    - 列宽调整为 `1fr 350px 330px`，避免内容被挤压
+- 验证：
+  - lint/build 通过
+  - Playwright 截图：
+    - `output/web-game-overlap-fix-v3/ai5.png`
+    - `output/web-game-overlap-fix-v3/ai10.png`
+  - 无 errors 文件，页面正常可访问。
