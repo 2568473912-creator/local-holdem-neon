@@ -320,3 +320,19 @@ TODO / Suggestions for next agent:
     - `output/web-game-overlap-fix-v3/ai5.png`
     - `output/web-game-overlap-fix-v3/ai10.png`
   - 无 errors 文件，页面正常可访问。
+
+## 2026-03-11 17:10 - Windows portable 空白页修复
+- 用户反馈：Windows 一键运行版能打开但不显示游戏内容。
+- 快速定位：`dist/index.html` 使用了绝对资源路径 `/assets/...`，Electron `loadFile(file://...)` 下会解析为 `file:///assets/...`，导致前端资源 404。
+- 计划：
+  1) Vite 构建改为 `base: './'`（仅影响资源引用方式，HTTP 和 file 协议均可用）
+  2) 重新 build + test + lint
+  3) 重打 Windows portable 包并覆盖上传 Release 资产
+  4) 给用户新的下载链接和验证建议
+- Windows portable 白屏修复：将 `vite.config.ts` 增加 `base: './'`，修复 Electron `file://` 场景静态资源路径 404。
+- 验证：
+  - `npm run test` 通过（22/22）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `dist/index.html` 已由 `/assets/...` 变为 `./assets/...`
+  - Playwright 回归截图：`output/windows-portable-fix/shot-{0..2}.png`
