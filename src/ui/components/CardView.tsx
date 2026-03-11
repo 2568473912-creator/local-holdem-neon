@@ -11,8 +11,8 @@ interface CardViewProps {
 }
 
 export function CardView({ card, hidden = false, small = false, highlighted = false, delay = 0 }: CardViewProps) {
-  const width = small ? 42 : 58;
-  const height = small ? 62 : 84;
+  const width = small ? 34 : 58;
+  const height = small ? 50 : 84;
 
   return (
     <motion.div
