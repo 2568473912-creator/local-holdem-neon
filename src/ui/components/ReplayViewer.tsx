@@ -20,19 +20,27 @@ interface ReplayViewerProps {
 interface SeatPosition {
   x: number;
   y: number;
+  scale: number;
 }
 
 function getSeatPositions(total: number): SeatPosition[] {
   const positions: SeatPosition[] = [];
-  const radiusX = 42;
-  const radiusY = 38;
+  const radiusX = 44;
+  const radiusY = 42;
   const start = 90;
+  const baseScale = total >= 10 ? 0.78 : total >= 9 ? 0.82 : total >= 8 ? 0.86 : total >= 7 ? 0.92 : 1;
 
   for (let i = 0; i < total; i += 1) {
     const angle = ((start + (360 / total) * i) * Math.PI) / 180;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
     positions.push({
-      x: 50 + Math.cos(angle) * radiusX,
-      y: 50 + Math.sin(angle) * radiusY,
+      x: 50 + cos * radiusX,
+      y:
+        50 +
+        sin * radiusY +
+        (sin < -0.2 ? -18 : sin > 0.2 ? 6 : cos > 0 ? 12 : -12),
+      scale: sin < -0.2 ? baseScale * 0.92 : baseScale,
     });
   }
 
@@ -163,7 +171,11 @@ export function ReplayViewer({
               const pos = seatPositions[idx];
               const seatPlayer = record.participants.find((p) => p.id === player.id);
               return (
-                <div key={`replay-seat-${player.id}`} className="seat-anchor" style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
+                <div
+                  key={`replay-seat-${player.id}`}
+                  className="seat-anchor"
+                  style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: `translate(-50%, -50%) scale(${pos.scale})` }}
+                >
                   <SeatPanel
                     player={{
                       ...player,
