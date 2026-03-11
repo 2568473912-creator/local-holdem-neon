@@ -1,0 +1,42 @@
+:root {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'SF Pro Display', 'Microsoft YaHei', sans-serif;
+  color: #f4f7ff;
+  background: #06070d;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --bg-main: #06070d;
+  --bg-panel: rgba(8, 12, 24, 0.72);
+  --bg-panel-strong: rgba(13, 18, 33, 0.9);
+  --line-neon: rgba(0, 230, 255, 0.35);
+  --line-warm: rgba(252, 190, 74, 0.5);
+  --text-dim: #95a4c0;
+  --accent-cyan: #0ce8ff;
+  --accent-gold: #f7c45f;
+  --accent-red: #ff5e7a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at 20% 10%, #18264e 0%, rgba(10, 13, 24, 0.95) 25%, #05060c 75%),
+    linear-gradient(120deg, #07090f, #05070c);
+  color: #f0f5ff;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
