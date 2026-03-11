@@ -235,11 +235,14 @@
 .table-wrap {
   position: relative;
   min-height: 0;
+  display: flex;
+  padding: 14px 0 64px;
 }
 
 .table-felt {
   position: relative;
-  height: 100%;
+  flex: 1;
+  height: auto;
   min-height: 300px;
   border-radius: 46px;
   overflow: visible;
@@ -271,7 +274,7 @@
 .board-area {
   position: absolute;
   left: 50%;
-  top: 54%;
+  top: 58%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -294,7 +297,7 @@
 .pot-display {
   position: absolute;
   left: 63%;
-  top: 56%;
+  top: 63%;
   transform: translate(-50%, -50%);
   width: 128px;
   height: 88px;
@@ -321,7 +324,7 @@
 .side-pot-list {
   position: absolute;
   left: 63%;
-  top: 62%;
+  top: 70%;
   transform: translateX(-50%);
   display: flex;
   gap: 8px;
@@ -352,15 +355,15 @@
 }
 
 .seat-panel {
-  width: 172px;
-  min-height: 108px;
+  width: 148px;
+  min-height: 90px;
   background: linear-gradient(165deg, rgba(16, 22, 41, 0.86), rgba(7, 12, 25, 0.95));
   border: 1px solid rgba(112, 141, 190, 0.36);
   border-radius: 14px;
-  padding: 9px;
+  padding: 7px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .seat-panel.human {
@@ -384,7 +387,7 @@
 }
 
 .seat-header strong {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
 }
 
 .seat-badges {
@@ -393,15 +396,15 @@
 }
 
 .seat-badge {
-  font-size: 0.64rem;
+  font-size: 0.58rem;
   border-radius: 999px;
-  padding: 2px 7px;
+  padding: 1px 6px;
   border: 1px solid rgba(255, 213, 115, 0.55);
   color: #ffd787;
 }
 
 .seat-meta {
-  font-size: 0.74rem;
+  font-size: 0.66rem;
   color: #b8c9e7;
   display: flex;
   justify-content: space-between;
@@ -409,9 +412,9 @@
 }
 
 .seat-status {
-  font-size: 0.75rem;
+  font-size: 0.66rem;
   color: #98ecff;
-  min-height: 16px;
+  min-height: 14px;
 }
 
 .seat-cards {
@@ -473,8 +476,9 @@
 
 .bottom-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px 300px;
+  grid-template-columns: minmax(0, 1fr) 350px 330px;
   gap: 12px;
+  align-items: stretch;
 }
 
 .left-stack {
@@ -484,7 +488,8 @@
 }
 
 .hint-box {
-  padding: 10px 12px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
   color: #d7ebff;
   border-radius: 12px;
   border: 1px solid rgba(116, 146, 191, 0.36);
@@ -497,13 +502,13 @@
 }
 
 .controls-panel {
-  padding: 12px;
+  padding: 10px;
   border-radius: 14px;
   border: 1px solid rgba(106, 136, 182, 0.34);
   background: linear-gradient(160deg, rgba(10, 15, 28, 0.92), rgba(7, 11, 22, 0.95));
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .controls-row {
@@ -513,7 +518,9 @@
 }
 
 .btn.action {
-  min-width: 82px;
+  min-width: 72px;
+  padding: 7px 10px;
+  font-size: 0.85rem;
 }
 
 .btn.action.fold {
@@ -537,7 +544,7 @@
 }
 
 .raise-control label {
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   color: #b6cae7;
 }
 
@@ -554,7 +561,7 @@
 .raise-values {
   display: flex;
   justify-content: space-between;
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   color: #a7bddb;
 }
 
@@ -563,7 +570,7 @@
 }
 
 .controls-footnote {
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   color: #95aac8;
 }
 
@@ -595,35 +602,37 @@
 
 .strategy-grid span {
   color: #9cb2d3;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
 }
 
 .strategy-grid strong {
   color: #d8ecff;
-  font-size: 0.86rem;
+  font-size: 0.8rem;
 }
 
 .strategy-card p {
   margin: 0;
   color: #b7cdf0;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
 }
 
 .action-log {
-  min-height: 220px;
-  max-height: 300px;
+  min-height: 0;
+  height: 100%;
+  max-height: none;
   overflow: auto;
-  padding: 12px;
+  padding: 10px;
 }
 
 .session-insights {
-  min-height: 220px;
-  max-height: 300px;
+  min-height: 0;
+  height: 100%;
+  max-height: none;
   overflow: auto;
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .session-insights h3,
@@ -648,12 +657,12 @@
 }
 
 .session-kpis span {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #9ab3d9;
 }
 
 .session-kpis strong {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   color: #dff0ff;
 }
 
@@ -669,12 +678,12 @@
 }
 
 .session-next-level span {
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   color: #9db6d9;
 }
 
 .session-next-level strong {
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   color: #8ee9ff;
   text-align: right;
 }
@@ -787,7 +796,7 @@
 }
 
 .session-standing-list .name {
-  font-size: 0.79rem;
+  font-size: 0.74rem;
 }
 
 .session-standing-list .status {
@@ -797,7 +806,7 @@
 
 .session-standing-list strong {
   color: #e4f4ff;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
 }
 
 .session-out-list p {
@@ -820,6 +829,7 @@
 
 .action-log h3 {
   margin: 0 0 10px;
+  font-size: 1rem;
 }
 
 .action-log ul {
@@ -852,13 +862,13 @@
 }
 
 .event-note {
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   color: #d9ebff;
 }
 
 .event-teaching {
   align-self: flex-start;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   padding: 2px 8px;
   border-radius: 999px;
   border: 1px solid rgba(141, 169, 212, 0.44);
@@ -905,7 +915,7 @@
 }
 
 .event-teaching-note {
-  font-size: 0.73rem;
+  font-size: 0.67rem;
   color: #9eb9db;
 }
 
@@ -1458,7 +1468,11 @@
   }
 
   .seat-panel {
-    width: 148px;
+    width: 136px;
+  }
+
+  .table-wrap {
+    padding-bottom: 74px;
   }
 
   .hud-actions {
