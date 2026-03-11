@@ -1,0 +1,282 @@
+Original prompt: Build a complete polished single-player Texas Hold'em poker game with Standard + Short Deck modes, strict rule accuracy (betting order, legal action validation, min-raise, all-in/side pots, split pots), event-sourced replay with visual reconstruction, polished casino-grade UI, full local React+TypeScript+Vite implementation, complete runnable files.
+
+2026-03-11
+- Initialized Vite React+TS project.
+- Installed dependencies including framer-motion.
+- Next: implement core engine modules first (rules, evaluator separation, side pots, state machine), then replay and UI.
+
+- Implemented full engine modules:
+  - deck logic (standard + short deck)
+  - action validation
+  - betting round queue + minimum raise logic
+  - all-in handling including under-raise not reopening action
+  - pot/side-pot settlement with split-pot and odd-chip allocation
+  - independent standard and short-deck evaluators
+- Implemented AI decision heuristics with style profiles and contextual factors.
+- Implemented event-sourced replay model + event-driven snapshot reconstruction.
+- Implemented UI screens: menu, table scene, history center, replay viewer.
+- Next: build, fix compile/runtime issues, run local validation and Playwright screenshot loop.
+- Ran `npm run build` and fixed all TypeScript/runtime build issues.
+- Ran Playwright skill client against local dev server:
+  - output/web-game
+  - output/web-game-fix1
+  - output/web-game-fix2
+  - output/web-game-fix3
+- Verified screenshots and render_game_to_text output generated; no playwright error logs produced.
+- Adjusted desktop layout so operation area and timeline are visible in common 1280x720 capture.
+
+TODO / Suggestions for next agent:
+- Add deterministic engine unit tests for side-pot split edge cases (multi-way all-in tiers and odd chips).
+- Add optional sound assets and hook into existing animation points.
+- Consider adding stack-size presets and keyboard shortcuts for betting controls.
+- Fixed important rule edge case: short all-in under min-raise now updates call queue without reopening raise rights.
+- Added raise-lock validation to block illegal re-raise/all-in when action is not reopened.
+- Passed `npm run lint` and `npm run build`.
+- Final Playwright verification run completed with screenshots in output/web-game-final and no error logs.
+- Added new session modes and pacing options:
+  - 现金局（固定盲注）
+  - 锦标赛（每 N 手自动升盲，默认系数 1.5）
+  - 快速模式（手牌结束后自动下一手）
+- Refactored controller state to track baseConfig vs current config, enabling proper restart behavior after blind escalation.
+- Moved main pot display rightward to avoid blocking board cards and aligned side-pot chips.
+- Updated HUD to display session mode, pace mode, blind level, and blind-up interval.
+- Verified with Playwright screenshots:
+  - output/web-game-menu-modes/shot-0.png
+  - output/web-game-new-modes/shot-0.png
+- Lint/build both pass after changes.
+- 继续优化：完成 AI 街道计划增强（preflop/flop/turn/river 分层决策）。
+  - 重构 `src/engine/ai.ts`：
+    - 新增牌面纹理分析（同花压力、顺子压力、paired board、wetness）
+    - 新增抽牌画像（同花听牌、顺子听牌、open-ended/gutshot、combo draw、overcards）
+    - 新增 postflop 手牌画像（made hand 等级、top pair / overpair / set-or-better）
+    - 新增基于意图的下注尺度（value/protection/semi-bluff/bluff/probe）
+    - 新增 jam 触发逻辑（SPR、BB 深度、牌力与听牌耦合）
+    - 保留并强化合法动作归一化，确保 AI 输出始终可通过 action validation。
+- 新增 AI 场景测试 `tests/aiDecision.test.ts`（5 条）：
+  - 翻前强牌主动进攻
+  - 河牌高压弱牌弃牌
+  - 翻牌 combo draw 不过度弃牌
+  - raise-lock 场景仍只输出合法动作
+  - 短牌 A9 同花连接性策略
+- 验证结果：
+  - `npm run test` 通过（9/9）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright 回归截图：`output/web-game-ai-next/shot-{0,1,2}.png`
+  - 状态输出：`output/web-game-ai-next/state-{0,1,2}.json`
+
+TODO / Suggestions for next agent:
+- 增加“AI 记忆上一街侵略者”与“范围收缩”建模，提高 turn/river 决策一致性。
+- 在回放时间线中增加“AI 决策标签”（value/semi-bluff/pot-control）用于教学模式。
+- 增加可选的 AI 难度档（保守/标准/激进），将当前策略参数化到菜单层。
+- 继续优化（本轮）：实现 AI“侵略者记忆 + 范围收缩”机制。
+  - `TableState` 新增 `aggression` 跟踪器（按街道侵略者、最后侵略者、玩家加注计数、主动动作计数、面对侵略弃牌计数）。
+  - `handEngine.applyAction` 在每次动作后更新 aggression memory：
+    - 识别 bet/raise/full-raise all-in 作为侵略事件
+    - 记录 street aggressor 与 last aggressor
+    - 记录 facing aggression fold 统计
+  - `ai.ts` 新增 aggression signal 分析：
+    - 读取当前街/上一街侵略者
+    - 识别同一对手连续开火（barrel chain）
+    - 根据对手历史侵略频率与弃牌频率估计 bluffLikelihood 与 lineStrength
+    - 将信号注入 confidence / foldThreshold / callThreshold / raise 条件
+    - 在有主动权时增加延续下注倾向；面对连续施压时收紧边缘跟注范围
+- 新增测试覆盖（`tests/aiDecision.test.ts`）：
+  - 同一侵略者连续施压时，边缘牌更倾向弃牌
+  - 有主动权时在有利牌面更倾向延续下注
+- 当前验证：
+  - `npm run test` 通过（11/11）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright 回归：`output/web-game-ai-memory/shot-{0..3}.png`
+- 继续优化（本轮）：回放教学标签系统上线（AI action intent tagging）。
+  - 新增 `src/engine/actionTeaching.ts`：为 AI 行动推断教学标签和说明（价值下注、半诈唬、诈唬施压、控池操作、压力弃牌、赔率跟注、防守跟注、价值全下、施压全下）。
+  - `handEngine.applyAction` 在写入 replay action 事件时附加 teaching 字段（`teachingTag/teachingLabel/teachingNote`）。
+  - 扩展 `src/types/replay.ts` 的 `ActionEvent` 类型，支持教学标签结构。
+  - UI 展示：
+    - `ActionLogPanel` 显示教学标签与说明文案
+    - `ReplayViewer` 时间线显示教学标签，并在当前步骤显示“教学标签 + 解释”
+    - `theme.css` 新增各标签视觉样式（颜色区分价值/诈唬/防守/弃牌）
+  - 新增单测 `tests/actionTeaching.test.ts`（3 条）验证标签推断稳定性。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（14/14）
+  - `npm run build` 通过
+  - Playwright 截图：`output/web-game-teaching-tags/shot-{0..3}.png`
+- 继续优化（本轮）：AI 难度档位（保守/标准/激进）上线。
+  - 配置层：`GameConfig` 新增 `aiDifficulty`，菜单可选并写入牌局配置。
+  - UI：
+    - `MainMenu` 新增“AI 难度”选择
+    - `TopHud` 新增 AI 难度显示
+    - `render_game_to_text` 输出加入 `aiDifficulty`
+  - AI 引擎：
+    - `ai.ts` 引入 `DIFFICULTY_TUNING`，按难度调整 tightness/aggression/bluff
+    - 难度影响 offense/caution/foldThreshold/jamThreshold/c-bet 倾向
+    - 保持现有合法动作归一化，不引入非法动作
+- 测试新增与更新：
+  - `tests/aiDecision.test.ts` 新增难度差异场景（主动权 c-bet 倾向、turn 压力下激进/保守行为分化）
+  - 所有测试配置补齐 `aiDifficulty` 字段
+- 文档更新：
+  - README 增加 AI 难度与测试覆盖说明
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（16/16）
+  - `npm run build` 通过
+  - Playwright 截图：
+    - 菜单：`output/web-game-difficulty-menu/shot-0.png`
+    - 牌桌：`output/web-game-difficulty-table/shot-{0..3}.png`
+- 继续完善（本轮）：局中难度切换 + 回放分析增强。
+  - 新增能力：可在 `TopHud` 中实时切换 AI 难度（保守/标准/激进），立即生效并写入运行中 table config。
+  - 数据结构增强：`HandHistoryRecord` 新增 `sessionMode`、`aiDifficulty`，历史手牌保留当时难度上下文。
+  - AI 决策：`ai.ts` 新增 `DIFFICULTY_TUNING`，按难度调整 aggression/tightness/bluff 与阈值（offense/caution/fold/jam/c-bet）。
+  - 历史/回放增强：
+    - `ReplayCenter` 新增 AI 难度筛选
+    - 新增教学统计卡片：AI 行动数、进攻频率、压力弃牌占比、Top 教学标签
+    - `ReplayViewer` 顶部显示该手 AI 难度，时间线侧栏新增该手教学统计摘要
+  - 可观测性：`render_game_to_text` 输出继续携带 `aiDifficulty`。
+- 验证：
+  - `npm run test` 通过（16/16）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright/可视化截图：
+    - 菜单：`output/web-game-polish-menu/shot-0.png`
+    - 牌桌：`output/web-game-polish-table/shot-{0..3}.png`
+    - 历史中心：`output/web-game-polish-history/shot-0.png`
+- 继续完善（本轮补充）：锦标赛前注（Ante）+ UI/分析增强。
+  - 玩法：锦标赛模式每手开局自动收前注（默认大盲 10%），并入主池；前注不计入 `currentBet`，不会抬高本轮跟注基线。
+  - 引擎：
+    - `bettingRound.ts` 新增 `postAnte`（与 `postBlind` 分离）
+    - `handEngine.startHand` 在小盲/大盲前按座位顺序收前注并写入 replay 事件
+  - 回放：`post_blind` 支持 `blindType: 'ante'`，重建时正确显示“前注”且不改 `currentBet`。
+  - HUD：锦标赛时显示当前前注；局中支持热切换 AI 难度（已接上一轮）。
+  - 历史/回放：手牌记录中保留 `sessionMode + aiDifficulty`，历史中心支持按难度筛选和教学统计，回放页显示该手难度与统计摘要。
+  - 观测：`render_game_to_text` 增加 `ante` 输出。
+- 新增规则测试：
+  - `tests/engineRules.test.ts` 新增 tournament ante 用例，验证前注入池与盲注基线正确。
+- 验证：
+  - `npm run test` 通过（17/17）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright/可视化截图：
+    - 菜单：`output/web-game-polish-menu/shot-0.png`
+    - 牌桌：`output/web-game-polish-table/shot-{0..3}.png`
+    - 历史中心：`output/web-game-polish-history/shot-0.png`
+    - 锦标赛前注验证图：`output/web-game-polish-tournament/table-0.png`
+- 继续优化（本轮）：牌桌态势面板 + 回放筹码变化 + 淘汰事件精度修复。
+  - 修复回放数据准确性：`handEngine.finishHand` 现在只为“本手新淘汰”的玩家写入 elimination 事件，避免已淘汰玩家在后续手牌重复记淘汰。
+  - 新增牌桌右侧 `SessionInsightsPanel`：
+    - 实时筹码排名（含你的位置）
+    - 淘汰记录（手牌编号 + 时间）
+    - 在局人数、平均筹码、M 值
+    - 升盲倒计时（锦标赛显示“本手后升盲 / X 手后升盲”）
+  - 新增回放侧栏“筹码变化”区块：展示每位玩家该手 `起始筹码 -> 结束筹码` 与净变化。
+  - 历史中心筛选增强：新增“局制筛选（现金局/锦标赛）”。
+  - 观感修复：`table-felt` 与 `replay-table-felt` 改为 `overflow: visible`，解决上方座位卡牌被切边问题。
+- 新增测试：
+  - `tests/engineRules.test.ts` 增加“已淘汰玩家不重复写 elimination 事件”用例。
+- 验证：
+  - `npm run test` 通过（18/18）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright（skill client）截图：
+    - `output/web-game-session-panel-v2/shot-{0..2}.png`
+  - 深度流程截图（菜单->牌桌->历史->回放）:
+    - `output/web-game-session-panel-replay/table-0.png`
+    - `output/web-game-session-panel-replay/history-0.png`
+    - `output/web-game-session-panel-replay/replay-0.png`
+
+TODO / Suggestions for next agent:
+- 给“牌桌态势”加入可切换视图（仅在局玩家 / 全部玩家），并可按最近 N 手净收益排序。
+- 回放关键节点可再加“可疑诈唬线”与“转折 EV 节点”标签（基于教学标签序列）。
+- 增加可选音效开关（发牌、下注、摊牌、派奖），并把当前动效点位接入统一 SoundBus。
+- 继续优化（本轮）：牌桌态势视图切换 + 回放“可疑诈唬线”识别。
+  - `SessionInsightsPanel` 新增“仅在局 / 全部”切换，支持查看实时筹码榜（默认仅在局）。
+  - 新增 `session-toggle` 样式与交互反馈，右侧态势面板在 1440 宽度下可稳定展示。
+  - `ReplayViewer` 新增可疑诈唬线检测：
+    - 识别 teachingTag 为 `bluff_pressure/pressure_all_in` 的行动
+    - 若该行动后本手未摊牌且施压者收池，标记为“可疑诈唬线”
+    - 关键节点列表新增对应跳转项，事件统计新增“可疑诈唬线”计数
+  - 识别文案区分：
+    - 有压力弃牌证据：`施压后逼退对手并收池`
+    - 无明确弃牌证据：`带诈唬标签下注后未摊牌收池`
+- 验证：
+  - `npm run test` 通过（18/18）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright 回归（含可疑诈唬线命中样本）：
+    - `output/web-game-next-ops-bluff-v2/table-0.png`
+    - `output/web-game-next-ops-bluff-v2/history-0.png`
+    - `output/web-game-next-ops-bluff-v2/replay-bluff-0.png`
+    - `output/web-game-next-ops-bluff-v2/scan-result.json`（found=true, foundCount=4）
+
+TODO / Suggestions for next agent:
+- 回放关键节点增加筛选开关（全部 / 仅高压 / 仅诈唬线 / 仅淘汰）。
+- 牌桌态势榜增加“最近 N 手净变化”排序维度，便于观察 momentum。
+- 继续优化（本轮）：关键节点筛选 + 态势榜排序维度。
+  - `ReplayViewer`：关键节点新增筛选器（全部/高压/诈唬线/淘汰），并在时间线事件上追加“可疑诈唬”标记。
+  - 可疑诈唬线识别更新：凡 `bluff_pressure` / `pressure_all_in` 标签行动后“未摊牌收池”即标记（有无弃牌证据分别给不同说明）。
+  - `SessionInsightsPanel`：新增榜单排序模式（筹码 / 近5手净变化），并在每位玩家右侧显示近5手净变化 delta。
+  - 牌桌态势右下角现有切换扩展为两组：`仅在局/全部` + `筹码/近5手`。
+  - 样式：新增 `session-list-controls`、`delta up/down`、`replay-key-filter`、`timeline-flag` 等视觉反馈。
+- 验证：
+  - `npm run test` 通过（18/18）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright 截图：
+    - `output/web-game-continue-next/table-0.png`
+    - `output/web-game-continue-next/history-0.png`
+    - `output/web-game-continue-next/replay-0.png`
+    - 无 errors 文件
+
+TODO / Suggestions for next agent:
+- 将“近5手净变化”窗口参数化（3/5/10 手切换）并与历史筛选联动。
+- 关键节点筛选可增加“仅看可跳转大额底池（>=XBB）”阈值输入。
+- 继续完善（本轮打包）：N窗口态势排序 + 关键节点阈值 + 时间线组合筛选。
+  - 新增模块 `src/replay/replayAnalysis.ts`：
+    - `detectSuspiciousBluffLines`：可疑诈唬线识别
+    - `buildReplayKeyMoments`：关键节点构建（支持 pressureThresholdBB）
+    - `filterReplayEvents`：时间线组合筛选（高压/诈唬/淘汰/教学/摊牌）
+  - `ReplayViewer` 增强：
+    - 关键节点筛选扩展为：全部/高压/诈唬线/淘汰/结算
+    - 新增高压阈值切换：2/4/6/8/10BB
+    - 新增时间线组合筛选区，多选并显示“事件 X/Y”
+    - 筛选为空时显示“当前筛选下无事件”
+  - `SessionInsightsPanel` 增强：
+    - 排序模式调整为：筹码 / 近N手
+    - N窗口可切换：3/5/10手
+    - 每位玩家保留 delta 展示并参与近N手排序
+  - 样式系统补充：
+    - `session-toggle.disabled`、`session-list-subtitle`
+    - `replay-threshold-row`、`replay-timeline-filters`
+    - `replay-timeline-empty` 等
+- 新增测试：
+  - `tests/replayAnalysis.test.ts`（4 条）覆盖：
+    - 可疑诈唬线识别/排除
+    - 关键节点阈值生效
+    - 时间线组合筛选
+- 验证：
+  - `npm run test` 通过（22/22）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright 回归：
+    - `output/web-game-final-batch-v2/table-0.png`
+    - `output/web-game-final-batch-v2/history-0.png`
+    - `output/web-game-final-batch-v2/replay-0.png`
+    - `output/web-game-final-batch-v2/meta.json`（doneHands=2, replayCount=2）
+    - 无 errors 文件
+
+TODO / Suggestions for next agent:
+- 把回放“时间线组合筛选”状态与 `render_game_to_text` 同步，便于自动化脚本断言筛选效果。
+- 增加“关键节点最小底池(>=XBB)”独立阈值，与“行动额阈值”拆分。
+- 在回放侧栏加入“按玩家过滤时间线”开关，提升教学复盘效率。
+- 健康巡检（本轮）：全面稳定性与崩溃排查。
+  - 基线检查：`npm run test`（22/22）、`npm run lint`、`npm run build` 全通过。
+  - 多场景压测（Playwright）：
+    - 标准德州现金局 / 短牌现金局 / 标准德州锦标赛
+    - 连续多手行动、暂停恢复、历史回放打开、关键节点筛选、阈值切换、时间线组合筛选
+    - 产物：`output/web-game-healthcheck/*`
+    - 结果：`summary.json` 中 `globalErrors: []`，未发现 console/pageerror 崩溃
+  - 导航链路专项：牌桌→历史→回放→历史→牌桌→菜单→重开
+    - 产物：`output/web-game-nav-check/*`
+    - 结果：无 errors 文件，状态恢复正常
+- 结论：当前未发现可复现的崩溃/报错问题；功能流与关键新特性均可正常工作。
