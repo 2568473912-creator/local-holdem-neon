@@ -20,19 +20,34 @@ interface TableSceneProps {
 interface SeatPosition {
   x: number;
   y: number;
+  scale: number;
 }
 
 function getSeatPositions(total: number): SeatPosition[] {
   const positions: SeatPosition[] = [];
-  const radiusX = 42;
-  const radiusY = 38;
+  const radiusX = 44;
+  const radiusY = 42;
   const start = 90;
+  const baseScale = total >= 10 ? 0.78 : total >= 9 ? 0.82 : total >= 8 ? 0.86 : total >= 7 ? 0.92 : 1;
 
   for (let i = 0; i < total; i += 1) {
     const angle = ((start + (360 / total) * i) * Math.PI) / 180;
-    const x = 50 + Math.cos(angle) * radiusX;
-    const y = 50 + Math.sin(angle) * radiusY;
-    positions.push({ x, y });
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const x = 50 + cos * radiusX;
+    let y = 50 + sin * radiusY;
+
+    // Push upper seats above the board and move side seats away from the center lane.
+    if (sin < -0.2) {
+      y -= 18;
+    } else if (sin > 0.2) {
+      y += 6;
+    } else {
+      y += cos > 0 ? 12 : -12;
+    }
+
+    const scale = sin < -0.2 ? baseScale * 0.92 : baseScale;
+    positions.push({ x, y, scale });
   }
 
   return positions;
@@ -134,7 +149,7 @@ export function TableScene({ table, paused, humanOptions, onAction, events, hist
               <div
                 key={player.id}
                 className={`seat-anchor ${isWinner ? 'winner' : ''}`}
-                style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+                style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: `translate(-50%, -50%) scale(${pos.scale})` }}
               >
                 <SeatPanel
                   player={player}
