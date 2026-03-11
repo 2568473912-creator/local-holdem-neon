@@ -16,6 +16,10 @@
   - `dist/` 静态文件
   - `启动游戏.bat` / `启动游戏.ps1`
   - Windows 运行说明文档
+- `local-holdem-neon-v1.0.0-windows-portable.zip`
+  - `NeonHoldemClub.exe`（免 Node 一键运行）
+  - 内置打包资源（Electron + dist）
+  - 便携版使用说明与用户说明书
 
 ## 校验
 - 单测通过（22/22）

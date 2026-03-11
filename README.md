@@ -51,6 +51,11 @@ npm run dev
 - 发布目录模板：`release/v1.0.0/windows`
 - 打包后可直接双击 `启动游戏.bat` 启动
 
+## Windows 便携一键版（免 Node）
+- 生成命令：`npm run desktop:portable:win`
+- 输出文件：`release/local-holdem-neon-v1.0.0-windows-portable.zip`
+- 解压后双击 `NeonHoldemClub.exe` 即可运行
+
 ## 构建
 ```bash
 npm run build
