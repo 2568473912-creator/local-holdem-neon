@@ -103,7 +103,7 @@ export function TableScene({ table, paused, humanOptions, onAction, events, hist
   return (
     <main className="table-scene">
       <section className="table-stage glass-panel">
-        <div className="stage-label">阶段：{handStageLabel(table.stage)}</div>
+        <div className="stage-label current">阶段：{handStageLabel(table.stage)}</div>
         <div className="stage-label">手牌编号：#{table.handId}</div>
         <div className="stage-label">行动玩家：{table.players.find((p) => p.id === table.activePlayerId)?.name ?? '自动推进中'}</div>
       </section>

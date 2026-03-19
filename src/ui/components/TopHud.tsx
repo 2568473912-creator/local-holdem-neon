@@ -79,10 +79,24 @@ export function TopHud({
         <button className="btn" onClick={onNextHand} disabled={table.stage !== 'complete'}>
           下一手
         </button>
-        <button className="btn" onClick={onRestart}>
+        <button
+          className="btn"
+          onClick={() => {
+            if (window.confirm('确定重新开局？当前牌局进度和历史记录将被清空。')) {
+              onRestart();
+            }
+          }}
+        >
           重新开局
         </button>
-        <button className="btn" onClick={onMenu}>
+        <button
+          className="btn"
+          onClick={() => {
+            if (window.confirm('确定返回主菜单？当前牌局将被放弃。')) {
+              onMenu();
+            }
+          }}
+        >
           返回菜单
         </button>
       </div>
