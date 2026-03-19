@@ -1621,22 +1621,117 @@
 
 /* ─── Responsive ──────────────────────────────────────────────── */
 
-@media (max-width: 1200px) {
+/* iPad landscape (768px–1100px wide) — keep 3-column layout but compact */
+@media (min-width: 761px) and (max-width: 1100px) {
   .top-hud {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1.2fr 1fr 1.4fr;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .hud-section {
+    padding: 7px 10px;
+  }
+
+  .hud-section h3 {
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+  }
+
+  .hud-stat {
+    font-size: 0.82rem;
+  }
+
+  .bottom-row {
+    grid-template-columns: minmax(0, 1fr) 240px 220px;
     gap: 8px;
   }
 
-  .bottom-row,
   .replay-main {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 8px;
   }
 
   .action-log,
   .replay-timeline {
-    max-height: 300px;
+    max-height: 220px;
   }
 
+  .table-felt,
+  .replay-table-felt {
+    min-height: 260px;
+  }
+
+  .seat-panel {
+    width: 116px;
+    padding: 6px 8px;
+    font-size: 0.78rem;
+  }
+
+  .table-stage {
+    padding: 6px 12px;
+    gap: 10px;
+  }
+
+  .stage-label {
+    font-size: 0.75rem;
+  }
+
+  .hint-box {
+    font-size: 0.76rem;
+    padding: 6px 10px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .history-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .history-filter-summary {
+    justify-self: start;
+  }
+
+  .history-analysis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .strategy-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .strategy-card p {
+    display: none;
+  }
+
+  .session-list-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .session-list-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .controls-footnote {
+    display: none;
+  }
+
+  .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .menu-card {
+    padding: 16px;
+  }
+}
+
+/* Narrower screens — full collapse to single column */
+@media (max-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1665,6 +1760,23 @@
   .session-list-controls {
     width: 100%;
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .top-hud {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .bottom-row,
+  .replay-main {
+    grid-template-columns: 1fr;
+  }
+
+  .action-log,
+  .replay-timeline {
+    max-height: 300px;
   }
 }
 
