@@ -40,6 +40,9 @@ export function shuffleDeck(cards: Card[]): Card[] {
 }
 
 export function drawCards(deck: Card[], count: number): { cards: Card[]; deck: Card[] } {
+  if (deck.length < count) {
+    throw new Error(`drawCards: requested ${count} cards but only ${deck.length} remain in deck`);
+  }
   const drawn = deck.slice(0, count);
   const rest = deck.slice(count);
   return { cards: drawn, deck: rest };

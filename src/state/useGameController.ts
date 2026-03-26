@@ -202,8 +202,11 @@ export function useGameController() {
     return () => window.clearTimeout(timer);
   }, [state.screen, state.runtime, state.config, state.paused, proceedToNextHand]);
 
+  const replayAutoplay = state.replayViewer?.autoplay ?? false;
+  const replayHandId = state.replayViewer?.handId;
+
   useEffect(() => {
-    if (state.screen !== 'replay' || !state.replayViewer?.autoplay || !currentReplayRecord) {
+    if (state.screen !== 'replay' || !replayAutoplay || !currentReplayRecord) {
       return;
     }
 
@@ -235,7 +238,7 @@ export function useGameController() {
     }, 900);
 
     return () => window.clearInterval(timer);
-  }, [state.screen, state.replayViewer, currentReplayRecord]);
+  }, [state.screen, replayAutoplay, replayHandId, currentReplayRecord]);
 
   const startGame = (config: GameConfig) => {
     const cleanConfig: GameConfig = {
