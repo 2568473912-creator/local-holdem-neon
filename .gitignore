@@ -28,3 +28,7 @@ release/v*/desktop
 *.njsproj
 *.sln
 *.sw?
+
+# Local Codex/Claude workspace artifacts
+.claude/settings.local.json
+.claude/worktrees/
