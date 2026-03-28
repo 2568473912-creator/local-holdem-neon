@@ -1,7 +1,7 @@
 import type { Card, GameMode } from '../types/cards';
 import type { AIDifficulty, PlayerAction, PlayerState, TableState } from '../types/game';
 import { getActionContext, getActionOptions } from './actionValidation';
-import { evaluateByMode } from './evaluators';
+import { evaluatePlayerByMode } from './evaluators';
 import { seatOrderFrom } from './tableUtils';
 
 interface StyleProfile {
@@ -180,13 +180,14 @@ function effectiveGap(a: number, b: number, mode: GameMode): number {
   return Math.min(direct, shortWheelPath);
 }
 
-function estimatePreflopStrength(player: PlayerState, mode: GameMode): number {
-  const [a, b] = [...player.holeCards].sort((x, y) => y.rank - x.rank);
-  const isPair = a.rank === b.rank;
-  const suited = a.suit === b.suit;
-  const gap = effectiveGap(a.rank, b.rank, mode);
-  const highNorm = normalizeRank(a.rank, mode);
-  const lowNorm = normalizeRank(b.rank, mode);
+function scorePreflopTwoCardCombo(a: Card, b: Card, mode: GameMode): number {
+  const high = a.rank >= b.rank ? a : b;
+  const low = a.rank >= b.rank ? b : a;
+  const isPair = high.rank === low.rank;
+  const suited = high.suit === low.suit;
+  const gap = effectiveGap(high.rank, low.rank, mode);
+  const highNorm = normalizeRank(high.rank, mode);
+  const lowNorm = normalizeRank(low.rank, mode);
 
   let score = 0;
 
@@ -212,11 +213,11 @@ function estimatePreflopStrength(player: PlayerState, mode: GameMode): number {
       score -= 0.08;
     }
 
-    if (a.rank >= 12 && b.rank >= 10) {
+    if (high.rank >= 12 && low.rank >= 10) {
       score += 0.08;
     }
 
-    if (a.rank >= 13 && b.rank >= 12) {
+    if (high.rank >= 13 && low.rank >= 12) {
       score += 0.04;
     }
 
@@ -224,13 +225,31 @@ function estimatePreflopStrength(player: PlayerState, mode: GameMode): number {
       if (gap <= 2) {
         score += 0.05;
       }
-      if (Math.min(a.rank, b.rank) >= 9) {
+      if (Math.min(high.rank, low.rank) >= 9) {
         score += 0.04;
       }
     }
   }
 
   return clamp(score, 0, 1);
+}
+
+function estimatePreflopStrength(player: PlayerState, mode: GameMode): number {
+  if (player.holeCards.length < 2) {
+    return 0;
+  }
+
+  let best = 0;
+  for (let i = 0; i < player.holeCards.length - 1; i += 1) {
+    for (let j = i + 1; j < player.holeCards.length; j += 1) {
+      const score = scorePreflopTwoCardCombo(player.holeCards[i], player.holeCards[j], mode);
+      if (score > best) {
+        best = score;
+      }
+    }
+  }
+
+  return best;
 }
 
 function analyzeBoardTexture(board: Card[], mode: GameMode): BoardTexture {
@@ -320,7 +339,7 @@ function analyzeDrawProfile(player: PlayerState, board: Card[], mode: GameMode):
     }
 
     const edgeMissing = missing === pattern[0] || missing === pattern[pattern.length - 1];
-    const standardWheelPattern = mode === 'standard' && pattern[0] === 14 && pattern[1] === 5;
+    const standardWheelPattern = mode !== 'shortDeck' && pattern[0] === 14 && pattern[1] === 5;
     const shortDeckWheelPattern = mode === 'shortDeck' && pattern[0] === 14 && pattern[1] === 9;
 
     if (edgeMissing && !standardWheelPattern && !shortDeckWheelPattern) {
@@ -380,7 +399,7 @@ function analyzePairContext(player: PlayerState, board: Card[]): { topPairLike: 
   }
 
   const boardHigh = Math.max(...board.map((card) => card.rank));
-  const pocketPair = player.holeCards[0].rank === player.holeCards[1].rank;
+  const pocketPair = player.holeCards.length >= 2 && player.holeCards[0].rank === player.holeCards[1].rank;
 
   const topPairLike = player.holeCards.some((card) => card.rank === boardHigh);
   const overPair = pocketPair && player.holeCards[0].rank > boardHigh;
@@ -407,7 +426,7 @@ function analyzePairContext(player: PlayerState, board: Card[]): { topPairLike: 
   };
 }
 
-function classifyHand(category: ReturnType<typeof evaluateByMode>['category'], pairContext: ReturnType<typeof analyzePairContext>, mode: GameMode): HandClass {
+function classifyHand(category: ReturnType<typeof evaluatePlayerByMode>['category'], pairContext: ReturnType<typeof analyzePairContext>, mode: GameMode): HandClass {
   if (category === 'straight_flush' || category === 'four_kind' || category === 'full_house') {
     return 'monster';
   }
@@ -435,7 +454,22 @@ function classifyHand(category: ReturnType<typeof evaluateByMode>['category'], p
 }
 
 function buildPostflopProfile(table: TableState, player: PlayerState): HandProfile {
-  const evaluated = evaluateByMode(table.mode, [...player.holeCards, ...table.board]);
+  const cards = [...player.holeCards, ...table.board];
+  if (cards.length < 5) {
+    const madeScore = estimatePreflopStrength(player, table.mode);
+    const handClass: HandClass =
+      madeScore >= 0.8 ? 'monster' : madeScore >= 0.66 ? 'strong' : madeScore >= 0.5 ? 'medium' : madeScore >= 0.36 ? 'marginal' : 'air';
+    return {
+      madeScore,
+      handClass,
+      topPairLike: false,
+      overPair: false,
+      setOrBetter: false,
+      draw: EMPTY_DRAW,
+    };
+  }
+
+  const evaluated = evaluatePlayerByMode(table.mode, player.holeCards, table.board);
   const pairContext = analyzePairContext(player, table.board);
   const draw = analyzeDrawProfile(player, table.board, table.mode);
 
@@ -569,7 +603,7 @@ interface AmountContext {
 function chooseAggressiveAmount(context: AmountContext): number {
   const { table, player, toCall, minTotal, maxTotal, profile, intent, confidence, boardTexture } = context;
 
-  const street = table.board.length === 0 ? 'preflop' : table.board.length === 3 ? 'flop' : table.board.length === 4 ? 'turn' : 'river';
+  const street = resolveStreet(table);
 
   let multiplier = 0.55;
 
@@ -654,7 +688,7 @@ export function decideAiAction(table: TableState, player: PlayerState): PlayerAc
   const spr = player.stack / Math.max(1, table.totalPot + toCall);
   const aggressionSignal = analyzeAggressionSignal(table, player, toCall);
 
-  const preflop = table.board.length === 0;
+  const preflop = table.stage === 'preflop';
 
   let handClass: HandClass;
   let madeScore: number;

@@ -45,13 +45,14 @@ function makeQueueNeedingCall(
     .map((p) => p.id);
 }
 
-export function buildPreflopQueue(players: PlayerState[], bigBlindSeat: number): string[] {
+export function buildPreflopQueue(players: PlayerState[], forcedOpenSeat: number): string[] {
   const alive = players.filter((p) => !p.eliminated);
   if (alive.length <= 1) {
     return [];
   }
 
-  const startExclusiveSeat = bigBlindSeat;
+  // Default is BB, but straddle hands can start from the straddle seat.
+  const startExclusiveSeat = forcedOpenSeat;
   return makeQueueFromSeat(players, startExclusiveSeat);
 }
 

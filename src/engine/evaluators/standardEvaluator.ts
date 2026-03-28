@@ -2,7 +2,7 @@ import type { Card } from '../../types/cards';
 import type { EvaluatedHand } from './shared';
 import { compareEvaluatedHands, evaluateBestOfSeven } from './shared';
 
-const standardConfig = {
+export const STANDARD_EVALUATOR_CONFIG = {
   categoryOrder: [
     'straight_flush',
     'four_kind',
@@ -30,7 +30,7 @@ const standardConfig = {
 };
 
 export function evaluateStandardHoldem(cards: Card[]): EvaluatedHand {
-  return evaluateBestOfSeven(cards, standardConfig);
+  return evaluateBestOfSeven(cards, STANDARD_EVALUATOR_CONFIG);
 }
 
 export function compareStandardHands(a: EvaluatedHand, b: EvaluatedHand): number {

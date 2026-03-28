@@ -1,6 +1,6 @@
 export type Suit = 'spades' | 'hearts' | 'diamonds' | 'clubs';
 
-export type GameMode = 'standard' | 'shortDeck';
+export type GameMode = 'standard' | 'shortDeck' | 'omaha' | 'plo' | 'stud';
 
 export interface Card {
   suit: Suit;

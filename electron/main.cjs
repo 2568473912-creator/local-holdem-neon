@@ -55,6 +55,7 @@ function createMainWindow() {
 }
 
 app.whenReady().then(() => {
+  app.setName('夜局');
   Menu.setApplicationMenu(null);
   createMainWindow();
 

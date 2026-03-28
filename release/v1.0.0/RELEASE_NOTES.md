@@ -1,6 +1,6 @@
 # Release 1.0.0
 
-霓虹德州俱乐部 `v1.0.0` 首个稳定发布版本。
+夜局 `v1.0.0` 首个稳定发布版本。
 
 ## 主要功能
 - 标准德州 + 短牌德州（独立评估器）
@@ -12,12 +12,12 @@
 - 牌桌态势榜（仅在局/全部、近N手净变化）
 
 ## 发布资产
-- `local-holdem-neon-v1.0.0-windows.zip`
+- `yeju-v1.0.0-windows.zip`
   - `dist/` 静态文件
   - `启动游戏.bat` / `启动游戏.ps1`
   - Windows 运行说明文档
-- `local-holdem-neon-v1.0.0-windows-portable.zip`
-  - `NeonHoldemClub.exe`（免 Node 一键运行）
+- `yeju-v1.0.0-windows-portable.zip`
+  - `Yeju.exe`（免 Node 一键运行）
   - 内置打包资源（Electron + dist）
   - 便携版使用说明与用户说明书
 

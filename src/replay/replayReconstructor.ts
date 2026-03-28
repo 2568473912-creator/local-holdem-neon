@@ -31,7 +31,14 @@ export function applyReplayEvent(prev: ReplaySnapshot, event: ReplayEvent): Repl
           player.currentBet += event.amount;
         }
         player.stack = event.stackAfter;
-        player.lastAction = event.blindType === 'sb' ? `小盲 ${event.amount}` : event.blindType === 'bb' ? `大盲 ${event.amount}` : `前注 ${event.amount}`;
+        player.lastAction =
+          event.blindType === 'sb'
+            ? `小盲 ${event.amount}`
+            : event.blindType === 'bb'
+              ? `大盲 ${event.amount}`
+              : event.blindType === 'straddle'
+                ? `跨注 ${event.amount}`
+                : `前注 ${event.amount}`;
         if (player.stack === 0) {
           player.allIn = true;
         }

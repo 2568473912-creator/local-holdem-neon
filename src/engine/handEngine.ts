@@ -7,6 +7,7 @@ import type {
   PlayerState,
   TableState,
 } from '../types/game';
+import type { HumanPortraitKey } from '../types/portrait';
 import type { HandHistoryRecord } from '../types/replay';
 import { getActionOptions, validateAction } from './actionValidation';
 import { inferActionTeachingMeta } from './actionTeaching';
@@ -14,6 +15,9 @@ import { applyBettingAction, buildPostflopQueue, buildPreflopQueue, postAnte, po
 import { createDeck, drawCards, shuffleDeck } from './cards';
 import { buildPotSegments, settlePots } from './potSettlement';
 import { getAlivePlayers, nextAliveSeat, seatOrderFrom } from './tableUtils';
+import { getTournamentLevel } from './tournamentStructure';
+import { getAiPackOption } from '../content/aiPacks';
+import { buildHoldemAiNames } from '../content/randomNames';
 import {
   addReplayEvent,
   createHandReplayBuilder,
@@ -33,8 +37,22 @@ export interface EngineStepResult {
   error?: string;
 }
 
-const AI_NAMES = ['霓虹鲨鱼', '黑桃猎手', '筹码法师', '深蓝读牌者', '冷面狙击手', '极光玩家', '隐身猎狐', '边池工程师', '红心流浪者', '夜店庄家'];
 const STYLE_ROTATION: PlayerState['style'][] = ['balanced', 'tight', 'aggressive', 'loose'];
+
+function buildAiRoster(
+  config: GameConfig,
+  totalAi: number,
+): Array<{ name: string; portraitKey?: HumanPortraitKey; style: PlayerState['style'] }> {
+  const pack = getAiPackOption(config.aiPackKey ?? 'club-core', config.language);
+  const names = pack.names;
+  const seed = `${config.mode}:${config.aiDifficulty}:${config.sessionMode}:${config.startingChips}:${config.smallBlind}:${config.bigBlind}:${config.humanPortraitKey ?? 'host'}:${Date.now()}`;
+  const shuffledNames = buildHoldemAiNames(names, totalAi, seed);
+  return shuffledNames.map((name, index) => ({
+    name,
+    portraitKey: pack.portraitKeys[index % pack.portraitKeys.length],
+    style: pack.stylePlan[index % pack.stylePlan.length] ?? STYLE_ROTATION[index % STYLE_ROTATION.length],
+  }));
+}
 
 function clonePlayers(players: PlayerState[]): PlayerState[] {
   return players.map((p) => ({
@@ -43,12 +61,21 @@ function clonePlayers(players: PlayerState[]): PlayerState[] {
   }));
 }
 
-function createPlayer(id: string, seat: number, name: string, isHuman: boolean, style: PlayerState['style'], stack: number): PlayerState {
+function createPlayer(
+  id: string,
+  seat: number,
+  name: string,
+  isHuman: boolean,
+  style: PlayerState['style'],
+  stack: number,
+  portraitKey?: HumanPortraitKey,
+): PlayerState {
   return {
     id,
     seat,
     name,
     isHuman,
+    portraitKey,
     style,
     stack,
     holeCards: [],
@@ -93,6 +120,14 @@ function determineBlindSeats(players: PlayerState[], dealerSeat: number): { sbSe
   return { sbSeat, bbSeat };
 }
 
+function determineStraddleSeat(players: PlayerState[], bigBlindSeat: number): number | undefined {
+  const alive = getAlivePlayers(players);
+  if (alive.length < 3) {
+    return undefined;
+  }
+  return nextAliveSeat(players, bigBlindSeat);
+}
+
 function resetBettingQueue(table: TableState): TableState {
   const activePlayerId = table.betting.actionQueue[0];
   return {
@@ -106,6 +141,17 @@ function getStreetRevealCount(stage: TableState['stage']): number {
   if (stage === 'flop') return 1;
   if (stage === 'turn') return 1;
   return 0;
+}
+
+function getInitialHoleCardCount(mode: TableState['mode']): number {
+  if (mode === 'omaha' || mode === 'plo') {
+    return 4;
+  }
+  return 2;
+}
+
+function isStudMode(mode: TableState['mode']): boolean {
+  return mode === 'stud';
 }
 
 function getNextStreet(stage: TableState['stage']): TableState['stage'] {
@@ -131,7 +177,7 @@ function getTournamentAnte(config: GameConfig): number {
   if (config.sessionMode !== 'tournament') {
     return 0;
   }
-  return Math.max(1, Math.round(config.bigBlind * 0.1));
+  return getTournamentLevel(config).ante;
 }
 
 function createAggressionTracker(players: PlayerState[]): AggressionTracker {
@@ -214,6 +260,8 @@ function createBaseTable(config: GameConfig, players: PlayerState[], handId: num
     dealerSeat,
     smallBlindSeat: dealerSeat,
     bigBlindSeat: dealerSeat,
+    straddleSeat: undefined,
+    straddleAmount: 0,
     betting: {
       currentBet: 0,
       minRaise: config.bigBlind,
@@ -363,18 +411,52 @@ function progressTable(runtime: HandRuntime): EngineStepResult {
 
     const fromStreet = table.stage;
     const nextStreet = getNextStreet(fromStreet);
-    const revealCount = getStreetRevealCount(fromStreet);
+    const studMode = isStudMode(table.mode);
+    const revealCount = studMode ? 0 : getStreetRevealCount(fromStreet);
+    let nextDeck = table.deck;
+    let boardAfter = table.board;
+    let playersAfterDeal = table.players;
+    let revealedCards: Card[] = [];
 
-    const draw = drawCards(table.deck, revealCount);
-    const boardAfter = [...table.board, ...draw.cards];
-    const resetPlayers = resetStreetBets(table.players);
+    if (studMode) {
+      const dealingOrder = seatOrderFrom(
+        table.players.filter((player) => !player.eliminated && !player.folded),
+        table.dealerSeat,
+      );
+      playersAfterDeal = clonePlayers(table.players);
+
+      for (const target of dealingOrder) {
+        const draw = drawCards(nextDeck, 1);
+        nextDeck = draw.deck;
+        const card = draw.cards[0];
+        const player = playersAfterDeal.find((candidate) => candidate.id === target.id);
+        if (!player || !card) {
+          continue;
+        }
+        player.holeCards.push(card);
+        addReplayEvent(replayBuilder, {
+          type: 'deal_hole',
+          stage: nextStreet,
+          actorId: player.id,
+          note: `${player.name} 获得第 ${player.holeCards.length} 张牌`,
+          cards: [...player.holeCards],
+        });
+      }
+    } else {
+      const draw = drawCards(nextDeck, revealCount);
+      nextDeck = draw.deck;
+      revealedCards = draw.cards;
+      boardAfter = [...table.board, ...draw.cards];
+    }
+
+    const resetPlayers = resetStreetBets(playersAfterDeal);
     const nextQueue = buildPostflopQueue(resetPlayers, table.dealerSeat);
 
     table = {
       ...table,
-      deck: draw.deck,
+      deck: nextDeck,
       board: boardAfter,
-      boardRevealOrder: [...table.boardRevealOrder, ...draw.cards],
+      boardRevealOrder: studMode ? table.boardRevealOrder : [...table.boardRevealOrder, ...revealedCards],
       stage: nextStreet,
       players: resetPlayers,
       betting: {
@@ -383,26 +465,42 @@ function progressTable(runtime: HandRuntime): EngineStepResult {
         actionQueue: nextQueue,
       },
       statusText:
-        nextStreet === 'flop' ? '翻牌圈' : nextStreet === 'turn' ? '转牌圈' : nextStreet === 'river' ? '河牌圈' : table.statusText,
+        studMode
+          ? nextStreet === 'flop'
+            ? '第二轮发牌'
+            : nextStreet === 'turn'
+              ? '第三轮发牌'
+              : '第四轮发牌'
+          : nextStreet === 'flop'
+            ? '翻牌圈'
+            : nextStreet === 'turn'
+              ? '转牌圈'
+              : nextStreet === 'river'
+                ? '河牌圈'
+                : table.statusText,
     };
 
     addReplayEvent(replayBuilder, {
       type: 'street_transition',
       stage: nextStreet,
-      note: `进入${nextStreet === 'flop' ? '翻牌圈' : nextStreet === 'turn' ? '转牌圈' : '河牌圈'}`,
+      note: studMode
+        ? `进入${nextStreet === 'flop' ? '第二轮下注' : nextStreet === 'turn' ? '第三轮下注' : '第四轮下注'}`
+        : `进入${nextStreet === 'flop' ? '翻牌圈' : nextStreet === 'turn' ? '转牌圈' : '河牌圈'}`,
       from: fromStreet,
       to: nextStreet,
       resetBets: true,
       activePlayerId: nextQueue[0],
     });
 
-    addReplayEvent(replayBuilder, {
-      type: 'reveal_board',
-      stage: nextStreet,
-      note: nextStreet === 'flop' ? '发出翻牌' : nextStreet === 'turn' ? '发出转牌' : '发出河牌',
-      cards: draw.cards,
-      boardAfter,
-    });
+    if (!studMode) {
+      addReplayEvent(replayBuilder, {
+        type: 'reveal_board',
+        stage: nextStreet,
+        note: nextStreet === 'flop' ? '发出翻牌' : nextStreet === 'turn' ? '发出转牌' : '发出河牌',
+        cards: revealedCards,
+        boardAfter,
+      });
+    }
 
     const actionableCount = table.players.filter((p) => !p.eliminated && !p.folded && !p.allIn).length;
 
@@ -438,14 +536,14 @@ function progressTable(runtime: HandRuntime): EngineStepResult {
   }
 }
 
-function dealHoleCards(players: PlayerState[], deck: Card[], dealerSeat: number): { players: PlayerState[]; deck: Card[] } {
+function dealHoleCards(players: PlayerState[], deck: Card[], dealerSeat: number, rounds = 2): { players: PlayerState[]; deck: Card[] } {
   const nextPlayers = clonePlayers(players);
   let nextDeck = [...deck];
 
   const alive = nextPlayers.filter((p) => !p.eliminated);
   const order = seatOrderFrom(alive, dealerSeat);
 
-  for (let round = 0; round < 2; round += 1) {
+  for (let round = 0; round < rounds; round += 1) {
     for (const player of order) {
       const draw = drawCards(nextDeck, 1);
       nextDeck = draw.deck;
@@ -465,18 +563,30 @@ function dealHoleCards(players: PlayerState[], deck: Card[], dealerSeat: number)
 export function createPlayers(config: GameConfig): PlayerState[] {
   const total = config.aiCount + 1;
   const players: PlayerState[] = [];
+  const aiRoster = buildAiRoster(config, config.aiCount);
+  const humanName =
+    config.language === 'ja'
+      ? 'あなた'
+      : config.language === 'fr'
+        ? 'Vous'
+        : config.language === 'de'
+          ? 'Du'
+          : config.language === 'en'
+            ? 'You'
+            : '你';
 
-  players.push(createPlayer('P0', 0, '你', true, 'balanced', config.startingChips));
+  players.push(createPlayer('P0', 0, humanName, true, 'balanced', config.startingChips, config.humanPortraitKey));
 
   for (let i = 1; i < total; i += 1) {
     players.push(
       createPlayer(
         `P${i}`,
         i,
-        AI_NAMES[(i - 1) % AI_NAMES.length],
+        aiRoster[i - 1].name,
         false,
-        STYLE_ROTATION[(i - 1) % STYLE_ROTATION.length],
+        aiRoster[i - 1].style,
         config.startingChips,
+        aiRoster[i - 1].portraitKey,
       ),
     );
   }
@@ -488,7 +598,7 @@ export function isSessionOver(players: PlayerState[]): boolean {
   return players.filter((p) => !p.eliminated).length <= 1;
 }
 
-export function startHand(config: GameConfig, sourcePlayers: PlayerState[], handId: number, previousDealerSeat: number): HandRuntime {
+export function startHand(config: GameConfig, sourcePlayers: PlayerState[], handId: number, previousDealerSeat: number, sessionId = 'session-unknown'): HandRuntime {
   let players = resetForNewHand(clonePlayers(sourcePlayers));
   const alive = getAlivePlayers(players);
 
@@ -497,13 +607,14 @@ export function startHand(config: GameConfig, sourcePlayers: PlayerState[], hand
     terminalTable.stage = 'complete';
     terminalTable.statusText = '比赛结束';
     const replayBuilder = createHandReplayBuilder({
+      sessionId,
       handId,
       timestamp: Date.now(),
       gameMode: config.mode,
       sessionMode: config.sessionMode,
       aiDifficulty: config.aiDifficulty,
       blindInfo: { smallBlind: config.smallBlind, bigBlind: config.bigBlind },
-      participants: players.map((p) => ({ id: p.id, name: p.name, seat: p.seat, style: p.style })),
+      participants: players.map((p) => ({ id: p.id, name: p.name, seat: p.seat, style: p.style, portraitKey: p.portraitKey })),
       dealerSeat: terminalTable.dealerSeat,
       smallBlindSeat: terminalTable.dealerSeat,
       bigBlindSeat: terminalTable.dealerSeat,
@@ -527,13 +638,14 @@ export function startHand(config: GameConfig, sourcePlayers: PlayerState[], hand
   const startingChips = Object.fromEntries(players.map((p) => [p.id, p.stack]));
 
   const replayBuilder = createHandReplayBuilder({
+    sessionId,
     handId,
     timestamp: Date.now(),
     gameMode: config.mode,
     sessionMode: config.sessionMode,
     aiDifficulty: config.aiDifficulty,
     blindInfo: { smallBlind: config.smallBlind, bigBlind: config.bigBlind },
-    participants: players.map((p) => ({ id: p.id, name: p.name, seat: p.seat, style: p.style })),
+    participants: players.map((p) => ({ id: p.id, name: p.name, seat: p.seat, style: p.style, portraitKey: p.portraitKey })),
     dealerSeat,
     smallBlindSeat: sbSeat,
     bigBlindSeat: bbSeat,
@@ -551,7 +663,7 @@ export function startHand(config: GameConfig, sourcePlayers: PlayerState[], hand
   });
 
   const freshDeck = shuffleDeck(createDeck(config.mode));
-  const dealt = dealHoleCards(players, freshDeck, dealerSeat);
+  const dealt = dealHoleCards(players, freshDeck, dealerSeat, getInitialHoleCardCount(config.mode));
   players = dealt.players;
   const deck = dealt.deck;
 
@@ -623,22 +735,59 @@ export function startHand(config: GameConfig, sourcePlayers: PlayerState[], hand
     potAfter: totalPot,
   });
 
-  const actionQueue = buildPreflopQueue(players, bbSeat);
+  let straddleSeat: number | undefined;
+  let straddleAmount = 0;
+  if (config.sessionMode === 'cash' && config.straddleMode === 'utg' && !isStudMode(config.mode)) {
+    const candidateSeat = determineStraddleSeat(players, bbSeat);
+    if (candidateSeat !== undefined) {
+      const straddlePlayer = players.find((p) => p.seat === candidateSeat);
+      if (straddlePlayer && !straddlePlayer.eliminated && straddlePlayer.stack > 0) {
+        const forcedStraddle = config.bigBlind * 2;
+        const straddlePosted = postBlind(players, straddlePlayer.id, forcedStraddle);
+        players = straddlePosted.players;
+        straddleSeat = candidateSeat;
+        straddleAmount = straddlePosted.posted;
+        totalPot = totalPotFromPlayers(players);
+        addReplayEvent(replayBuilder, {
+          type: 'post_blind',
+          stage: 'preflop',
+          actorId: straddlePlayer.id,
+          note: `${straddlePlayer.name} 投入跨注 ${straddlePosted.posted}`,
+          blindType: 'straddle',
+          amount: straddlePosted.posted,
+          stackAfter: players.find((p) => p.id === straddlePlayer.id)?.stack ?? 0,
+          potAfter: totalPot,
+        });
+      }
+    }
+  }
+
+  const forcedOpenSeat = straddleSeat ?? bbSeat;
+  const actionQueue = buildPreflopQueue(players, forcedOpenSeat);
+  const currentBet = players.reduce((max, player) => Math.max(max, player.currentBet), 0);
+  const currentBbBet = players.find((p) => p.id === bbPlayer.id)?.currentBet ?? 0;
+  const straddlePlayerId =
+    straddleSeat !== undefined ? players.find((p) => p.seat === straddleSeat && !p.eliminated)?.id : undefined;
+  const straddleBet = straddlePlayerId ? players.find((p) => p.id === straddlePlayerId)?.currentBet ?? 0 : 0;
+  const lastForcedAggressorId = straddlePlayerId && straddleBet > currentBbBet ? straddlePlayerId : bbPlayer.id;
 
   table.players = players;
   table.deck = deck;
   table.totalPot = totalPot;
+  table.straddleSeat = straddleSeat;
+  table.straddleAmount = straddleAmount;
   table.betting = {
-    currentBet: Math.max(
-      players.find((p) => p.id === bbPlayer.id)?.currentBet ?? 0,
-      players.find((p) => p.id === sbPlayer.id)?.currentBet ?? 0,
-    ),
+    currentBet,
     minRaise: config.bigBlind,
     actionQueue,
-    lastAggressorId: bbPlayer.id,
+    lastAggressorId: lastForcedAggressorId,
   };
   table.activePlayerId = actionQueue[0];
-  table.statusText = '翻前行动';
+  table.statusText = isStudMode(config.mode)
+    ? '第一轮下注'
+    : straddleSeat !== undefined
+      ? '翻前行动（跨注生效）'
+      : '翻前行动';
   replayBuilder.initialSnapshot.activePlayerId = actionQueue[0];
 
   return {
@@ -647,9 +796,9 @@ export function startHand(config: GameConfig, sourcePlayers: PlayerState[], hand
   };
 }
 
-export function createInitialHand(config: GameConfig): HandRuntime {
+export function createInitialHand(config: GameConfig, sessionId = 'session-unknown'): HandRuntime {
   const players = createPlayers(config);
-  return startHand(config, players, 1, -1);
+  return startHand(config, players, 1, -1, sessionId);
 }
 
 export function getCurrentPlayer(table: TableState): PlayerState | undefined {

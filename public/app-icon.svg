@@ -1,0 +1,61 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(320 240) rotate(47.4) scale(884.988)">
+      <stop stop-color="#1DF0FF" stop-opacity="0.28"/>
+      <stop offset="0.52" stop-color="#0A2147" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#050913" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shell" x1="120" y1="96" x2="900" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D1D38"/>
+      <stop offset="1" stop-color="#07111F"/>
+    </linearGradient>
+    <linearGradient id="felt" x1="512" y1="172" x2="512" y2="858" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F7D78"/>
+      <stop offset="0.48" stop-color="#0A5A4F"/>
+      <stop offset="1" stop-color="#062C28"/>
+    </linearGradient>
+    <linearGradient id="cardFace" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E5EEF8"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="312" y1="292" x2="688" y2="732" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD57E"/>
+      <stop offset="1" stop-color="#E89D27"/>
+    </linearGradient>
+    <filter id="shadow" x="90" y="88" width="844" height="848" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="228" fill="#050913"/>
+  <rect width="1024" height="1024" rx="228" fill="url(#bgGlow)"/>
+  <g filter="url(#shadow)">
+    <rect x="120" y="96" width="784" height="832" rx="170" fill="url(#shell)"/>
+    <rect x="152" y="144" width="720" height="736" rx="142" fill="#071424" stroke="#22D8F7" stroke-opacity="0.18" stroke-width="4"/>
+    <ellipse cx="512" cy="512" rx="276" ry="330" fill="url(#felt)" stroke="#FFD07A" stroke-opacity="0.24" stroke-width="10"/>
+    <ellipse cx="512" cy="512" rx="300" ry="354" stroke="#1DE4FF" stroke-opacity="0.18" stroke-width="20"/>
+  </g>
+  <g transform="translate(388 320) rotate(-14 120 190)">
+    <rect x="0" y="0" width="224" height="320" rx="26" fill="url(#cardFace)"/>
+    <rect x="10" y="10" width="204" height="300" rx="20" stroke="#C8D7E8" stroke-width="2"/>
+    <text x="34" y="62" fill="#D44949" font-size="54" font-weight="700" font-family="'SF Pro Display', 'PingFang SC', sans-serif">A</text>
+    <path d="M71 102C57 82 29 86 27 112C25 141 60 160 71 187C82 160 117 141 115 112C113 86 85 82 71 102Z" fill="#D44949"/>
+    <path d="M72 212C98 249 125 279 142 300C133 301 122 300 112 296C101 308 86 314 72 314C58 314 43 308 32 296C22 300 11 301 2 300C19 279 46 249 72 212Z" fill="#D44949"/>
+  </g>
+  <g transform="translate(250 502)">
+    <circle cx="274" cy="138" r="138" fill="#13283E" stroke="url(#gold)" stroke-width="18"/>
+    <circle cx="274" cy="138" r="114" fill="#0C1728" stroke="#1DE4FF" stroke-opacity="0.32" stroke-width="8"/>
+    <circle cx="274" cy="138" r="74" fill="url(#gold)" fill-opacity="0.92"/>
+    <circle cx="274" cy="138" r="52" fill="#0C1728"/>
+    <circle cx="274" cy="138" r="28" fill="#1DE4FF" fill-opacity="0.86"/>
+    <g fill="#EAB76B" opacity="0.96">
+      <rect x="268" y="12" width="12" height="40" rx="6"/>
+      <rect x="268" y="224" width="12" height="40" rx="6"/>
+      <rect x="148" y="132" width="40" height="12" rx="6"/>
+      <rect x="360" y="132" width="40" height="12" rx="6"/>
+      <rect x="187" y="51" width="12" height="32" rx="6" transform="rotate(-45 193 67)"/>
+      <rect x="349" y="213" width="12" height="32" rx="6" transform="rotate(-45 355 229)"/>
+      <rect x="349" y="51" width="12" height="32" rx="6" transform="rotate(45 355 67)"/>
+      <rect x="187" y="213" width="12" height="32" rx="6" transform="rotate(45 193 229)"/>
+    </g>
+  </g>
+</svg>

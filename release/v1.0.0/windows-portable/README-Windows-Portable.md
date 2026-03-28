@@ -1,14 +1,14 @@
 # Windows 便携版（免 Node）使用说明
 
 ## 版本信息
-- 产品：霓虹德州俱乐部
+- 产品：夜局
 - 版本：v1.0.0
 - 形态：Electron 便携版（无需安装 Node/Python）
 
 ## 启动方式
-1. 解压 `local-holdem-neon-v1.0.0-windows-portable.zip`
-2. 打开目录 `NeonHoldemClub-win32-x64`
-3. 双击 `NeonHoldemClub.exe`
+1. 解压 `yeju-v1.0.0-windows-portable.zip`
+2. 打开目录 `Yeju-win32-x64`
+3. 双击 `Yeju.exe`
 
 ## 特性
 - 双击 EXE 即可运行

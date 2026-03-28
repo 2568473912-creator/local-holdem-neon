@@ -11,7 +11,7 @@ if not exist "%ROOT%\index.html" (
   exit /b 1
 )
 
-echo 正在启动霓虹德州俱乐部 v1.0.0 ...
+echo 正在启动夜局 v1.0.0 ...
 echo 访问地址: http://127.0.0.1:%PORT%
 
 where py >nul 2>nul

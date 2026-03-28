@@ -218,6 +218,157 @@ TODO / Suggestions for next agent:
   - `SessionInsightsPanel`：新增榜单排序模式（筹码 / 近5手净变化），并在每位玩家右侧显示近5手净变化 delta。
   - 牌桌态势右下角现有切换扩展为两组：`仅在局/全部` + `筹码/近5手`。
   - 样式：新增 `session-list-controls`、`delta up/down`、`replay-key-filter`、`timeline-flag` 等视觉反馈。
+
+2026-03-16
+- iPad 文字与纵向节奏二次收口（本轮）：
+  - 文本专项检查：
+    - 追加一轮 iPad 文本溢出扫描（中文 + `en/ja/fr/de` 菜单关键文案）。
+    - 结果：未发现真实 `overflow / clipped` 文本问题，当前多语言在 iPad 菜单与主页面上均可完整显示。
+  - 文本观感：
+    - `theme.css` 调整斗地主 / 掼蛋对手卡、人类区标题、选择条、摘要卡的小字号 `line-height` 与 `text-shadow`，提升小字在深色玻璃面板上的清晰度。
+  - 纵向节奏：
+    - `DouDizhuTable` / `GuandanTable` 人类区新增 `phase-*` 类名，支持按 `bidding / playing / settlement` 精细控高。
+    - iPad 下斗地主人类区按阶段继续压缩高度；掼蛋人类区 `phase-playing` 再压一档，减少状态区与手牌之间的空白。
+    - iPad 下斗地主 / 掼蛋对手卡改为 `align-self: start`，并降低最小高度，避免在上半区被拉得过高、产生大块空白。
+    - 修正掼蛋人类操作按钮的样式覆盖，统一回到更适合触控的高度。
+- 复验：
+  - `npm run appstore:shots:ipad` 通过
+  - 重点截图：
+    - `output/app-store-ipad-13/05-doudizhu-table.png`
+    - `output/app-store-ipad-13/06-guandan-table.png`
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+
+- iPad 验证链路与触控尺寸修复（本轮）：
+  - 截图脚本：
+    - `scripts/capture-app-store-ipad.mjs` 默认 `APP_URL` 改为 `http://127.0.0.1:4173`，与当前本地 preview 链路保持一致。
+    - `scripts/validate-ipad-ui-pass.mjs` 同步支持 `APP_URL` 覆盖，并默认走 `4173`。
+    - 解决此前“脚本默认 4183，但本地实际跑 4173”导致的 `ERR_CONNECTION_REFUSED`。
+  - iPad 触控优化：
+    - 德州菜单顶部返回/战绩按钮增大触控尺寸。
+    - 德州底部 `focus-dock`、主操作按钮、自动行动下拉、加注快捷按钮整体增大点击高度。
+    - 斗地主 / 掼蛋顶部工具按钮增大触控尺寸。
+    - 斗地主 / 掼蛋底部人类操作按钮增大触控尺寸。
+  - iPad 纵向留白收口：
+    - 斗地主人类区高度与动作壳层最小高度下调，状态/按钮/手牌间距更紧凑。
+    - 掼蛋人类区最小高度与内部 gap 下调，减少中段大块空白。
+- 复验：
+  - `npm run appstore:shots:ipad` 通过
+  - 新截图产物：
+    - `output/app-store-ipad-13/02-holdem-menu.png`
+    - `output/app-store-ipad-13/04-holdem-focus-controls.png`
+    - `output/app-store-ipad-13/05-doudizhu-table.png`
+    - `output/app-store-ipad-13/06-guandan-table.png`
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+
+- iPad 菜单信息密度继续收口（本轮）：
+  - 德州菜单：
+    - `MainMenu` 新增 iPad 默认折叠的“外观资产”摘要。
+    - 折叠态改为轻量 pill 列表，仅展示当前人物 / 牌面 / 主题与当前可用积分，减少首屏纵向占用。
+    - 保留展开按钮，展开后仍可查看完整说明与积分摘要。
+  - 斗地主 / 掼蛋菜单：
+    - `DouDizhuMenu` 与 `GuandanMenu` 的规则卡改为 iPad 默认折叠。
+    - 折叠态只显示规则要点 chip；展开后再展示完整 4 项规则说明。
+    - 目标是压缩 iPad 横屏首屏高度，优先把“开始游戏”与核心配置稳定留在首屏。
+  - 多语言：
+    - 新增通用文案键 `common.expand` / `common.collapse`（zh-CN / en / ja / fr / de）。
+  - 样式：
+    - `theme.css` 新增 `menu-preview-head.with-toggle`、`menu-inline-toggle`、`menu-preview-pills`、`menu-preview-pill`，并补齐 iPad 专用尺寸。
+- 验证：
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+
+- iPad 横屏收口（定点按真机图修正）：
+  - 德州：
+    - `TableScene` 为 8+ 人桌单独收紧座位坐标，非英雄位继续上提并向外展开，英雄位略下压，减少公共牌与人物卡重叠。
+    - `theme.css` 调整 iPad 专用 `board-area / pot-display / side-pot-list` 位置，主底池进一步右移，公共牌整体上提。
+    - iPad 多人桌人物卡继续压缩：姓名改为单行省略，副标题/细节隐藏，筹码与下注指标缩小到紧凑档。
+    - `ControlsPanel` 新增 iPad 紧凑结构：下注区改成单面板布局，自动行动、动作按钮、加注信息和关键赔率摘要都放在同一面，不再依赖内层纵向滚动。
+  - 模式大厅：
+    - iPad 菜单整体下移，给系统状态栏让出更多顶部安全区。
+    - 大厅卡片进一步压缩：隐藏商店说明副文案、各模式卡第三条 bullet，保持单屏。
+  - 斗地主：
+    - iPad 对手区固定为上下两张 AI 模块，出牌区保持在模块右侧。
+    - 人类区字体再压缩，手牌区增加顶部可视空间，选牌上抬时不再被模块边界吃掉。
+    - 选牌态收口成两态：默认 / 选中；iPad 下关闭 hover 漂浮效果。
+  - 掼蛋：
+    - 同步斗地主的人类区字体与手牌选中态修正。
+    - 人类手牌区域改为更稳定的两态选择显示，避免选中卡顶部被裁切。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - iPad 回归截图：
+    - `output/app-store-ipad-13/01-menu-hub.png`
+    - `output/app-store-ipad-13/03-holdem-table.png`
+    - `output/app-store-ipad-13/04-holdem-focus-controls.png`
+    - `output/app-store-ipad-13/05-doudizhu-table.png`
+    - `output/app-store-ipad-13/06-guandan-table.png`
+  - 额外专项截图：
+    - `output/ipad-10p-check.png`
+    - `output/ipad-10p-focus-check.png`
+
+2026-03-15
+- 菜单与结算体验压缩收口：
+  - 德州主菜单移除内联生涯卡与锦标赛大预览，改为 `战绩` / `赛程` 按钮弹窗。
+  - 德州菜单压成单屏布局：三列设置网格、简化标题区、压缩外观摘要，实测 1440x1024 下无需滚动。
+  - 语言选择改为主题一致的玻璃按钮风格，选项显示为原生语言名：`中文 / English / 日本語 / Français / Deutsch`。
+  - 去掉斗地主 / 掼蛋菜单顶部的“二级页面”类无关提示文案。
+- 结算确认流改造：
+  - 德州结算弹窗补入完整人物卡、公共牌条、本局信息网格，并改为明确的 `确认继续` / `确认` 节奏。
+  - 斗地主结算改成真正的全屏浮层，显示三张完整人物卡、倍率摘要、本局信息与确认继续按钮。
+  - 关闭德州 / 斗地主 / 掼蛋的结算自动跳局逻辑，避免跳过确认弹窗。
+- 多语言与文案：
+  - 新增 `common.confirm`、`common.confirmContinue`、`main.viewCareer`、`main.viewTournament`、`main.resumeClosed` 等键，并补到 `zh-CN / en / ja / fr / de`。
+  - 将 `common.manualNext / common.autoNext` 和德州节奏文案改成不再暗示“结算自动跳过”。
+- 验证：
+  - `npm run build` 通过
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `$WEB_GAME_CLIENT` 运行完成：`output/web-game-final-march15`
+  - Playwright 实拍回归：`output/ui-pass-march15`
+
+- 非专注模式抖动修复：
+  - 德州：
+    - 非专注模式底部三模块改为稳定高度壳层，`操作 / 时间线 / 态势` 固定为同一高度。
+    - `compact-waiting-panel` 补齐占位卡片，禁用原因提示改为保留占位，避免英雄行动权切换时底部高度跳变。
+    - 非专注座位卡取消 `scale/y` 位移动画，只保留高亮阴影，减少轮到不同玩家时的视觉抖动。
+  - 斗地主：
+    - 人类操作区改为固定高度容器，叫分/出牌/托管切换不再重新撑高底部。
+    - 托管提示改为稳定占位条，`上一动作` 收为单行省略，避免文本长度变化引起区域跳动。
+    - 叫分按钮在 bidding 阶段始终保留同一壳层，仅切换可用状态。
+- 本轮验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - `$WEB_GAME_CLIENT` 运行完成：
+    - `output/web-game-jitter-holdem-menu-2`
+    - `output/web-game-jitter-ddz-menu-2`
+  - 额外 Playwright 抖动测量脚本：
+    - `output/jitter-check/summary.json`
+    - `output/jitter-check/holdem-jitter.png`
+    - `output/jitter-check/doudizhu-jitter.png`
+  - 抖动测量结果：
+    - 德州 `table-felt / bottom-row / controls / action-log / insights` 坐标与高度序列 `delta = 0`
+    - 斗地主 `ddz-human / ddz-center / ddz-layout` 坐标与高度序列 `delta = 0`
+
+TODO / Suggestions for next agent:
+- 若用户继续优化，可以把德州非专注模式底部三个模块做成可折叠标签页，进一步给牌桌腾纵向空间。
+- 斗地主当前右侧“行动时间线”仍偏长，下一轮可考虑做两档密度切换（精简/完整）。
+    - `holdem-menu.png`
+    - `holdem-settlement.png`
+    - `doudizhu-settlement.png`
+    - `hub.png`
+  - 回归摘要：`output/ui-pass-march15/summary.json`
+
+TODO / Suggestions for next agent:
+- 把斗地主 / 掼蛋菜单里的规则卡再做一轮折叠化，进一步压缩 iPad 纵向空间。
+- 把德州菜单的“外观资产”摘要继续改成更轻量的 chip/pill 布局，进一步提升首屏留白。
+- 若继续做多语言精修，可把斗地主结算里的 `landlord / farmer` 在 `fr/de/ja` 再换成更自然的本地术语。
 - 验证：
   - `npm run test` 通过（18/18）
   - `npm run lint` 通过
@@ -336,3 +487,5246 @@ TODO / Suggestions for next agent:
   - `npm run build` 通过
   - `dist/index.html` 已由 `/assets/...` 变为 `./assets/...`
   - Playwright 回归截图：`output/windows-portable-fix/shot-{0..2}.png`
+- 2026-03-11 UI + 玩法优化：
+  - 压牌桌底部右侧两栏（行动时间线 / 牌桌态势）高度到 `clamp(220px, 26vh, 300px)`，并对列表加局部滚动，释放牌桌垂直空间。
+  - 缩紧底栏与 HUD 间距/内边距，提升中间牌桌可视面积。
+  - 新增现金局玩法：`UTG 跨注（Straddle）`，菜单可配置，HUD/牌桌/回放可见；规则侧实现为：
+    - 翻前 BB 后自动由 UTG 强制下 2xBB（短码自动全下）
+    - 翻前行动从跨注位左侧开始，跨注位最后行动
+    - 当前下注线与 last aggressor 同步到跨注位
+  - 回放扩展：`post_blind.blindType` 增加 `straddle`，重建时动作文案支持“跨注”。
+- 验证：`npm run test`、`npm run lint`、`npm run build` 全通过；Playwright截图：`output/layout-straddle-pass/shot-{0..2}.png`。
+- 2026-03-11 新玩法扩展：
+  - 新增玩法模式：Omaha、PLO、梭哈（stud）。
+  - 评估器：新增 `omahaEvaluator`，Omaha/PLO 按严格 `2 张底牌 + 3 张公共牌` 评估。
+  - 下注规则：PLO 接入底池限注（bet/raise/all-in 上限受当前底池约束）。
+  - 发牌流程：
+    - Omaha/PLO：每人 4 张底牌。
+    - 梭哈：无公共牌，preflop 后每街给在局玩家各发 1 张牌（共 5 张）。
+  - 回放：继续复用事件溯源，梭哈发牌通过 `deal_hole` 事件逐街更新。
+  - UI：菜单/HUD/历史筛选/回放文案支持新模式；座位卡牌显示扩展到 4-5 张；梭哈模式展示“无公共牌”提示。
+  - 新增测试：Omaha 评估约束、PLO 底池限注上限、梭哈逐街发牌、Omaha/PLO 初始 4 张底牌。
+- 当前验证：
+  - `npm run test` 通过（26/26）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+- 2026-03-11 视觉与交互增强（按用户反馈）：
+  - 卡牌可读性：放大 seat 卡牌尺寸（small/tiny），并微调重叠策略，数字与花色更清晰。
+  - 座位越界修复：收紧座位半径并对 x/y 做安全夹取，避免上方 AI 牌面超出牌桌边缘。
+  - 底栏可调：新增“底栏宽度调节”模块，支持调节三栏宽度（操作区最小宽度、行动时间线宽度、牌桌态势宽度），支持本地持久化和一键恢复默认。
+  - 教学增强：新增 `SkillCoachPanel`（技巧教学），按当前模式/街道/赔率/SPR/可用动作给出最多 5 条策略提示。
+  - UI 氛围强化：新增桌圈呼吸、霓虹扫光、底池脉冲等动效；阶段标签增加内发光材质。
+  - 梭哈/奥马哈/PLO 兼容：座位卡显示扩展到 4~5 张手牌，梭哈保留“无公共牌”提示。
+- 验证：
+  - `npm run test` 通过（26/26）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - Playwright 截图：`output/ui-polish-pass/` 与 `output/ui-polish-pass-v2/`
+- 2026-03-11 继续优化（本轮）：底栏拖拽与视觉质感升级。
+  - 交互：去掉独立宽度调节框，改为底栏三列之间“左右拖拽分隔条”交互。
+    - `TableScene` 新增拖拽状态 `draggingTarget`，分隔条支持实时调整 `timeline/insights` 宽度并本地持久化。
+    - 分隔条样式增强（发光、箭头、active 态），鼠标拖动时全局 `col-resize`。
+  - 布局：抽离座位布局为共享模块 `src/ui/seatLayout.ts`，统一 Table 与 Replay。
+    - 重算半径/缩放/上下偏移与安全夹取，优先避免“上方 AI 牌压公共牌/越界”。
+    - 对 10 人桌额外收紧 scale 并外扩半径，降低玩家间遮挡概率。
+  - 视觉：牌桌整体做更强霓虹赌场材质。
+    - board 区域升级为玻璃托盘（描边、模糊、内发光）。
+    - 主底池/边池位置右移并下移，避免压公共牌。
+    - seat panel 增加高光反射层、active 态发光强化。
+    - 小牌字体与花色字号增大，提升可读性。
+    - 下方时间线/态势区高度进一步压缩，释放中部牌桌空间。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（26/26）
+  - `npm run build` 通过
+  - Playwright 截图：
+    - `output/ui-check-after-v4/shot-0.png`（常规桌）
+    - `output/ui-check-ai10/table-v3.png`（10 AI 极限桌）
+- 2026-03-11 底栏信息长度与对齐优化：
+  - `TableScene` 将行动时间线 `maxItems` 从 10 提升到 24。
+  - `theme.css` 调整右侧两栏高度策略：取消固定 clamp 高度，改为和底栏最高模块等高拉伸（`align-self: stretch`）。
+  - 右侧两栏改为内部列表滚动，外层面板保持完整对齐，提升可见内容量。
+  - 牌桌态势列表容量提升：`session-standing-list` / `session-out-list` 最大可视高度提高。
+  - 淘汰记录显示上限从 5 提升到 12。
+- 验证：`npm run lint`、`npm run test`（26/26）、`npm run build` 全通过；截图 `output/ui-align-expand/shot-0.png`。
+- 2026-03-11 遮挡修复（用户反馈“手牌与公共牌再次遮挡”）：
+  - `seatLayout` 增加顶部中心位硬避让逻辑：对上半区且接近中心的座位追加上移偏移，避免手牌侵入公共牌区域。
+  - `SeatPanel` 激活态缩放从 1.04 降到 1.02，防止行动玩家高亮放大时挤入公共牌。
+  - `theme.css` 将 `board-area`、`pot-display`、`side-pot-list` 进一步下移 1%，增加和上方座位的安全间距。
+- 自动化回归：
+  - 1~10 AI 全量截图 + 碰撞检测（seat-cards vs board-cards）均为 0 碰撞。
+  - 报告：`output/overlap-detect-after/report-cards.json`
+  - 截图示例：`output/overlap-detect-after/ai-1.png`、`ai-6.png`、`ai-10.png`
+  - `npm run lint`、`npm run test`（26/26）、`npm run build` 均通过。
+- 2026-03-12 继续优化（本轮）：自动行动、牌桌聚焦、结算高潮。
+  - 自动行动：
+    - 新增 `AutoActionPreset` 与纯逻辑模块 `src/state/autoAction.ts`
+    - 支持 `过/弃到我`、`仅过牌`、`自动跟注 <= 1/2/4BB`
+    - 控制器在轮到人类时自动解析并执行，执行后自动清空；超阈值或不可执行时给出取消原因
+    - 快捷键新增：`X` 过弃、`V` 自动过牌、`B` 自动跟 2BB、`Esc` 清除自动行动
+  - 牌桌聚焦模式：
+    - `TableScene` 增加 `聚焦牌桌` 切换，进入后收起底栏，仅保留桌面与浮动 Dock
+    - Dock 可展开 `操作` / `时间线` / `态势` 三个浮层，提升桌面可视面积
+    - 聚焦模式状态本地持久化：`neon.holdem.focus-mode.v1`
+  - 结算高潮：
+    - 新增 `settlement-spotlight` 覆盖层
+    - 显示赢家、赢池金额、牌型说明 / 弃牌赢池说明、是否快速模式继续
+  - 渲染状态输出：
+    - `render_game_to_text` 现在包含 `autoAction`
+  - 新增测试：
+    - `tests/autoAction.test.ts`（6 条）覆盖自动行动标签、过弃、自动过牌取消、跟注阈值成功/失败
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（32/32）
+    - `npm run build` 通过
+  - Playwright：
+      - `output/final-pass-base/shot-0.png`
+      - `output/final-pass-interactive/auto-action.png`
+      - `output/final-pass-interactive/focus-controls.png`
+      - `output/final-pass-interactive/focus-timeline.png`
+      - `output/final-pass-settlement/settlement.png`
+      - 无 errors 文件
+- 2026-03-12 继续优化（本轮）：本地自动存档与继续对局。
+  - 新增 `src/state/sessionPersistence.ts`
+    - 当前会话自动保存到 `localStorage`（key: `neon.holdem.session.v1`）
+    - 持久化内容包含：`baseConfig/config/runtime/history/stats/banner/paused/autoAction`
+    - 持久化历史上限 60 手，避免本地存储过大
+  - `useGameController`：
+    - 初始化时读取本地存档摘要用于主菜单展示
+    - 新增 `resumeSavedSession` / `clearSavedSessionEntry`
+    - 每次运行态变化后自动写入本地存档
+  - `MainMenu`：
+    - 新增“继续上次对局”卡片，显示模式、当前手牌、盲注、你的筹码、在局人数、已完成手数
+    - 支持“继续对局”与“清除存档”
+  - `App` 的 `render_game_to_text` 输出加入 `resume`
+  - 新增测试：
+    - `tests/sessionPersistence.test.ts`（2 条）覆盖摘要生成与持久化历史截断
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（34/34）
+    - `npm run build` 通过
+    - Playwright：
+      - `output/session-resume-pass/menu-with-resume.png`
+    - `output/session-resume-pass/menu-after-reload.png`
+    - `output/session-resume-pass/table-after-resume.png`
+      - 无 errors 文件
+- 2026-03-12 继续优化（本轮）：锦标赛结构预览、奖励圈、终局总结增强。
+  - 引擎层：
+    - 新增 `src/engine/tournamentPrize.ts`
+    - 奖励结构按参赛人数自动分配：
+      - 2 人：冠军 100%
+      - 3~4 人：70 / 30
+      - 5~6 人：55 / 30 / 15
+      - 7~9 人：50 / 30 / 20
+      - 10~12 人：45 / 27 / 18 / 10
+    - `src/engine/tournamentStructure.ts` 新增 `getUpcomingTournamentLevels`，供菜单 / 态势 / HUD 统一读取后续盲注
+  - UI：
+    - `MainMenu` 新增锦标赛双预览卡：
+      - 奖励结构（百分比 + 买入倍数）
+      - 前 6 档盲注结构预览
+    - `TopHud` 新增“奖励圈：前 N 名”信息 pill
+    - `SessionInsightsPanel` 新增：
+      - 奖励圈卡片（当前名次对应奖励）
+      - 后续 5 档盲注列表
+    - `TableScene` 锦标赛结束覆盖层升级：
+      - 新增模糊背景 `settlement-backdrop`
+      - 新增赛制摘要、奖励结果、前 5 名排名、奖励结构对照
+      - 终局卡片对比此前版本可读性显著提升
+  - 可观测性：
+    - `render_game_to_text` 输出加入 `tournament.prizeLines` 与 `tournament.upcomingLevels`
+  - 测试：
+    - `tests/tournamentStructure.test.ts` 扩展到 7 条
+    - 覆盖：后续盲注切片、奖励结构档位、按名次查奖
+  - 文档：
+    - `README.md` 补充锦标赛结构预设、奖励结构、态势面板赛制信息说明
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（41/41）
+    - `npm run build` 通过
+    - Skill client：
+      - `output/tournament-next-pass/menu-client/shot-0.png`
+      - `output/tournament-next-pass/menu-client/state-0.json`
+    - Playwright 截图：
+      - `output/tournament-next-pass/menu-tournament.png`
+      - `output/tournament-next-pass/table-tournament.png`
+      - `output/tournament-next-pass-2p/menu-2p.png`
+      - `output/tournament-next-pass-2p/table-2p.png`
+      - `output/tournament-finale-forced/forced-finale.png`
+    - 说明：
+      - 自动长局推进脚本未在限定轮数内自然打到终局，因此额外构造“已结束锦标赛存档”来单独验证新版终局覆盖层布局与可读性。
+- 2026-03-12 继续优化（本轮）：局中赛制详情 + 自动行动增强。
+  - 自动行动：
+    - `AutoActionMode` 新增 `callAny`
+    - `src/state/autoAction.ts` 现支持“自动跟注或过牌”
+    - `ControlsPanel` 新增按钮 `跟/过到我`
+    - 快捷键新增：`N` = 自动跟注/过牌
+    - `tests/autoAction.test.ts` 扩展到 8 条，覆盖：
+      - 有免费过牌时优先过牌
+      - 面对下注时自动跟注
+  - 赛制详情：
+    - 新增组件 `src/ui/components/TournamentInfoPanel.tsx`
+    - 从牌桌阶段栏进入 `赛制详情`，支持 `Esc` 关闭
+    - 面板内容：
+      - 当前/下一盲注级别
+      - 剩余人数、平均筹码、你的排名与 M 值
+      - 奖励圈状态（是否进圈 / 泡沫 / 距离奖励圈）
+      - 完整奖励结构
+      - 完整盲注结构表
+    - `TableScene` 增加阶段栏开关按钮并挂载浮层
+    - `theme.css` 新增高层赛制抽屉样式与响应式布局
+  - 文档：
+    - `README.md` 增加自动行动预设与局中赛制详情说明
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（43/43）
+    - `npm run build` 通过
+    - Skill client：
+      - `output/tournament-panel-skill/shot-0.png`
+      - `output/tournament-panel-skill/state-0.json`
+    - Playwright 截图：
+      - `output/next-optimization-pass/menu.png`
+      - `output/next-optimization-pass/tournament-panel.png`
+      - `output/next-optimization-pass/auto-action-call-check.png`
+      - `output/next-optimization-pass/state.json`
+- 2026-03-12 继续优化（本轮）：锦标赛压力分析 + 阈值超限自动弃牌。
+  - 锦标赛压力分析：
+    - 新增 `src/engine/tournamentPressure.ts`
+    - 输出统一的 `TournamentPressureReport`
+    - 计算项包括：
+      - 当前名次 / 奖励圈名次
+      - M 值 / BB 深度
+      - 下一级后的 M 值 / BB 深度
+      - 筹码区间（舒适区 / 警戒区 / 推弃区 / 危急区）
+      - 奖励圈形势（已进圈 / 泡沫 / 临近 / 远离）
+      - 对应中文建议文案
+    - `TournamentInfoPanel` 现在展示：
+      - 压力区间
+      - 奖励圈状态
+      - 下一级别压力影响
+      - 战术建议
+    - `SessionInsightsPanel` 新增 `锦标赛压力` 卡片
+  - 自动行动：
+    - `AutoActionMode` 新增 `callLimitThenFold`
+    - 新按钮：`跟/过≤2BB否则弃`
+    - 快捷键新增：`G`
+    - 行为：可过则过，可跟且不超阈值则跟，超阈值则直接弃牌
+  - 测试：
+    - 新增 `tests/tournamentPressure.test.ts`（2 条）
+    - `tests/autoAction.test.ts` 扩展到 10 条
+    - 全量测试通过（47/47）
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（47/47）
+    - `npm run build` 通过
+    - Playwright 截图：
+      - `output/pressure-pass/tournament-pressure-panel.png`
+      - `output/pressure-pass/auto-action-threshold-fold.png`
+      - `output/pressure-pass/state.json`
+- 2026-03-12 继续优化（本轮）：本地生涯战绩 / 结果中心。
+  - 新增类型与本地档案：
+    - `src/types/profile.ts`
+    - `src/state/careerProfile.ts`
+  - 本地生涯档案内容：
+    - 已完成会话数
+    - 总手数
+    - 总盈亏
+    - 最大单次盈利 / 亏损
+    - 现金局 / 锦标赛会话数
+    - 冠军数 / 进圈次数
+    - 最佳名次 / 平均名次
+    - 最近完成会话列表
+  - 持久化：
+    - 新 key：`neon.holdem.career.v1`
+    - `sessionPersistence` 扩展 `sessionId` 与 `careerRecorded`
+    - 解决“同一会话重复入账”问题
+  - 控制器：
+    - `useGameController` 现在在以下时机结算生涯数据：
+      - 会话自然结束（如锦标赛结束）
+      - 启动新会话替换旧会话时
+    - 为现金局保留“返回菜单后仍可恢复”的行为，同时在真正被新会话覆盖时才结算到生涯档案
+  - UI：
+    - `MainMenu` 新增“本地生涯战绩”卡片
+    - `ReplayCenter` 新增“本地结果中心”
+    - `App.render_game_to_text` 新增 `career` 摘要输出
+  - 测试：
+    - 新增 `tests/careerProfile.test.ts`（2 条）
+    - `tests/sessionPersistence.test.ts` 适配新增字段
+    - 全量测试通过（49/49）
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（49/49）
+    - `npm run build` 通过
+    - Playwright UI：
+      - `output/career-center-pass/menu-career.png`
+      - `output/career-center-pass/history-career.png`
+      - `output/career-center-pass/state.json`
+    - Playwright 集成链路：
+      - 打一手现金局 -> `重新开局` -> 检查 `neon.holdem.career.v1`
+      - 输出：
+        - `output/career-integration-pass/before-restart.png`
+      - `output/career-integration-pass/after-restart.png`
+      - `output/career-integration-pass/career.json`
+      - 结果：`totalSessions = 1`，说明自动入账链路已生效
+- 2026-03-12 继续优化（本轮补完）：生涯战绩按玩法拆分 + 导出/清空。
+  - 数据结构：
+    - `CareerProfile` 新增 `modeBreakdown`
+    - 按 `standard / shortDeck / omaha / plo / stud` 聚合会话数、手数、盈亏、冠军、进圈
+  - `careerProfile.ts`：
+    - 新增空拆分初始化
+    - 聚合逻辑接入 `recordCareerSession`
+    - 增加 `getCareerModeBreakdown`
+    - 增加 `exportCareerProfile`
+    - 兼容旧存档，缺失 `modeBreakdown` 时自动回填默认值
+  - UI：
+    - `MainMenu` 生涯卡片新增：
+      - 导出按钮
+      - 清空按钮（带确认）
+      - 按玩法拆分统计网格
+    - `ReplayCenter` 结果中心新增：
+      - 导出生涯 / 清空生涯
+      - 按玩法拆分统计卡片（会话 / 手牌 / 盈亏）
+    - `App` 已接入 `clearCareerArchive`
+    - `theme.css` 新增菜单/历史中心生涯操作区与玩法拆分布局样式，并补小屏对齐规则
+  - 测试：
+    - `tests/careerProfile.test.ts` 增加玩法拆分断言
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（49/49）
+    - `npm run build` 通过
+    - develop-web-game skill client 菜单回归：
+      - `output/career-breakdown-pass/shot-0.png`
+      - `output/career-breakdown-pass/shot-1.png`
+    - Playwright 种子数据可视验证：
+      - `output/career-breakdown-seeded/menu-career.png`
+      - `output/career-breakdown-seeded/history-career.png`
+
+TODO / Suggestions for next agent:
+- 生涯档案增加“导入”能力，允许用户把导出的 JSON 再导回本地。
+- 历史中心增加“按会话查看”入口，把单手历史和跨会话战绩拆成两个更明确的视图。
+- 生涯统计再补 `按 AI 难度` 与 `现金局/锦标赛` 双维度拆分。
+- 2026-03-12 继续优化（本轮）：生涯档案导入恢复 + 结果中心补充概览。
+  - `careerProfile.ts`
+    - 新增 `parseCareerProfileImport`
+    - 支持导入两种 JSON：
+      - 直接 `CareerProfile`
+      - `{ exportedAt, profile }` 导出包装结构
+    - 对 `version / recentSessions / recordedSessionIds / modeBreakdown` 做兼容校验
+    - 旧档案若缺玩法拆分统计，会给出兼容载入 warning
+  - `useGameController`
+    - 新增 `importCareerArchive(profile, message?)`
+  - `MainMenu`
+    - 生涯卡片新增 `导入`
+    - 隐藏文件输入 + 覆盖确认
+    - 新增导入反馈提示
+  - `ReplayCenter`
+    - 本地结果中心新增 `导入生涯`
+    - 新增“局制分布”与“最近难度分布”两个概览块
+    - 同样支持覆盖确认与导入反馈
+  - `theme.css`
+    - 新增 `visually-hidden-input`
+    - 新增 `career-feedback`
+    - 新增 `career-center-split-grid / career-mini-grid`
+  - 测试：
+    - `tests/careerProfile.test.ts` 扩展到 4 条
+    - 新增导入成功/失败用例
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（51/51）
+    - `npm run build` 通过
+    - develop-web-game skill client：
+      - `output/career-import-skill/shot-0.png`
+      - `output/career-import-skill/shot-1.png`
+    - Playwright 导入链路验证：
+      - `output/career-import-flow/menu-after-import.png`
+      - `output/career-import-flow/history-after-import.png`
+      - `output/career-import-flow/menu-state.json`
+      - `output/career-import-flow/history-state.json`
+
+TODO / Suggestions for next agent:
+- 历史中心增加“按会话查看”入口，把单手历史和跨会话战绩拆成两个更明确的视图。
+- 生涯档案导入增加“合并导入”选项，而不只是覆盖当前档案。
+- 生涯统计再补 `按 AI 难度` 的长期累计聚合，而不是只看最近会话分布。
+- 2026-03-12 继续优化（本轮）：历史中心“手牌视图 / 会话视图”拆分。
+  - 回放数据：
+    - `HandHistoryRecord` 新增可选 `sessionId`
+    - `replayBuilder` 保存 `sessionId`
+    - `handEngine.startHand/createInitialHand` 现在接收 `sessionId` 并写入 hand history
+    - `sessionPersistence.readPersistedSession` 会为旧 history 回填缺失的 `sessionId`
+  - 新增 `src/replay/sessionHistory.ts`
+    - `getReplaySessionKey`
+    - `summarizeReplaySessions`
+    - 输出当前缓存会话摘要：手数、胜率、盈亏、最大底池、时间范围
+  - `ReplayCenter`
+    - 顶部新增页签：`手牌视图` / `会话视图`
+    - 手牌视图只保留筛选、统计、逐手列表
+    - 会话视图展示：
+      - 当前缓存会话摘要（若当前尚无已完成手牌则显示空态）
+      - 本地结果中心（生涯统计、玩法拆分、局制分布、最近难度分布）
+  - 样式：
+    - 新增 history tab button / session archive card 样式
+    - 修复历史页 grid 容器把 panel 垂直拉高的问题：`align-content: start` + `grid-auto-rows: max-content`
+  - 测试：
+    - 新增 `tests/sessionHistory.test.ts`（2 条）
+    - 全量测试通过（53/53）
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（53/53）
+    - `npm run build` 通过
+    - develop-web-game skill client：
+      - `output/history-session-skill/shot-0.png`
+    - Playwright 截图：
+      - `output/history-session-views/history-hands-tab-v2.png`
+      - `output/history-session-views/history-sessions-tab-v2.png`
+
+TODO / Suggestions for next agent:
+- 生涯档案导入增加“合并导入”选项，而不只是覆盖当前档案。
+- 会话视图可继续升级为“会话详情页”，展示当前会话的手牌列表和局内关键节点。
+- 若未来要保留跨会话逐手回放，需要把完整 hand history 做成本地归档，而不只保留当前缓存。
+- 2026-03-12 继续优化（本轮）：跨会话本地回放归档 + 唯一回放键。
+  - 新增 `src/replay/replayRecordKey.ts`
+    - 统一生成 `sessionId:handId:timestamp` 形式的唯一回放键
+    - 解决不同会话 `handId` 重复时的回放定位冲突
+  - 新增 `src/state/replayArchive.ts`
+    - 本地存储 key：`neon.holdem.replay-archive.v1`
+    - 自动归档已结束或被替换的会话手牌
+    - 限制最近 `8` 个会话、每会话最多 `30` 手，避免 localStorage 失控
+    - 提供当前缓存 + 归档去重合并能力
+  - `useGameController`
+    - state 新增 `replayArchive`
+    - `currentReplayRecord` / `openReplay` / replay step 全部改为基于唯一键查找
+    - 会话自然结束时自动归档，并清理无意义的“已结束继续对局”存档
+    - 开新局覆盖旧存档、或手动清除存档时，会先把旧 history 转入回放归档
+  - `ReplayCenter`
+    - 接入“当前缓存 + 本地归档”统一历史源
+    - 手牌视图新增 `来源筛选`（全部 / 当前会话 / 本地归档）
+    - 会话视图头部显示归档会话数、手牌数、最近更新时间
+    - 新增“清空回放归档”
+    - 会话卡与详情列表回放按钮改为基于唯一键打开
+  - `App`
+    - `render_game_to_text` 新增 `replayArchive` 摘要和 `replay.handKey`
+  - 测试：
+    - 新增 `tests/replayArchive.test.ts`（3 条）
+    - 全量测试通过（57/57）
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（57/57）
+    - `npm run build` 通过
+    - develop-web-game skill client：
+      - `output/replay-archive-skill/shot-0.png`
+      - `output/replay-archive-skill/state-0.json`
+    - Playwright 定向验证：
+      - `output/replay-archive-flow/history-session-archive.png`
+      - `output/replay-archive-flow/archive-replay.png`
+      - `output/replay-archive-flow/history-state.json`
+      - `output/replay-archive-flow/replay-state.json`
+
+TODO / Suggestions for next agent:
+- 给回放归档增加 `导出 / 导入 / 合并导入`，与生涯档案解耦管理。
+- 归档会话详情可继续加入“关键节点书签”和“仅看大底池 / 全下手牌”筛选。
+- 若后续要支持更长会话，考虑把 replay archive 从 localStorage 升级到 IndexedDB。
+- 2026-03-12 继续优化（本轮）：回放归档导出 / 合并导入 / 覆盖导入。
+  - `src/state/replayArchive.ts`
+    - 新增 `ReplayArchiveImportMode`
+    - 新增 `mergeReplayArchives`
+    - 新增 `parseReplayArchiveImport`
+    - 新增 `exportReplayArchive`
+    - 导入时对 hand history 做基础结构校验，并对坏记录给出 warning
+    - 合并归档后会话顺序按“最近手牌时间”排序，而不是旧顺序硬覆盖
+  - `src/state/useGameController.ts`
+    - 新增 `importReplayArchive(archive, mode, message?)`
+    - `replace/merge` 两种导入策略都接入 controller state
+  - `src/App.tsx`
+    - 历史中心现在拿到完整 `replayArchive`，不只 summary
+  - `src/ui/components/ReplayCenter.tsx`
+    - 会话视图头部新增：
+      - `合并导入`
+      - `覆盖导入`
+      - `导出归档`
+      - `清空回放归档`
+    - 新增归档导入反馈条
+    - 文件导入使用 ref 记录导入模式，避免 React 异步 state 带来“点了覆盖却按合并导入”这类时序风险
+  - 测试：
+    - `tests/replayArchive.test.ts` 扩展到 5 条
+    - 新增：
+      - merge archive 会话排序
+      - wrapped import 解析与坏记录 warning
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（59/59）
+    - `npm run build` 通过
+    - develop-web-game skill client：
+      - `output/replay-archive-import-skill/shot-0.png`
+      - `output/replay-archive-import-skill/state-0.json`
+    - Playwright 定向链路：
+      - `output/replay-archive-import-flow/session-archive-initial.png`
+      - `output/replay-archive-import-flow/session-archive-merged.png`
+      - `output/replay-archive-import-flow/session-archive-replaced.png`
+      - `output/replay-archive-import-flow/exported-archive.json`
+      - `output/replay-archive-import-flow/merged-state.json`
+      - `output/replay-archive-import-flow/replaced-state.json`
+
+TODO / Suggestions for next agent:
+- 回放归档可继续补“导入时预览差异”与“选择性导入某些会话”。
+- 会话详情值得加 `仅看大底池 / 全下 / 教学标签命中` 的子筛选。
+- 若下一轮继续做长期数据层，优先把回放归档迁到 IndexedDB，并保留当前 localStorage 兼容导入路径。
+- 2026-03-12 继续优化（本轮）：会话详情子筛选 + 关键标签。
+  - `src/replay/sessionHistory.ts`
+    - 新增 `ReplaySessionHandFilter`
+    - 新增 `ReplaySessionHandInsight / ReplaySessionHandAnalysis`
+    - 新增 `analyzeReplaySessionHands`
+    - 新增 `filterReplaySessionHandInsights`
+    - 现在会为会话内每手计算：
+      - 盈亏
+      - 总底池
+      - 是否大底池
+      - 是否全下
+      - 是否教学命中
+      - 是否你赢
+      - 是否进入摊牌
+  - `src/ui/components/ReplayCenter.tsx`
+    - 会话详情顶部新增筛选芯片：
+      - `全部`
+      - `大底池`
+      - `全下`
+      - `教学命中`
+      - `你赢`
+    - 新增会话 marker strip，直接显示：
+      - 全下手数
+      - 教学命中手数
+      - 你赢手数
+      - 大底池手数
+      - 摊牌手数
+    - 每手新增关键标签徽章：
+      - 大底池
+      - 全下
+      - 摊牌
+      - 你赢
+      - 教学标签（最多显示前 2 个）
+  - `src/ui/styles/theme.css`
+    - 新增会话筛选芯片、marker strip、手牌标签样式
+  - 测试：
+    - `tests/sessionHistory.test.ts` 扩展到 4 条
+    - 新增会话手牌分析/筛选断言
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（60/60）
+    - `npm run build` 通过
+    - Playwright 定向验证：
+      - `output/session-detail-filters/session-filter-all.png`
+      - `output/session-detail-filters/session-filter-all-in.png`
+      - `output/session-detail-filters/session-filter-teaching.png`
+      - `output/session-detail-filters/session-filter-hero-win.png`
+      - `output/session-detail-filters/state.json`
+
+TODO / Suggestions for next agent:
+- 会话详情下一步适合加“只看大额亏损 / 只看淘汰手 / 只看边池”这类高价值复盘筛选。
+- 回放归档导入下一步可以做差异预览：新增多少会话、覆盖哪些 sessionId。
+- 长期数据层若升级到 IndexedDB，可顺带把导出范围从“归档”扩到“生涯 + 归档 + 当前存档”一体化备份。
+- 2026-03-12 继续优化（本轮）：会话详情高价值复盘筛选。
+  - `src/replay/sessionHistory.ts`
+    - `ReplaySessionHandFilter` 扩展：
+      - `bigLoss`
+      - `elimination`
+      - `sidePot`
+    - `ReplaySessionHandInsight` 新增：
+      - `isBigLoss`
+      - `causedElimination`
+      - `eliminationPlayerIds`
+      - `hasSidePot`
+    - `ReplaySessionHandAnalysis` 新增 `bigLossThreshold`
+    - 大额亏损阈值规则：
+      - 取会话内亏损额 75 分位
+      - 与 `6BB` 基线取较大值
+    - 淘汰手识别：读取 replay `elimination` 事件
+    - 边池手识别：`potBreakdown.length > 1` 或存在 `side_pot` 事件
+  - `src/ui/components/ReplayCenter.tsx`
+    - 会话详情新增筛选芯片：
+      - `大亏损`
+      - `淘汰手`
+      - `边池手`
+    - 会话详情 metadata 额外显示 `大亏损阈值`
+    - marker strip 额外显示：
+      - 大亏损手数
+      - 淘汰手数
+      - 边池手数
+    - 每手关键标签新增：
+      - `大额亏损`
+      - `淘汰`
+      - `边池`
+  - `src/ui/styles/theme.css`
+    - 新增 `orange / steel` 标签色
+  - 测试：
+    - `tests/sessionHistory.test.ts` 增补大亏损/淘汰/边池断言
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（60/60）
+    - `npm run build` 通过
+    - develop-web-game skill client：
+      - `output/session-detail-extra-skill/shot-0.png`
+      - `output/session-detail-extra-skill/state-0.json`
+    - Playwright 定向验证：
+      - `output/session-detail-filters/session-filter-big-loss.png`
+      - `output/session-detail-filters/session-filter-elimination.png`
+      - `output/session-detail-filters/session-filter-side-pot.png`
+      - `output/session-detail-filters/state-extra.json`
+
+TODO / Suggestions for next agent:
+- 下一步最值钱的是“差异预览导入”：告诉用户导入后会新增多少会话、多少手、覆盖哪些 sessionId。
+- 会话详情还可以补“只看最大输赢 swing 手”和“只看被动防守失败手”。
+- 真要把复盘做深，下一层应是从会话详情直接跳“关键节点起始步”而不是只跳整手回放。
+- 2026-03-12 继续优化（本轮）：回放归档导入差异预检面板。
+  - `src/state/replayArchive.ts`
+    - 新增 `ReplayArchiveImportPreview`
+    - 新增 `buildReplayArchiveImportPreview(current, incoming, mode)`
+    - 预检结果包含：
+      - 当前归档会话数 / 手牌数
+      - 导入文件会话数 / 手牌数
+      - 导入后会话数 / 手牌数
+      - 重复手牌数
+      - `newSessionIds`
+      - `overlappingSessionIds`
+      - `removedSessionIds`
+      - `overflowSessionIds`
+  - `src/ui/components/ReplayCenter.tsx`
+    - 回放归档导入从即时 `window.confirm` 改为真正的预检确认流
+    - 读取 JSON 后先生成 `pendingReplayImport`
+    - 会话视图新增“回放导入预检”面板，展示：
+      - 当前归档摘要
+      - 导入文件摘要
+      - 导入后结果
+      - 重复手牌数
+      - 新增/重叠/移除/截断会话列表
+      - warning 提示
+    - 新增 `取消` / `确认合并导入` / `确认覆盖导入`
+    - 清空归档时会同步清掉 pending preview，避免 UI 悬挂旧导入状态
+  - `src/ui/styles/theme.css`
+    - 新增导入预检面板与 pills/grid/动作区样式
+    - 补响应式规则，窄宽度下自动折成单列
+  - 测试：
+    - `tests/replayArchive.test.ts` 新增导入预检断言
+    - 覆盖 merge/replace 统计、移除会话、overflow 会话识别
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（62/62）
+    - `npm run build` 通过
+    - develop-web-game skill client：
+      - `output/replay-import-preview-skill/shot-0.png`
+      - `output/replay-import-preview-skill/state-0.json`
+    - Playwright 定向验证：
+      - `output/replay-import-preview-flow/merge-preview.png`
+      - `output/replay-import-preview-flow/merge-confirmed.png`
+      - `output/replay-import-preview-flow/replace-preview.png`
+      - `output/replay-import-preview-flow/replace-confirmed.png`
+      - `output/replay-import-preview-flow/state.json`
+
+TODO / Suggestions for next agent:
+- 下一步适合把“差异预检”再推进到“选择性导入会话”，而不只是 merge / replace 两档。
+- 会话详情下一层可以做“跳转到关键节点步骤”，而不是只打开整手回放。
+- 长期数据量再上涨时，应把回放归档从 `localStorage` 迁到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：回放归档选择性导入。
+  - `src/state/replayArchive.ts`
+    - 新增 `pickReplayArchiveSessions(archive, sessionIds)`
+    - 支持从导入归档中裁切出“仅勾选的会话子集”，再参与 preview / merge / replace
+  - `src/ui/components/ReplayCenter.tsx`
+    - 回放导入预检面板新增“选择导入会话”区
+    - 支持：
+      - 单个会话勾选 / 取消
+      - `全选`
+      - `清空选择`
+    - 预检统计改为实时基于“已选导入子集”重算：
+      - 已选导入会话数 / 手牌数
+      - 导入后结果
+      - 重复手牌数
+      - 新增 / 重叠 / 移除 / 超上限会话
+    - 若未选中任何会话，则禁用确认按钮并提示“不会执行导入”
+  - `src/ui/styles/theme.css`
+    - 新增会话选择卡片区、选中态、悬停态、工具按钮样式
+    - 预检 grid 改为 `auto-fit`，避免新增“已选导入”卡片后布局过挤
+  - 测试：
+    - `tests/replayArchive.test.ts` 新增按会话裁切归档断言
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（63/63）
+    - develop-web-game skill client：
+      - `output/replay-import-selective-skill/shot-0.png`
+      - `output/replay-import-selective-skill/state-0.json`
+    - Playwright 定向验证：
+      - `output/replay-import-selective-flow/merge-selective-preview.png`
+      - `output/replay-import-selective-flow/merge-selective-confirmed.png`
+      - `output/replay-import-selective-flow/replace-selective-preview.png`
+      - `output/replay-import-selective-flow/replace-selective-confirmed.png`
+      - `output/replay-import-selective-flow/merge-preview.txt`
+      - `output/replay-import-selective-flow/replace-preview.txt`
+      - `output/replay-import-selective-flow/archive.json`
+
+TODO / Suggestions for next agent:
+- 下一步可把“选择性导入”再推进成“导入前差异表”，按会话显示会新增多少手、会覆盖哪些手。
+- 会话详情仍然值得做“跳到关键节点步骤”，直接从列表跳到关键动作而不是整手开头。
+- 真要把历史拉长，下一层应把回放归档迁到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：回放归档预检“会话差异表”。
+  - `src/state/replayArchive.ts`
+    - 新增 `ReplayArchiveImportSessionDiff`
+    - `buildReplayArchiveImportPreview` 现在会输出 `sessionDiffs`
+    - 每条 diff 包含：
+      - 当前手数
+      - 导入手数
+      - 重复手数
+      - 新增手数
+      - 导入后保留手数
+      - 是否因上限未保留
+  - `src/ui/components/ReplayCenter.tsx`
+    - 回放归档预检面板新增“会话差异表”
+    - 按当前勾选实时展示：
+      - 会话
+      - 玩法/局制/难度
+      - 当前
+      - 导入
+      - 新增
+      - 重复
+      - 结果
+      - 状态（新增会话 / 并入现有 / 覆盖旧会话 / 超上限丢弃）
+  - `src/ui/styles/theme.css`
+    - 新增差异表容器、滚动区、状态 badge 样式
+    - 窄宽度下通过横向滚动避免压坏布局
+  - 测试：
+    - `tests/replayArchive.test.ts` 扩展 `sessionDiffs` 断言
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（63/63）
+    - develop-web-game skill client：
+      - `output/replay-import-diff-skill/shot-0.png`
+      - `output/replay-import-diff-skill/state-0.json`
+    - Playwright 定向验证：
+      - `output/replay-import-selective-flow/merge-selective-preview.png`
+      - `output/replay-import-selective-flow/replace-selective-preview.png`
+      - `output/replay-import-selective-flow/merge-preview.txt`
+      - `output/replay-import-selective-flow/replace-preview.txt`
+
+TODO / Suggestions for next agent:
+- 下一步可把差异表再细化到“本会话会新增哪些 handId / 与当前重复哪些 handId”。
+- 会话详情仍然值得做“跳到关键节点步骤”，直接定位到翻牌/转牌/全下节点。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：回放归档差异表 handId 明细。
+  - `src/state/replayArchive.ts`
+    - `ReplayArchiveImportSessionDiff` 新增：
+      - `currentHandIds`
+      - `incomingHandIds`
+      - `duplicateHandIds`
+      - `newHandIds`
+      - `resultHandIds`
+    - `buildReplayArchiveImportPreview` 现在为每个导入会话计算具体手号列表
+  - `src/ui/components/ReplayCenter.tsx`
+    - 差异表每个会话下方新增明细行
+    - 明细直接展示：
+      - `新增 handId`
+      - `重复 handId`
+      - `导入后保留`
+    - 对无保留结果的会话显示 `未保留`
+  - `src/ui/styles/theme.css`
+    - 新增明细行、handId pills、颜色分组样式
+  - 测试：
+    - `tests/replayArchive.test.ts` 新增 handId 明细断言
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（63/63）
+    - develop-web-game skill client：
+      - `output/replay-import-handids-skill/shot-0.png`
+      - `output/replay-import-handids-skill/state-0.json`
+    - Playwright 定向验证：
+      - `output/replay-import-selective-flow/merge-selective-preview.png`
+      - `output/replay-import-selective-flow/replace-selective-preview.png`
+      - `output/replay-import-selective-flow/merge-preview.txt`
+      - `output/replay-import-selective-flow/replace-preview.txt`
+
+TODO / Suggestions for next agent:
+- 下一步可继续把 handId 明细升级成“点击 handId 直接预览该手摘要 / 回放入口”。
+- 会话详情仍然值得做“跳到关键节点步骤”，直接定位到翻牌/转牌/全下节点。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：导入差异表 handId 可点击回放 + 历史视图状态保留。
+  - `src/state/useGameController.ts`
+    - 控制器新增 `replayPreviewRecord`
+    - `openReplay(handKey, previewRecord?)` 支持打开未正式导入的临时手牌记录
+    - replay autoplay / step / jump / slider 全部改为走 `resolveReplayRecord(...)`
+  - `src/ui/components/ReplayCenter.tsx`
+    - 差异表里的 handId pills 现在可点击并直接进入回放
+    - 若该手来自导入预检而非正式历史，仍可用临时记录打开回放
+    - 新增 ReplayCenter 模块级 view cache：
+      - `viewMode`
+      - `selectedSessionKey`
+      - `selectedSessionHandFilter`
+      - 各类筛选项
+      - `minPot`
+    - 新增导入预检 draft cache：
+      - 从导入预检点进回放后，返回历史中心仍恢复到原来的会话视图与勾选状态
+  - `src/ui/styles/theme.css`
+    - handId pills 增加按钮交互样式、hover/focus 状态
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（63/63）
+    - `npm run build` 通过
+    - develop-web-game skill client：
+      - `output/replay-import-click-skill-v2/shot-0.png`
+      - `output/replay-import-click-skill-v2/state-0.json`
+    - Playwright 定向验证：
+      - `output/replay-import-selective-flow/merge-hand-replay.png`
+      - `output/replay-import-selective-flow/merge-preview-restored.png`
+      - `output/replay-import-selective-flow/replace-hand-replay.png`
+      - `output/replay-import-selective-flow/replace-preview-restored.png`
+
+TODO / Suggestions for next agent:
+- 下一步可把 handId 点击后的回放再增强成“回到差异表时自动高亮刚查看过的手”。
+- 会话详情仍然值得做“跳到关键节点步骤”，直接定位到翻牌/转牌/全下节点。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：导入差异表 handId 返回高亮与自动回滚。
+  - `src/ui/components/ReplayCenter.tsx`
+    - 新增 `lastViewedImportHandCache`
+    - 点击差异表里的 handId 时，立即同步记录最近查看手牌
+    - 返回历史中心后：
+      - 自动滚动到该 handId pill
+      - 高亮对应 handId
+      - 高亮对应差异行
+    - 新增 ReplayCenter 局部视图缓存与导入 draft 缓存的配合，使“点回放 -> 返回”不会丢导入预检上下文
+  - `src/ui/styles/theme.css`
+    - 新增 `recent` 高亮样式：
+      - handId pills glow
+      - 差异行背景高亮
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（63/63）
+    - `npm run build` 通过
+    - develop-web-game skill client：
+      - `output/replay-import-highlight-skill/shot-0.png`
+      - `output/replay-import-highlight-skill/state-0.json`
+    - Playwright 定向验证：
+      - `output/replay-import-selective-flow/merge-preview-restored.png`
+      - `output/replay-import-selective-flow/replace-preview-restored.png`
+      - `output/replay-import-selective-flow/merge-hand-replay.png`
+      - `output/replay-import-selective-flow/replace-hand-replay.png`
+
+TODO / Suggestions for next agent:
+- 下一步可把“最近查看 handId”扩展成固定的“最近查看手牌列表”，允许在导入预检里来回切换。
+- 会话详情仍然值得做“跳到关键节点步骤”，直接定位到翻牌/转牌/全下节点。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：导入预检“最近查看手牌”列表。
+  - `src/ui/components/ReplayCenter.tsx`
+    - 新增 `recentViewedImportHandsCache`
+    - 点击差异表 handId 时，同时把该手推入“最近查看手牌”列表（最多 6 手）
+    - 新增“最近查看手牌”面板：
+      - 显示 handId、sessionId、玩法、难度、时间
+      - 支持再次打开回放
+      - 当前选中项带 active 状态
+      - 支持一键清空
+    - 最近查看列表与最后查看项都会在“点回放 -> 返回”链路中保持
+  - `src/ui/styles/theme.css`
+    - 新增最近查看卡片样式、active/disabled/hover 状态
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（63/63）
+    - Playwright 定向验证：
+      - `output/replay-import-selective-flow/merge-recent-list.png`
+      - `output/replay-import-selective-flow/merge-recent-reopen.png`
+      - `output/replay-import-selective-flow/merge-preview-restored.png`
+    - develop-web-game skill client：
+      - `output/replay-import-recent-skill/shot-0.png`
+      - `output/replay-import-recent-skill/state-0.json`
+
+TODO / Suggestions for next agent:
+- 下一步可把“最近查看手牌”列表做成可固定 pin 的复盘篮子，而不只是最近历史。
+- 会话详情仍然值得做“跳到关键节点步骤”，直接定位到翻牌/转牌/全下节点。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：导入预检“复盘篮子”。
+  - `src/ui/components/ReplayCenter.tsx`
+    - 新增 `pinnedImportHandsCache`
+    - 最近查看卡片新增“加入篮子 / 已固定”按钮
+    - 新增“复盘篮子”面板：
+      - 固定保留重点手牌（最多 8 手）
+      - 支持从篮子中直接重开回放
+      - 当前查看手在篮子中会保持 active 高亮
+      - 支持单手取消固定与一键清空
+    - 清空/确认/取消导入预检时同步清空篮子，避免跨导入残留
+  - `src/ui/styles/theme.css`
+    - 新增复盘篮子卡片布局、按钮层级、active 态样式
+    - 最近查看卡片改为“主按钮 + 辅助按钮”结构样式
+  - `output/replay-import-selective-flow/validate-selective-import.mjs`
+    - 回归链路补充：
+      - 最近查看手牌加入篮子
+      - 从复盘篮子重开回放
+      - 返回后验证篮子 active 高亮恢复
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（63/63）
+    - `npm run build` 通过（仅保留既有 chunk size warning）
+    - Playwright 定向验证：
+      - `output/replay-import-selective-flow/merge-pinned-basket.png`
+      - `output/replay-import-selective-flow/merge-pinned-reopen.png`
+      - `output/replay-import-selective-flow/merge-pinned-restored.png`
+      - `output/replay-import-selective-flow/merge-recent-reopen.png`
+    - develop-web-game skill client：
+      - `output/replay-import-pin-skill/shot-0.png`
+      - `output/replay-import-pin-skill/state-0.json`
+
+TODO / Suggestions for next agent:
+- 会话详情仍然值得做“跳到关键节点步骤”，直接定位到翻牌/转牌/全下节点。
+- 如果继续深挖复盘工作流，可以给“复盘篮子”增加 `pin note` 或“加入对比组”标签。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：会话详情关键节点跳转。
+  - `src/types/replay.ts`
+    - 新增 `ReplayOpenOptions`
+    - 回放打开入口支持 `initialStep`
+  - `src/state/useGameController.ts`
+    - `openReplay` 支持带 `initialStep` 打开回放
+    - 初始步数会按当前手可用 snapshot 范围进行 clamp
+  - `src/replay/sessionHistory.ts`
+    - 为每手新增 `quickJumps`
+    - 组合 stage anchor（翻牌/转牌/河牌/摊牌）与 replay key moments（施压/全下/边池/淘汰/诈唬线）
+    - 新增 `targetStep`，把 replay 事件步号映射为 viewer snapshot 索引，避免“事件 step”和“回放 slider 索引”混淆
+  - `src/ui/components/ReplayCenter.tsx`
+    - 会话详情每手新增“关键节点”按钮条
+    - 点击后直接跳到目标 replay step 打开
+  - `src/ui/styles/theme.css`
+    - 新增关键节点按钮样式与颜色分层（street / pressure / settlement / bluff / elimination）
+  - `tests/sessionHistory.test.ts`
+    - 新增 quick jumps 单测
+  - `output/session-key-jump-flow/validate-session-key-jumps.mjs`
+    - 新增定向浏览器回归脚本，验证：
+      - 会话详情关键节点按钮可见
+      - 点击“全下”后回放定位到 `step=3`
+      - 点击“翻牌”后回放定位到 `step=1`
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（64/64）
+    - `npm run build` 通过（仅保留既有 chunk size warning）
+    - Playwright 定向验证：
+      - `output/session-key-jump-flow/session-detail-jumps.png`
+      - `output/session-key-jump-flow/replay-jump-all-in.png`
+      - `output/session-key-jump-flow/replay-jump-flop.png`
+      - `output/session-key-jump-flow/replay-step-all-in.json`
+      - `output/session-key-jump-flow/replay-step-flop.json`
+    - develop-web-game skill client：
+      - `output/session-key-jump-skill/shot-0.png`
+      - `output/session-key-jump-skill/state-0.json`
+
+TODO / Suggestions for next agent:
+- 会话详情下一步可以继续做“关键节点预览 hover”，在不进回放的情况下先看该节点摘要。
+- 复盘工作流仍然值得补“对比组”能力，把多个 handId 并排比较关键节点。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：会话详情关键节点 hover 预览。
+  - `src/replay/sessionHistory.ts`
+    - `ReplaySessionHandJump` 新增预览字段：
+      - `stage / stageLabel`
+      - `totalPot`
+      - `boardCount`
+      - `sidePotCount`
+      - `snapshotNote`
+    - `buildReplaySessionHandJumps` 现在会为每个跳点附带目标 snapshot 的预览信息
+    - 为无 snapshot 的简化手牌记录补了安全 fallback，避免预览数据层崩溃
+  - `src/ui/components/ReplayCenter.tsx`
+    - 会话详情新增 `previewedSessionJumpKey`
+    - 每手默认展示首个关键节点预览
+    - hover / focus 其他关键节点时，预览卡片实时切换
+    - 预览卡片展示：
+      - 节点标签
+      - 所在街道
+      - 底池
+      - 公共牌数量
+      - 边池数量
+      - 节点说明
+      - 桌面状态说明
+  - `src/ui/styles/theme.css`
+    - 新增关键节点预览卡片样式
+    - active 跳点按钮增加视觉高亮
+  - `tests/sessionHistory.test.ts`
+    - quick jumps 单测补充预览字段断言
+  - `output/session-key-jump-flow/validate-session-key-jumps.mjs`
+    - 浏览器定向回归新增：
+      - hover “全下”并截图/导出预览文本
+      - hover “翻牌”并截图/导出预览文本
+      - 点击后继续验证回放跳点定位
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（64/64）
+    - `npm run build` 通过（仅保留既有 chunk size warning）
+    - Playwright 定向验证：
+      - `output/session-key-jump-flow/session-jump-preview-all-in.png`
+      - `output/session-key-jump-flow/session-jump-preview-flop.png`
+      - `output/session-key-jump-flow/jump-preview-all-in.txt`
+      - `output/session-key-jump-flow/jump-preview-flop.txt`
+      - `output/session-key-jump-flow/replay-jump-all-in.png`
+      - `output/session-key-jump-flow/replay-jump-flop.png`
+    - develop-web-game skill client：
+      - `output/session-jump-preview-skill/shot-0.png`
+      - `output/session-jump-preview-skill/state-0.json`
+
+TODO / Suggestions for next agent:
+- 复盘工作流仍然值得补“对比组”能力，把多个 handId 并排比较关键节点。
+- 会话详情可以继续做“关键节点 mini board 预览”，把公共牌缩略图直接显示出来，而不只是文字。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：会话详情“对比组”。
+  - `src/ui/components/ReplayCenter.tsx`
+    - 新增 `ComparedSessionHandState`
+    - 新增模块缓存 `comparedSessionHandsCache`
+    - 会话详情每手新增 `加入对比 / 已在对比组`
+    - 新增“对比组”面板：
+      - 最多保留 4 手
+      - 显示手号、玩法、局制、难度、时间、盲注、盈亏、底池、结果
+      - 复用标签系统展示 marker / teaching labels
+      - 可从对比组内直接点关键节点跳转回放
+      - 支持单手移出与一键清空
+    - 对比组展示前会按当前可用回放记录做可见性过滤，避免归档消失后留下失效入口
+  - `src/ui/styles/theme.css`
+    - 新增对比组面板、并排卡片、KPI 区块、对比组跳点样式
+  - `output/session-key-jump-flow/validate-session-key-jumps.mjs`
+    - 定向回归脚本升级为 2 手同会话样本
+    - 验证：
+      - 两手加入对比后，对比组面板出现
+      - 对比组文本正确包含两手摘要
+      - 从对比组里的关键节点按钮直接打开对应手牌回放
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（64/64）
+    - `npm run build` 通过（仅保留既有 chunk size warning）
+    - Playwright 定向验证：
+      - `output/session-key-jump-flow/session-compare-panel.png`
+      - `output/session-key-jump-flow/compare-panel.txt`
+      - `output/session-key-jump-flow/compare-jump-flop.png`
+      - `output/session-key-jump-flow/compare-jump-flop.json`
+    - develop-web-game skill client：
+      - `output/session-compare-skill/shot-0.png`
+      - `output/session-compare-skill/state-0.json`
+
+TODO / Suggestions for next agent:
+- 会话详情可以继续做“关键节点 mini board 预览”，把公共牌缩略图直接显示出来，而不只是文字。
+- 对比组下一步值得补“共同字段对齐比较”，比如只突出不同的 blind / profit / tag / key jump。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：专注模式下注框改侧边，不遮挡牌桌。
+  - `src/ui/components/TableScene.tsx`
+    - 新增 `focusControlsStack`
+    - 专注模式下 `操作` 面板不再复用底部宽浮层，而是使用右侧独立下注框
+    - 下注框仅保留专注模式所需的下注/提示信息，不再把技巧教学整块压在牌桌上
+    - `table-wrap` 根据 `focusPanel === 'controls'` 增加 `focus-controls-open` 类
+  - `src/ui/styles/theme.css`
+    - 新增 `focus-overlay-controls`
+    - 新增 `focus-controls-shell / head / status`
+    - 专注模式打开下注框时为牌桌右侧预留 gutter，避免与公共牌、主底池、你的手牌区域相交
+    - 小屏回退到底部 overlay，避免窄屏侧栏压缩过度
+  - `output/focus-side-bet/validate-focus-side-bet.mjs`
+    - 新增专注模式几何碰撞验证脚本
+    - 检查下注框与：
+      - `board-area`
+      - `seat-panel.human`
+      - `pot-display`
+      是否发生矩形重叠
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（64/64）
+    - `npm run build` 通过（仅保留既有 chunk size warning）
+    - Playwright 定向验证：
+      - `output/focus-side-bet/focus-side-bet.png`
+      - `output/focus-side-bet/overlap-report.json`
+      - `output/focus-side-bet/state.json`
+    - develop-web-game skill client：
+      - `output/focus-side-bet-skill/shot-0.png`
+      - `output/focus-side-bet-skill/state-0.json`
+
+TODO / Suggestions for next agent:
+- 专注模式下注框下一步可以继续做“可拖拽停靠”，允许用户选左侧或右侧。
+- 会话详情可以继续做“关键节点 mini board 预览”，把公共牌缩略图直接显示出来，而不只是文字。
+- 长期历史层若继续扩容，应优先迁移回放归档到 `IndexedDB`。
+- 2026-03-12 继续优化（本轮）：高优先级收口（IndexedDB 归档 / mini board / 对比差异高亮 / 专注模式左右停靠）。
+  - `src/state/replayArchive.ts`
+    - 补完整 `IndexedDB` 读写、清理与 legacy `localStorage` 迁移
+    - 新增 bootstrap key：`neon.holdem.replay-archive-bootstrap.v1`
+    - `readReplayArchive` 首屏优先读取 bootstrap
+    - `loadReplayArchive` 异步读取 `IndexedDB` 全量归档，并在 legacy 更新时自动迁移
+  - `src/state/useGameController.ts`
+    - 新增回放归档异步水合流程，避免首屏 bootstrap 反向覆盖完整归档
+    - 归档持久化改为“ready 后再写”，并用快照比较防止晚到数据覆盖用户刚产生的新归档
+  - `src/ui/components/TableScene.tsx`
+    - 专注模式下注框新增 `左 / 右` 停靠切换
+    - 停靠偏好本地持久化：`neon.holdem.focus-dock.v1`
+  - `src/ui/components/ReplayCenter.tsx`
+    - 对比组新增 `仅高亮差异`
+    - 差异高亮覆盖：玩法 / 局制 / 难度 / session / 盲注 / 盈亏 / 底池 / 结果 / 标签 / 关键节点
+    - 关键节点预览卡片新增 mini board 缩略牌面
+  - `src/replay/sessionHistory.ts`
+    - 修复街道跳点预览取到“翻牌圈切换快照但未 reveal board”的问题
+    - 当快照 board 为空时，按街道从 `communityCardsRevealOrder` 回填 `3/4/5` 张公共牌
+  - `tests/replayArchive.test.ts`
+    - 新增 `IndexedDB` 主存储 + legacy 迁移 + 清空链路测试
+  - `tests/sessionHistory.test.ts`
+    - 新增街道 jump 回填公共牌断言
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（65/65）
+    - `npm run build` 通过（保留既有 chunk size warning）
+    - develop-web-game skill client：
+      - `output/high-priority-skill/shot-0.png`
+      - `output/high-priority-skill/state-0.json`
+    - 定向浏览器回归：
+      - 专注模式左右停靠与碰撞报告：
+        - `output/high-priority-ui/focus-right.png`
+        - `output/high-priority-ui/focus-left.png`
+        - `output/high-priority-ui/focus-dock-report.json`
+      - 对比组差异高亮：
+        - `output/high-priority-ui/compare-panel-diff.png`
+      - 关键节点 mini board：
+        - `output/high-priority-ui/jump-preview.png`
+        - `output/high-priority-ui/jump-preview.json`
+
+TODO / Suggestions for next agent:
+- 继续深挖回放层的话，下一步最值钱的是把 `ReplayCenter` 做懒加载或局部拆包，处理当前 build 的 chunk warning。
+- 专注模式下注框如果还要继续做，可以上“拖拽停靠 + 宽度记忆”，但现在左右停靠已足够解决遮挡。
+- 对比组下一步可以再加“差异摘要行”，直接列出哪几个字段不同，而不只是视觉高亮。
+- 2026-03-12 继续优化（本轮）：中优先级收口（拆包 / 音效 / 小屏专注模式）。
+  - `src/App.tsx`
+    - 为 `MainMenu / TopHud / TableScene / ReplayCenter / ReplayViewer` 接入 `React.lazy + Suspense`
+    - 新增统一 `ScreenLoader`
+    - 接入本地音效状态：
+      - 从 `localStorage` 读取/写入音效偏好
+      - 监听 `handId / boardCount / activePlayerId / stage / screen` 变化触发音效 cue
+      - `render_game_to_text` 新增 `audio.level`
+  - `src/state/audioPreferences.ts`
+    - 新增音效偏好存储、档位循环、增益映射、中文标签
+  - `src/audio/soundBus.ts`
+    - 新增 Web Audio 合成音效总线
+    - cue 覆盖：
+      - `handStart`
+      - `chipCommit`
+      - `boardReveal`
+      - `heroTurn`
+      - `panelOpen`
+      - `heroWin`
+      - `heroLose`
+  - `src/ui/components/TopHud.tsx`
+    - HUD 新增音效按钮，支持 `关 / 柔 / 满` 循环切换
+  - `src/ui/styles/theme.css`
+    - 新增 `screen-loader` 与 `btn.ghost`
+    - 新增小屏历史页按钮栈布局
+    - 新增小屏专注模式纵向堆叠：
+      - `table`
+      - `focus-dock`
+      - `focus panel`
+    - 小屏下不再让 `focus-overlay-controls` 绝对定位压在牌桌上
+  - `tests/audioPreferences.test.ts`
+    - 新增音效偏好模块测试（读写、回退、档位循环）
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（67/67）
+    - `npm run build` 通过
+    - 构建结果：
+      - 主入口 `dist/assets/index-B8Eoj4PW.js` 约 `282.93 kB`
+      - Vite `500 kB` chunk warning 已消失
+    - develop-web-game skill client：
+      - `output/medium-priority-skill/shot-0.png`
+      - `output/medium-priority-skill/state-0.json`
+    - 定向浏览器回归：
+      - 音效档位与持久化：
+        - `output/medium-priority-ui/audio-cycle.json`
+      - 移动端历史中心：
+        - `output/medium-priority-ui/history-mobile.png`
+      - 移动端专注模式：
+        - `output/medium-priority-ui/focus-mobile-controls.png`
+        - `output/medium-priority-ui/mobile-layout.json`
+
+TODO / Suggestions for next agent:
+- 音效系统下一步可以接入真正的采样资源或音色包，但当前合成音已足够做功能级反馈。
+- 如果继续做中优先级，可以把 `ReplayCenter` 再向下拆分为按面板懒加载，进一步压低首次进入历史中心的感知加载。
+- 移动端专注模式现在改成纵向堆叠；下一步若要更像原生客户端，可以做“半屏抽屉 + 上拉展开”。
+- 2026-03-12 继续优化（本轮）：`ReplayCenter` 面板级懒加载落地。
+  - 新增 `src/ui/components/replayCenterShared.ts`
+    - 抽出历史中心共享类型、格式化工具、对比组差异计算与会话跳点辅助方法
+  - 新增 `src/ui/components/ReplayHandsPanel.tsx`
+    - 承接“手牌视图”渲染层
+    - 保留原筛选、统计卡、逐手列表与回放入口
+  - 新增 `src/ui/components/ReplaySessionsPanel.tsx`
+    - 承接“会话视图 + 本地结果中心”渲染层
+    - 保留导入预检、会话详情、关键节点预览、对比组与生涯统计
+  - 重构 `src/ui/components/ReplayCenter.tsx`
+    - 改为父级状态容器
+    - 用 `React.lazy + Suspense` 按 `viewMode` 懒加载 `ReplayHandsPanel / ReplaySessionsPanel`
+    - 保留全部状态、缓存、导入/导出、回放打开与对比逻辑在父组件
+    - 对会话聚合与分析计算增加 `viewMode === 'sessions'` 门控，避免进入历史中心时先做无效会话分析
+  - 更新 `src/ui/styles/theme.css`
+    - 新增 `replay-panel-loader`，减少历史中心切换时的版面跳动
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（67/67）
+    - `npm run build` 通过
+    - 新 chunk：
+      - `dist/assets/ReplayHandsPanel-B4jB2Scj.js`
+      - `dist/assets/ReplaySessionsPanel-CvsjJ_4R.js`
+      - `dist/assets/ReplayCenter-xnANBzk7.js`
+    - develop-web-game skill client：
+      - `output/replay-center-split-skill/shot-0.png`
+      - `output/replay-center-split-skill/state-0.json`
+      - `output/replay-center-split-table/shot-0.png`
+      - `output/replay-center-split-table/state-0.json`
+    - 定向浏览器回归：
+      - `output/replay-center-split-flow/history-hands.png`
+      - `output/replay-center-split-flow/history-sessions.png`
+      - `output/replay-center-split-flow/history-hands-state.json`
+      - `output/replay-center-split-flow/history-sessions-state.json`
+      - `output/replay-center-split-flow/view-switch.json`
+
+TODO / Suggestions for next agent:
+- 如果继续做增强项，下一步最值钱的是把 `ReplaySessionsPanel` 再拆成“会话详情 / 生涯结果中心”两个懒加载子面板，进一步缩短首次切到会话视图的等待。
+- 回放中心已经按视图拆包；下一步可以把“导入预检差异表”再改成按需展开，减少首屏长 DOM 渲染压力。
+- 可以补一个轻量性能观测项，把历史中心视图切换耗时写入 `render_game_to_text` 或开发态日志，方便后续继续压加载时延。
+- 2026-03-12 继续增强（本轮）：会话视图继续细分为“会话归档区 + 本地结果中心”。
+  - 新增 `src/ui/components/replaySessionsShared.ts`
+    - 抽出 `ReplaySessionsPanel` 子面板共享 props/types
+  - 新增 `src/ui/components/ReplaySessionArchivePanel.tsx`
+    - 独立承接会话摘要、回放归档导入预检、会话详情、关键节点预览与对比组
+  - 新增 `src/ui/components/ReplayCareerPanel.tsx`
+    - 独立承接本地结果中心、生涯导入导出与玩法/难度拆分统计
+  - 重构 `src/ui/components/ReplaySessionsPanel.tsx`
+    - 改为轻量协调器
+    - 使用 `React.lazy + Suspense` 分别加载 `ReplaySessionArchivePanel / ReplayCareerPanel`
+    - `ReplayCareerPanel` 增加“短延迟 + idle”后挂载，让会话视图先稳定上半区
+  - 更新 `src/ui/styles/theme.css`
+    - 新增 `replay-subpanel-loader`、`replay-deferred-panel`
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（67/67）
+    - `npm run build` 通过
+    - 新 chunk：
+      - `dist/assets/ReplaySessionsPanel-DxSdFuXe.js`
+      - `dist/assets/ReplaySessionArchivePanel-ypSSP59P.js`
+      - `dist/assets/ReplayCareerPanel-DnG-aEI3.js`
+    - develop-web-game skill client：
+      - `output/replay-sessions-split-skill-v2/shot-0.png`
+      - `output/replay-sessions-split-skill-v2/state-0.json`
+    - 定向浏览器回归：
+      - 初始会话视图（上半区先到、下半区 loader）：
+        - `output/replay-sessions-split-flow/sessions-initial.png`
+      - 完整会话视图：
+        - `output/replay-sessions-split-flow/sessions-ready.png`
+      - 状态/标记：
+        - `output/replay-sessions-split-flow/sessions-initial-state.json`
+        - `output/replay-sessions-split-flow/sessions-ready-state.json`
+        - `output/replay-sessions-split-flow/markers.json`
+
+TODO / Suggestions for next agent:
+- 继续做性能增强的话，最值钱的是把 `ReplaySessionArchivePanel` 内的“导入预检差异表”改成默认折叠 + 按需展开，避免长表格在无查看意图时也完整渲染。
+- 目前最大的 chunk 仍是 `CardView` 相关产物（约 `121 kB`）；下一步可以考虑把回放牌面和桌面牌面再拆细，或压缩动效依赖。
+- 可以给历史中心补一个开发态性能打点，例如“切入会话视图首屏耗时 / 结果中心完成加载耗时”，方便继续做精确优化。
+- 2026-03-12 继续增强（本轮）：历史中心剩余高价值性能点继续收口。
+  - `src/ui/components/ReplaySessionArchivePanel.tsx`
+    - 导入预检中的“会话差异表”改为默认折叠
+    - 折叠态仅显示摘要 chip 和展开按钮，不再无意图渲染整张长表
+    - `mini board` 预览改用轻量静态牌面组件，不再依赖动态 `CardView`
+  - `src/ui/components/StaticCardView.tsx`
+    - 新增静态卡牌视图，复用现有牌面样式但移除 `framer-motion`
+  - `src/ui/components/ReplayHandsPanel.tsx`
+    - 新增 `onReady`
+  - `src/ui/components/ReplaySessionsPanel.tsx`
+    - 增加 `onReady / onArchiveReady / onCareerReady`
+    - 保持“上半区先到、下半区后到”的延迟加载策略
+  - `src/ui/components/replaySessionsShared.ts`
+    - 扩展子面板 ready 回调类型
+  - `src/ui/components/ReplayCenter.tsx`
+    - 新增历史中心性能打点：
+      - `handsPanelReadyMs`
+      - `sessionsPanelReadyMs`
+      - `sessionArchiveReadyMs`
+      - `careerPanelReadyMs`
+      - `sessionsPrefetched / handsPrefetched`
+    - 增加空闲预取：
+      - 在手牌视图空闲时预取会话视图相关 chunk
+      - 在会话视图空闲时预取手牌视图 chunk
+  - `src/App.tsx`
+    - `render_game_to_text` 新增 `historyPerf`
+  - `src/ui/styles/theme.css`
+    - 新增 `archive-import-diff-summary`
+    - 新增 `card-view.static`
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（67/67）
+    - `npm run build` 通过
+    - 定向浏览器回归：
+      - 差异表折叠态：
+        - `output/history-perf-and-diff/diff-collapsed.png`
+      - 差异表展开态：
+        - `output/history-perf-and-diff/diff-expanded.png`
+      - 标记结果：
+        - `output/history-perf-and-diff/markers.json`
+          - `collapsedState.rowCount = 0`
+          - `expandedState.rowCount = 2`
+          - `errors = []`
+      - 历史性能状态：
+        - `output/history-perf-and-diff/history-hands-state.json`
+        - `output/history-perf-and-diff/history-sessions-ready-state.json`
+          - 已包含 `historyPerf`
+          - 示例字段：`sessionsPrefetchedAtMs`, `sessionArchiveReadyMs`, `careerPanelReadyMs`
+
+TODO / Suggestions for next agent:
+- 目前最大的共享 chunk 仍约 `122 kB`，命名为 `seatLayout-*`，实际已经包含剩余重型共享依赖；下一步若继续压体积，优先检查 `TableScene / ReplayViewer / SeatPanel` 与动画依赖的共享边界。
+- 历史中心性能数据已经可观测；下一步可以直接做“按阈值预警”，例如当 `careerPanelReadyMs > 400ms` 时在开发态打印提示。
+- 如果继续做 UI 体感优化，最值钱的是把“导入预检差异表”做成逐会话展开，不只是整表折叠。
+- 2026-03-12 遗留问题清扫（本轮）：把上一轮剩余的历史中心性能与体积问题彻底收口。
+  - 更新 `vite.config.ts`
+    - 新增 `manualChunks`
+    - 将共享依赖拆为：
+      - `react-vendor`
+      - `motion-vendor`
+      - `animated-card-view`
+      - `seat-layout-core`
+  - 更新 `src/ui/components/ReplaySessionArchivePanel.tsx`
+    - 差异表保持“整表默认折叠”
+    - 展开后再支持“逐会话展开/收起 handId 明细”
+    - 避免一次性渲染全部差异明细 DOM
+  - 更新 `src/ui/components/ReplayCenter.tsx`
+    - 新增稳定 `onReady` 回调与 `historyPerf` warning 生成
+    - `render_game_to_text` 可直接读取：
+      - `handsPanelReadyMs`
+      - `sessionsPanelReadyMs`
+      - `sessionArchiveReadyMs`
+      - `careerPanelReadyMs`
+      - `sessionsPrefetched / handsPrefetched`
+      - `warnings`
+    - 修复浏览器回归中发现的真实问题：`Maximum update depth exceeded`
+      - 原因是子面板 `onReady` 每次 render 变更，导致 effect 循环触发
+      - 现已改为 `useCallback` 稳定回调
+  - 更新 `src/App.tsx`
+    - 历史页状态输出加入 `historyPerf`
+  - 文档更新：
+    - `README.md` 同步当前拆包策略、性能观测与构建体积
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（67/67）
+    - `npm run build` 通过
+    - 构建产物关键结果：
+      - `dist/assets/index-C3IzIvgd.js` ≈ `90.25 kB`
+      - `dist/assets/react-vendor-Ah1pgjPn.js` ≈ `192.35 kB`
+      - `dist/assets/motion-vendor-aICp27ZA.js` ≈ `123.91 kB`
+      - `dist/assets/TableScene-7KONRjQi.js` ≈ `38.80 kB`
+    - 定向浏览器回归：
+      - `output/history-perf-and-diff/diff-collapsed.png`
+      - `output/history-perf-and-diff/diff-expanded.png`
+      - `output/history-perf-and-diff/history-hands-state.json`
+      - `output/history-perf-and-diff/history-sessions-ready-state.json`
+      - `output/history-perf-and-diff/markers.json`
+        - `collapsedState.rowCount = 0`
+        - `expandedState.rowCount = 2`
+        - `errors = []`
+  - 结论：
+    - 当前已知阻塞性遗留问题已处理完毕
+    - 剩余项属于非阻塞增强，不再是稳定性或性能清欠
+- 2026-03-12 增强（本轮）：会话对比组升级为“摘要 + 排序”。
+  - 更新 `src/ui/components/replayCenterShared.ts`
+    - 新增 `buildComparedSessionSummary`
+    - 新增 `sortComparedSessionHands`
+    - 抽出对比组差异摘要字段与排序模式，避免逻辑散落在 UI 中
+  - 更新 `src/ui/components/ReplaySessionArchivePanel.tsx`
+    - 对比组新增“差异摘要”面板
+    - 自动汇总核心差异：`盈亏 / 底池 / 结果 / 标记 / 教学 / 关键节点`
+    - 额外显示共同项：`玩法 / 局制 / 难度 / 会话 / 盲注`
+    - 新增排序切换：
+      - `篮子顺序`
+      - `最新优先`
+      - `盈亏波动`
+      - `大底池优先`
+  - 更新 `src/ui/styles/theme.css`
+    - 新增对比组摘要板与排序按钮样式
+  - 新增测试 `tests/replayCenterShared.test.ts`
+    - 验证差异摘要字段输出
+    - 验证对比组排序行为
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（69/69）
+    - `npm run build` 通过
+    - skill client 烟测：
+      - `output/enhance-compare-skill/`
+    - 定向浏览器回归：
+      - `output/session-compare-enhanced/compare-summary-default.png`
+      - `output/session-compare-enhanced/compare-summary-sorted.png`
+      - `output/session-compare-enhanced/compare-summary.txt`
+      - `output/session-compare-enhanced/compare-state.json`
+        - `defaultOrder = [第 19 手, 第 18 手, 第 17 手]`
+        - `potOrder = [第 19 手, 第 17 手, 第 18 手]`
+        - `swingOrder = [第 19 手, 第 17 手, 第 18 手]`
+        - `errors = []`
+
+TODO / Suggestions for next agent:
+- 如果继续做复盘增强，最值钱的是给“对比组”增加逐街数据对照，例如翻牌前投入、摊牌牌型、边池数量。
+- 现在已有摘要和排序，下一步可以考虑“保存一个命名对比组”或把对比组导出为简报。
+- 若继续做性能优化，可对历史中心的长会话列表引入虚拟滚动，但这不再是当前阻塞项。
+- 2026-03-12 动画与特效增强（本轮）：牌桌演出层升级。
+  - 新增 `src/ui/components/TableEffectsLayer.tsx`
+    - 环境漂浮光斑
+    - 公共牌揭示爆发（翻牌 / 转牌 / 河牌）
+    - 筹码入池脉冲
+    - 结算扫光
+  - 更新 `src/ui/components/TableScene.tsx`
+    - 接入 `TableEffectsLayer`
+    - 当前行动玩家的 `seat-anchor` 增加 `active` 态，用于外围聚光
+  - 更新 `src/ui/components/SeatPanel.tsx`
+    - 行动中座位增加轻微抬升与更强箱体辉光
+  - 更新 `src/ui/components/CardView.tsx`
+    - 发牌翻转改成更顺滑的弹簧过渡
+  - 更新 `src/ui/styles/theme.css`
+    - 新增桌面 FX 样式：
+      - `table-effects-layer`
+      - `board-fx / pot-fx / winner-sweep`
+      - `table-ambient-orb`
+    - 新增座位聚光、状态脉冲、卡牌镜面扫光
+    - 新增公共牌托盘和主底池表面的扫光层
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（69/69）
+    - `npm run build` 通过
+    - skill client 烟测：
+      - `output/animation-enhance-skill/shot-0.png`
+      - `output/animation-enhance-skill/state-0.json`
+    - 定向浏览器回归：
+      - 常规桌面效果：`output/animation-enhance-ui/table-effects.png`
+      - 爆发帧：`output/animation-enhance-ui/table-burst.png`
+      - 状态：`output/animation-enhance-ui/state.json`
+      - 错误：`output/animation-enhance-ui/errors.json`（`[]`）
+
+TODO / Suggestions for next agent:
+- 如果继续做演出增强，下一步最值钱的是把 `board reveal / payout / showdown` 的音效与特效联动起来。
+- 可继续考虑为“结算 spotlight”和“锦标赛终局”加入更明确的粒子雨或奖杯光束，但要先控制遮挡。
+- 目前牌桌已经有环境光与阶段爆发；下一步可以把回放模式复用同一套 FX，统一观感。
+- 2026-03-12 形象系统增强（本轮）：为玩家和 AI 增加本地人物画像。
+  - 新增 `src/ui/playerPortraits.ts`
+    - 定义人类玩家与 10 个 AI 的稳定画像预设
+    - 每个画像包含：称号、徽记、装饰主题、配色变量
+  - 新增 `src/ui/components/PlayerPortrait.tsx`
+    - 纯前端绘制头像徽章，不依赖外部图片
+  - 更新 `src/ui/components/SeatPanel.tsx`
+    - 座位头部加入头像与称号
+    - 主牌桌与回放共用同一人物形象系统
+  - 更新 `src/ui/styles/theme.css`
+    - 新增画像徽章、装饰、呼吸动画与座位文字布局样式
+  - 新增测试 `tests/playerPortraits.test.ts`
+    - 验证人类画像固定
+    - 验证已命名 AI 的稳定映射
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（71/71）
+    - `npm run build` 通过
+    - skill client 烟测：
+      - `output/player-portrait-skill/shot-0.png`
+    - 定向浏览器回归：
+      - `output/player-portrait-ui/table-portraits.png`
+      - `output/player-portrait-ui/portrait-state.json`
+        - `portraitCount = 6`
+        - `titleSamples = [牌桌主理人, 深水诈压, 伏击读牌, 筹码编排]`
+        - `errors = []`
+
+TODO / Suggestions for next agent:
+- 如果继续做“人物感”，下一步最值钱的是给头像加入情绪状态，比如弃牌/全下/获胜时切换表情或边框。
+- 可以考虑在菜单中加入“人类头像主题切换”，让玩家选择自己的主形象。
+- 当前头像是纯前端矢量徽章；如果后续要走更强角色感，可以引入一组本地静态 PNG / SVG 立绘，但要先做资源规范。
+- 2026-03-12 形象系统增强（本轮）：为人物画像补齐情绪态，并修正头像与牌桌核心区域的布局冲突。
+  - 更新 `src/ui/playerPortraits.ts`
+    - 新增 `PlayerPortraitMood`
+    - 新增 `resolvePlayerPortraitMood`
+    - 为已命名 AI 增加稳定名称到画像预设的映射，避免回放或不同桌人数下画像漂移
+  - 更新 `src/ui/components/PlayerPortrait.tsx`
+    - 新增情绪态状态徽记
+    - 支持 `focused / all-in / folded / winner / busted`
+  - 更新 `src/ui/components/SeatPanel.tsx`
+    - 座位支持 `isWinner`
+    - 将当前行动 / 获胜状态传给人物画像，联动情绪态
+  - 更新 `src/ui/components/TableScene.tsx`
+    - 主牌桌座位接入 `isWinner`
+  - 更新 `src/ui/components/ReplayViewer.tsx`
+    - 回放座位接入 `active / winner` 状态，复用同一人物情绪态视觉
+  - 更新 `src/ui/seatLayout.ts`
+    - 下调 heads-up 人类位
+    - 外扩底部斜侧位
+    - 清掉头像对公共牌区和主底池区的碰撞
+  - 更新 `src/ui/styles/theme.css`
+    - 新增人物画像情绪态辉光、全下脉冲、获胜闪耀、淘汰灰化
+    - 新增座位获胜态箱体样式
+  - 更新 `tests/playerPortraits.test.ts`
+    - 覆盖情绪态优先级
+  - 更新回归脚本 `output/player-portrait-regression/validate-portrait-layout.mjs`
+    - 改为每个 AI 数单独浏览器上下文
+    - 改为真实键盘调节菜单 range，确保 `AI 1~10` 真正生效
+    - 只检测人物画像自身碰撞：头像是否溢出座位、是否压住手牌、公共牌、主底池
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（72/72）
+    - `npm run build` 通过
+    - skill client 烟测：
+      - `output/player-portrait-skill-v2/shot-0.png`
+      - `output/player-portrait-skill-v2/state-0.json`
+    - 全量人物布局回归：
+      - `output/player-portrait-regression/portrait-layout-report.json`
+      - `output/player-portrait-regression/ai-1.png`
+      - `output/player-portrait-regression/ai-6.png`
+      - `output/player-portrait-regression/ai-10.png`
+        - `aiCount 1~10` 的 `portraitOverflowCount = 0`
+        - `portraitCardOverlapCount = 0`
+        - `portraitBoardOverlapCount = 0`
+        - `portraitPotOverlapCount = 0`
+        - `errors = []`
+
+TODO / Suggestions for next agent:
+- 如果继续做“人物感”，下一步最值钱的是给人物画像加入可切换主题，让人类玩家能在菜单中选主形象。
+- 若继续做演出增强，可把画像情绪态与 `showdown / payout / elimination` 的音效进一步联动。
+- 当前人物回归已覆盖 `1~10` AI；如果后续继续改牌桌布局，保留 `output/player-portrait-regression/validate-portrait-layout.mjs` 作为固定碰撞检查。 
+- 2026-03-12 形象系统增强（本轮）：加入“人类主形象主题切换”，并将主题贯穿到对局与回放。
+  - 新增 `src/types/portrait.ts`
+    - 收敛 `HumanPortraitKey`
+  - 新增 `src/state/portraitPreferences.ts`
+    - 本地读写人类头像主题偏好
+    - storage key: `neon.holdem.portrait-preferences.v1`
+  - 更新 `src/types/game.ts`
+    - `GameConfig` 新增 `humanPortraitKey`
+    - `PlayerState` 新增 `portraitKey`
+  - 更新 `src/types/replay.ts`
+    - `ReplayParticipant` / `ReplayPlayerState` 新增 `portraitKey`
+  - 更新 `src/ui/playerPortraits.ts`
+    - 新增 4 个可选人类主题：
+      - `牌桌主理人`
+      - `彗光领航`
+      - `轨迹策士`
+      - `夜幕策展`
+    - 新增 `getHumanPortraitOptions`
+  - 更新 `src/ui/components/MainMenu.tsx`
+    - 新增“玩家主形象”主题选择区
+    - 菜单内直接预览头像、主题名和风格说明
+    - 新开对局时将主题写入 `GameConfig`
+  - 更新 `src/App.tsx`
+    - 新增人类头像主题状态
+    - 将主题偏好持久化到本地
+    - 将主题透传给主菜单、牌桌、回放
+    - `render_game_to_text` 新增 `portrait.humanPortraitKey`
+  - 更新 `src/state/useGameController.ts`
+    - 支持默认人类头像主题注入
+    - 新开对局时自动带入主题
+    - 继续旧存档时若缺少主题字段，会为人类玩家补默认主题
+  - 更新 `src/engine/handEngine.ts` / `src/replay/replayBuilder.ts`
+    - 人类头像主题进入玩家状态、回放参与者与初始快照
+  - 更新 `src/ui/components/SeatPanel.tsx`
+    - 支持 `humanPortraitKeyOverride`
+  - 更新 `src/ui/components/TableScene.tsx` / `src/ui/components/ReplayViewer.tsx`
+    - 主牌桌与回放统一接入当前人类头像主题
+  - 更新 `src/ui/styles/theme.css`
+    - 新增菜单头像主题选择卡样式
+  - 新增测试 `tests/portraitPreferences.test.ts`
+    - 覆盖本地偏好读写
+  - 更新测试 `tests/playerPortraits.test.ts`
+    - 覆盖非默认人类主题解析
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（75/75）
+    - `npm run build` 通过
+    - skill client 烟测：
+      - `output/human-portrait-theme-skill/shot-0.png`
+      - `output/human-portrait-theme-skill/state-0.json`
+    - 定向浏览器链路：
+      - `output/human-portrait-theme-flow/menu-theme-selected.png`
+      - `output/human-portrait-theme-flow/table-theme-selected.png`
+      - `output/human-portrait-theme-flow/history-after-theme.png`
+      - `output/human-portrait-theme-flow/replay-theme-selected.png`
+      - `output/human-portrait-theme-flow/theme-flow-state.json`
+        - `menuPortraitKey = human-noir`
+        - `tablePortraitKey = human-noir`
+        - `replayPortraitKey = human-noir`
+        - `heroTitle = 夜幕策展`
+        - `replayHeroTitle = 夜幕策展`
+        - `errors = []`
+    - 人物布局碰撞回归复跑：
+      - `output/player-portrait-regression/portrait-layout-report.json`
+        - `aiCount 1~10` 全部通过
+        - `portraitOverflowCount = 0`
+        - `portraitCardOverlapCount = 0`
+        - `portraitBoardOverlapCount = 0`
+        - `portraitPotOverlapCount = 0`
+
+TODO / Suggestions for next agent:
+- 如果继续做人物增强，下一步最值钱的是给主菜单的头像主题加入“名称外的风格标签”，例如稳控 / 爆发 / 冷静 / 夜厅。
+- 可继续把人类主题扩展到结算层和 Top HUD，让冠军演出时头像发光更明显。
+- 若继续做菜单打磨，可加入“随机主题”或“最近使用主题”按钮，减少频繁切换成本。
+- 2026-03-12 人物演出增强（本轮）：把人物画像进一步接入结算层、回放焦点与音效挂点。
+  - 更新 `src/audio/soundBus.ts`
+    - 新增 `showdown / allIn / elimination` 三个本地 cue
+  - 更新 `src/App.tsx`
+    - 扩展 sound snapshot，跟踪 `allInCount / eliminatedCount`
+    - 在进入 `showdown`、新增全下、出现新淘汰时触发对应音效
+  - 更新 `src/ui/components/PlayerPortrait.tsx`
+    - 新增 `size` 变体（seat / hero）
+    - 新增人物镜面 flare 层
+  - 新增 `src/ui/components/PortraitSpotlightCard.tsx`
+    - 统一承载人物聚焦卡，用于结算层和回放侧栏
+  - 更新 `src/ui/components/TableEffectsLayer.tsx`
+    - 新增 `showdown` 中央特效文案与环形脉冲
+  - 更新 `src/ui/components/TableScene.tsx`
+    - 结算层新增 `settlement-portrait-strip`
+    - 赢家现在会显示人物聚焦卡（头像、称号、说明、派奖）
+  - 更新 `src/ui/components/ReplayViewer.tsx`
+    - 新增“当前人物聚焦卡”
+    - 跟随当前事件 actor / activePlayer / winner 自动切换
+    - 对旧回放中缺少 `portraitKey` 的人类玩家，回退到当前人类主题
+  - 更新 `src/ui/styles/theme.css`
+    - 新增 `portrait-spotlight-card`、`showdown-fx`、人物大头像 frame 与 flare 动画样式
+    - 调整 `PlayerPortrait` 为 frame + inner 结构，确保 hero 尺寸和情绪动画可共存
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（75/75）
+    - `npm run build` 通过
+    - skill client 烟测：
+      - `output/portrait-fx-enhance-skill/shot-0.png`
+      - `output/portrait-fx-enhance-skill/state-0.json`
+    - 定向流程：
+      - `output/portrait-fx-flow/menu-selected.png`
+      - `output/portrait-fx-flow/table-settlement.png`
+      - `output/portrait-fx-flow/replay-focus.png`
+      - `output/portrait-fx-flow/summary.json`
+        - `settlementSpotlightCount = 1`
+        - `replayFocusCount = 1`
+        - `portraitKey = human-noir`
+        - `errors = []`
+    - 人物布局碰撞回归复跑：
+      - `output/player-portrait-regression/portrait-layout-report.json`
+        - `aiCount 1~10` 全部通过
+        - `portraitOverflowCount = 0`
+        - `portraitCardOverlapCount = 0`
+        - `portraitBoardOverlapCount = 0`
+        - `portraitPotOverlapCount = 0`
+
+TODO / Suggestions for next agent:
+- 如果继续做人物演出，优先给锦标赛终局和冠军结算加更强的主视觉人物卡，而不是再堆小粒度按钮特效。
+- 如果继续做音效，可把 `showdown / all-in / elimination` 从合成音升级成采样音，并保留当前 cue 名称作为兼容层。
+- 若继续做回放演出，可让“当前人物聚焦卡”在关键节点跳转时做短暂位移动画或切牌式过渡，但要先保持右侧信息密度可读。
+- 2026-03-12 人物终局增强（本轮补充）：冠军人物卡与回放焦点切换动画。
+  - 结论：本地项目内未发现可直接接入的 `.wav/.mp3/.ogg/.m4a` 采样音资源，因此未强行添加假素材，继续沿用现有 Web Audio 合成音。
+  - 更新 `src/ui/components/PortraitSpotlightCard.tsx`
+    - 新增 `className` 扩展，便于冠军卡/玩家成绩卡做差异化视觉
+  - 更新 `src/ui/components/TableScene.tsx`
+    - 锦标赛终局新增 `tournamentSpotlights`
+    - 当锦标赛结束时，额外展示“冠军人物卡”；若人类玩家未夺冠，则同时展示“你的成绩”人物卡
+  - 更新 `src/ui/components/ReplayViewer.tsx`
+    - 人物聚焦卡改为 `AnimatePresence` 过渡切换
+    - 关键节点或焦点人物变化时，使用短暂淡入/位移/去模糊过渡
+  - 更新 `src/ui/styles/theme.css`
+    - 新增 `portrait-spotlight-card.champion / hero-result`
+    - 新增 `tournament-finale-spotlights`
+    - 新增 `replay-focus-card-shell`
+    - 响应式断点下允许终局人物卡栈改单列
+  - 新增验证脚本：
+    - `output/tournament-champion-spotlight/validate-tournament-champion.mjs`
+    - 基于真实存档模板构造“已结束锦标赛”并验证冠军人物卡落位
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（75/75）
+    - `npm run build` 通过
+    - 定向终局验证：
+      - `output/tournament-champion-spotlight/tournament-champion.png`
+      - `output/tournament-champion-spotlight/summary.json`
+        - `championCardExists = true`
+        - `spotlightCount = 1`
+        - `heroRank = 你已夺冠`
+        - `errors = []`
+    - 回放人物卡验证复跑：
+      - `output/portrait-fx-flow/replay-focus.png`
+      - `output/portrait-fx-flow/summary.json`
+        - `replayFocusCount = 1`
+        - `errors = []`
+    - skill client 烟测：
+      - `output/comprehensive-enhance-skill/shot-0.png`
+      - `output/comprehensive-enhance-skill/state-0.json`
+
+TODO / Suggestions for next agent:
+- 如果继续做终局演出，下一步应把冠军人物卡和奖杯/光束做成一个整体 banner，而不是继续堆更多小卡片。
+- 若后续拿到真实采样音资源，优先接 `showdown / allIn / elimination / heroWin` 这四个 cue，收益最高。
+- 回放人物焦点卡当前是轻量过渡；若继续加强，需要先控制右侧面板高度，避免动画增加滚动跳动。
+- 2026-03-12 人物终局增强（本轮续作）：冠军 banner 与回放固定高度人物卡。
+  - 更新 `src/ui/components/TableScene.tsx`
+    - 将锦标赛终局人物区拆为 `championSpotlight + secondaryTournamentSpotlights`
+    - 冠军人物不再只是普通卡片，而是独立 `tournament-champion-banner`
+  - 更新 `src/ui/components/ReplayViewer.tsx`
+    - 人物聚焦卡外层改为固定高度 shell
+    - 内层改为切牌式 `x + rotateY + blur` 过渡，减少生硬跳变
+  - 更新 `src/ui/styles/theme.css`
+    - 新增 `tournament-champion-banner / badge / rays`
+    - 新增 `champion-banner-card`
+    - 新增 `replay-focus-card-content`
+    - 回放焦点壳层固定高度 `154px`
+  - 更新验证脚本：
+    - `output/tournament-champion-spotlight/validate-tournament-champion.mjs`
+      - 现检查 `championBannerExists`
+    - `output/portrait-fx-flow/validate-portrait-fx-flow.mjs`
+      - 现检查 `replayFocusShellHeight >= 140`
+  - 再次确认：项目内仍无可直接接入的本地采样音资源，因此继续保持合成音实现。
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（75/75）
+    - `npm run build` 通过
+    - 锦标赛冠军验证：
+      - `output/tournament-champion-spotlight/tournament-champion.png`
+      - `output/tournament-champion-spotlight/summary.json`
+        - `championBannerExists = true`
+        - `championCardExists = true`
+        - `errors = []`
+    - 回放焦点壳层验证：
+      - `output/portrait-fx-flow/replay-focus.png`
+      - `output/portrait-fx-flow/summary.json`
+        - `replayFocusShellHeight = 154`
+        - `errors = []`
+    - skill client 烟测：
+      - `output/champion-banner-skill/shot-0.png`
+      - `output/champion-banner-skill/state-0.json`
+    - 人物布局碰撞回归复跑：
+      - `output/player-portrait-regression/portrait-layout-report.json`
+        - `1~10` AI 全部 `portraitOverflowCount = 0`
+
+TODO / Suggestions for next agent:
+- 如果继续增强终局演出，下一步做“冠军 banner + 奖池数字 + 赛制摘要”的单体聚焦动画，而不是再加更多零散 glow。
+- 回放人物卡目前已经稳住高度；后续若继续做更强 3D 过渡，要优先防止 Safari/低性能设备出现文字模糊。
+- 采样音仍缺资源；若后续补素材，优先接 `heroWin / showdown / allIn / elimination` 四个 cue。
+- 2026-03-12 人物终局增强（本轮续作 2）：冠军摘要 chip 与回放切牌遮罩。
+  - 更新 `src/ui/components/TableScene.tsx`
+    - 冠军 banner 新增 `championSummaryItems`
+    - 在 banner 内增加 4 个摘要 chip：`冠军奖励 / 参赛人数 / 总手数 / 最终盲注`
+    - 通过 stagger 动画分段入场
+  - 更新 `src/ui/components/ReplayViewer.tsx`
+    - 在固定高度人物卡壳层中新增 `replay-focus-card-wipe`
+    - 切换焦点人物时增加扫光遮罩，进一步强化“切牌”感
+  - 更新 `src/ui/styles/theme.css`
+    - 新增 `tournament-champion-summary / tournament-champion-chip`
+    - 新增 `replay-focus-card-wipe`
+    - 窄屏下 `tournament-champion-summary` 改为单列
+  - 更新验证脚本：
+    - `output/tournament-champion-spotlight/validate-tournament-champion.mjs`
+      - 现检查 `championSummaryCount >= 4`
+    - `output/portrait-fx-flow/validate-portrait-fx-flow.mjs`
+      - 现检查 `replayFocusWipeCount >= 1`
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（75/75）
+    - `npm run build` 通过
+    - 锦标赛冠军验证：
+      - `output/tournament-champion-spotlight/summary.json`
+        - `championBannerExists = true`
+        - `championSummaryCount = 4`
+        - `errors = []`
+    - 回放人物卡验证：
+      - `output/portrait-fx-flow/summary.json`
+        - `replayFocusShellHeight = 154`
+        - `replayFocusWipeCount = 1`
+        - `errors = []`
+    - skill client 烟测：
+      - `output/banner-wipe-skill/shot-0.png`
+      - `output/banner-wipe-skill/state-0.json`
+    - 人物布局碰撞回归复跑：
+      - `output/player-portrait-regression/portrait-layout-report.json`
+        - `1~10` AI 全部 `portraitOverflowCount = 0`
+
+TODO / Suggestions for next agent:
+- 如果继续做这条线，下一步可把冠军 banner 的摘要 chip 做成更明确的“从牌桌中心飞入”路径，而不是只在 banner 内部 stagger。
+- 回放人物卡已经有 wipe；下一步可以尝试让 wipe 与当前街道颜色联动，但要先限制颜色数量，避免信息噪声。
+- 继续增强前，优先保持“终局信息可读 > 光效更强”，不要把冠军 banner 做成只剩氛围没有数据。
+
+- 2026-03-12 人物终局增强（本轮续作 3）：冠军摘要尾焰与回放街道环境光。
+  - 更新 `src/ui/components/TableScene.tsx`
+    - 为冠军摘要 chip 新增 `tournament-champion-chip-trail` 与 `tournament-champion-chip-spark`
+    - 延续现有飞入轨迹，让 chip 带尾焰和点状高光落入 banner
+  - 更新 `src/ui/styles/theme.css`
+    - 新增 `tournament-champion-chip-trail / tournament-champion-chip-spark`
+    - 为 `replay-focus-card-shell` 增加 `focus-ambient` 变量、底色和 `replayFocusPulse`
+    - `tone-preflop / flop / turn / river / showdown / settlement` 现在同时控制 rail、wipe 和环境光
+  - 保持 `src/ui/components/ReplayViewer.tsx` 的 `tone-*` 状态类驱动
+    - 当前回放焦点卡会根据快照街道切换色调
+  - 更新验证脚本：
+    - `output/tournament-champion-spotlight/validate-tournament-champion.mjs`
+      - 现检查 `championTrailCount >= 4`
+    - `output/portrait-fx-flow/validate-portrait-fx-flow.mjs`
+      - 现检查 `replayFocusToneClass` 与 `replayFocusRail`
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（75/75）
+    - `npm run build` 通过
+    - 锦标赛冠军验证：
+      - `output/tournament-champion-spotlight/summary.json`
+        - `championSummaryCount = 4`
+        - `championTrailCount = 4`
+        - `errors = []`
+    - 回放人物卡验证：
+      - `output/portrait-fx-flow/summary.json`
+        - `replayFocusShellHeight = 154`
+        - `replayFocusWipeCount = 1`
+        - `replayFocusToneClass = tone-preflop`
+        - `replayFocusRail = rgba(116, 215, 255, 0.2)`
+        - `errors = []`
+    - 人物布局碰撞回归复跑：
+      - `output/player-portrait-regression/portrait-layout-report.json`
+        - `1~10` AI 全部 `portraitOverflowCount = 0`
+        - `portraitCardOverlapCount = 0`
+        - `portraitBoardOverlapCount = 0`
+        - `portraitPotOverlapCount = 0`
+
+- 2026-03-12 动画收口包：全局动效强度、冠军粒子散射、回放右栏街道联动。
+  - 新增 `src/state/motionPreferences.ts`
+    - 本地持久化 `MotionLevel = full / soft / reduced`
+    - 支持 `prefers-reduced-motion` 首次默认降级
+  - 新增测试 `tests/motionPreferences.test.ts`
+    - 当前测试总数更新为 `78/78`
+  - 更新 `src/App.tsx`
+    - 挂接 `motionLevel` 状态
+    - 写入 `document.documentElement.dataset.motionLevel`
+    - `render_game_to_text` 输出 `motion.level`
+    - 向 `TopHud / TableScene / ReplayViewer` 透传动效强度
+  - 更新 `src/ui/components/TopHud.tsx`
+    - HUD 新增 `动效：满 / 柔 / 减`
+  - 更新 `src/ui/components/TableEffectsLayer.tsx`
+    - `soft` 降低粒子数量与持续时间
+    - `reduced` 关闭环境粒子和胜者扫光这类纯装饰特效
+  - 更新 `src/ui/components/TableScene.tsx`
+    - 冠军摘要 chip 新增一次性粒子散射 `tournament-champion-chip-scatter`
+    - `reduced` 下不再渲染尾焰/散射层
+  - 更新 `src/ui/components/ReplayViewer.tsx`
+    - 回放右栏增加 `tone-*` 到时间线面板本身
+    - `reduced` 下关闭 wipe，收窄切换位移/模糊
+  - 更新 `src/ui/styles/theme.css`
+    - 新增 `championChipScatter / championChipScatterWide / championChipScatterReverse`
+    - `replay-timeline` 标题、边框、激活态按街道联动
+    - 增加 `html[data-motion-level='soft'|'reduced']` 对装饰层的统一衰减
+  - 新增验证脚本 `output/motion-settings-flow/validate-motion-settings.mjs`
+    - 校验 HUD 点击后 `motionLevel = reduced`
+    - 校验 `documentElement.dataset.motionLevel = reduced`
+  - 更新验证脚本：
+    - `output/tournament-champion-spotlight/validate-tournament-champion.mjs`
+      - 现检查 `championScatterCount >= 4`
+      - 输出 `motionLevel`
+    - `output/portrait-fx-flow/validate-portrait-fx-flow.mjs`
+      - 现检查 `replayTimelineToneClass`
+      - 输出 `motionLevel`
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（78/78）
+    - `npm run build` 通过
+    - 动效设置验证：
+      - `output/motion-settings-flow/summary.json`
+        - `motionLevel = reduced`
+        - `rootMotionLevel = reduced`
+        - `errors = []`
+    - 锦标赛冠军验证：
+      - `output/tournament-champion-spotlight/summary.json`
+        - `championTrailCount = 4`
+        - `championScatterCount = 4`
+        - `motionLevel = full`
+        - `errors = []`
+    - 回放人物卡验证：
+      - `output/portrait-fx-flow/summary.json`
+        - `replayTimelineToneClass = tone-preflop`
+        - `replayFocusToneClass = tone-preflop`
+        - `motionLevel = full`
+        - `errors = []`
+    - 人物布局碰撞回归复跑：
+      - `output/player-portrait-regression/portrait-layout-report.json`
+        - `1~10` AI 全部 `portraitOverflowCount = 0`
+        - `portraitCardOverlapCount = 0`
+        - `portraitBoardOverlapCount = 0`
+        - `portraitPotOverlapCount = 0`
+    - 常规 skill 烟测：
+      - `output/final-motion-polish-skill/shot-0.png`
+      - `output/final-motion-polish-skill/state-0.json`
+
+- 2026-03-12 主题扩展收口：多套牌桌皮肤 + 占位扫描。
+  - 新增 `src/types/theme.ts`
+    - 定义 `TableThemeKey = neon-ocean / noir-gold / emerald-classic / crimson-royale`
+  - 新增 `src/state/themePreferences.ts`
+    - 本地持久化主题偏好
+    - 支持 HUD 内循环切换
+  - 新增 `src/ui/tableThemes.ts`
+    - 提供主题标题、短标签、说明和菜单预览色板
+  - 新增测试 `tests/themePreferences.test.ts`
+    - 当前测试总数更新为 `80/80`
+  - 更新 `src/App.tsx`
+    - 增加 `tableThemeKey` 全局状态
+    - 写入 `document.documentElement.dataset.tableTheme`
+    - `render_game_to_text` 输出 `theme.key`
+  - 更新 `src/ui/components/MainMenu.tsx`
+    - 新增“牌桌主题皮肤”区块
+    - 可在菜单中直接选择 4 套主题
+    - 配置摘要现包含当前牌桌主题
+  - 更新 `src/ui/components/TopHud.tsx`
+    - HUD 新增 `主题：<短标签>` 一键轮换按钮
+  - 更新 `src/ui/styles/theme.css`
+    - 新增全局主题变量
+    - 为 `app-shell / menu-backdrop / glass-panel / btn / hud-pill / table-felt / board-area / pot-display / seat-panel` 接入变量
+    - 新增主题预览卡样式 `menu-theme-*`
+  - 新增验证脚本 `output/theme-skins-flow/validate-theme-skins.mjs`
+    - 校验菜单主题切换
+    - 校验局内 HUD 一键轮换主题
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run test` 通过（80/80）
+    - `npm run build` 通过
+    - 主题切换验证：
+      - `output/theme-skins-flow/summary.json`
+        - 菜单选中 `crimson-royale` 后 `rootTheme = crimson-royale`
+        - 局内点击 HUD 主题按钮后切回 `neon-ocean`
+        - `errors = []`
+      - 菜单截图：
+        - `output/theme-skins-flow/menu-noir-gold.png`
+        - `output/theme-skins-flow/menu-emerald-classic.png`
+        - `output/theme-skins-flow/menu-crimson-royale.png`
+      - 局内截图：
+        - `output/theme-skins-flow/table-crimson-royale.png`
+        - `output/theme-skins-flow/table-cycled.png`
+    - 既有回归继续通过：
+      - `output/tournament-champion-spotlight/summary.json`
+      - `output/portrait-fx-flow/summary.json`
+      - `output/player-portrait-regression/portrait-layout-report.json`
+    - 占位扫描：
+      - `rg -n "TODO|FIXME|placeholder|stub|未实现" src`
+      - 结果为空，运行时代码中未发现占位标记
+- 继续优化（本轮）：重做 1-10 人聚焦模式座位可读性与本地人物画像。
+  - `src/ui/seatLayout.ts` 扩展为 `table / focus / replay` 三种布局模式，并新增 `SeatDensity`，按人数与场景统一控制半径、缩放和边界。
+  - `src/ui/components/SeatPanel.tsx` 新增 `density/context`，按 1-10 人密度档统一放大聚焦模式手牌、头像和文字；回放也复用同一套逻辑。
+  - `src/ui/components/CardView.tsx` 新增 `CardSizeVariant`，把座位手牌从旧的 `small/tiny` 二元尺寸升级成 `seat-roomy / balanced / compact / dense / omaha`。
+  - `src/ui/playerPortraits.ts` 与 `src/ui/components/PlayerPortrait.tsx` 改成更接近真人的本地 SVG 立绘体系：发型、肤色、服装、配件、面部细节都按角色预设稳定映射，不依赖网络或外部素材。
+  - `src/ui/styles/theme.css` 增加 `seat-context-*` 与 `seat-density-*` 样式变量，统一控制座位宽度、最小高度、标题/副标题/状态字级、卡牌重叠量和头像尺寸。
+  - 新增聚焦模式回归脚本 `output/focus-seat-readability/validate-focus-seat-readability.mjs`，覆盖 `AI 1~10` 的聚焦模式截图与几何校验。
+- 验证结果：
+  - `npm run lint` 通过
+  - `npm run test` 通过（80/80）
+  - `npm run build` 通过
+  - `node output/focus-seat-readability/validate-focus-seat-readability.mjs` 通过
+  - 输出：
+    - `output/focus-seat-readability/focus-seat-report.json`
+    - `output/focus-seat-readability/focus-ai-1.png`
+    - `output/focus-seat-readability/focus-ai-6.png`
+    - `output/focus-seat-readability/focus-ai-10.png`
+- 备注：
+  - 本机未设置 `OPENAI_API_KEY`，因此本轮没有调用 `imagegen` 生成真人素材；改为交付可离线运行、风格统一的本地 SVG 角色画像。
+- 聚焦模式座位卡继续增强：
+  - `SeatPanel` 在 `focus` 场景下改为更大的卡片容器，并把 `筹码 / 当前下注 / 状态` 压缩成 `seat-info-strip` 紧凑读数条。
+  - 聚焦模式人物头像从 header 内联改成 `seat-focus-portrait` 悬浮徽章，放大后浮在座位卡上方，和牌面分层更清晰。
+  - `seatLayout` 继续提高 `focus` 模式高人数的缩放系数，并减小顶部位缩小惩罚，提升 8-10 人桌可读性。
+- 最新聚焦模式回归：
+  - `node output/focus-seat-readability/validate-focus-seat-readability.mjs` 通过
+  - 最小指标更新为：
+    - 手牌宽度 `43.03px`
+    - 头像宽度 `41.11px`
+    - 姓名字号 `12.8px`
+    - 读数/状态字号 `10.72px`
+- 聚焦模式悬浮人物牌继续改造：
+  - `PlayerPortrait` 新增 `variant="panel"`，聚焦模式不再使用圆形徽章，而是使用带立绘内容的竖向人物牌。
+  - `seat-focus-portrait` 上移并放大，`seat-context-focus::after` 关闭，去掉此前因 `overflow: visible` 带来的漂浮斜高光“空框感”。
+  - 最新回归后最小头像宽度提升到 `49.53px`，并保持 `1~10` AI 聚焦模式无遮挡通过。
+- 聚焦模式卡片整体再放大：
+  - `focus` 模式继续增大座位半径和缩放，9-10 人桌也提高了整体可读性。
+  - 聚焦模式手牌统一抬到更大的 seat 尺寸，人物牌和座位卡同步放大。
+  - 最新回归最小值提升到：手牌 `48.88px`、悬浮人物牌 `57.34px`、姓名字号 `13.12px`。
+- 聚焦模式人物牌继续从头像牌升级为半身像人物卡：
+  - `PlayerPortrait` 的 `panel` 变体增加了更完整的上半身构图、肩线、服装层次和背景灯带。
+  - 同时保留 1-10 人聚焦模式无遮挡回归通过。
+- 聚焦模式人物牌再次放大并回调 heads-up 布局边界：
+  - `seat-focus-portrait` 与 `variant-panel` 继续增大，聚焦模式人物牌最小宽度提升到 `69.00px`，顶部留白也同步增加。
+  - `seatLayout` 针对 `heads-up + focus` 调整底部 clamp，修复放大后 `1 AI` 人类位轻微超出视口的问题。
+  - 最新回归最小值更新为：手牌 `48.88px`、悬浮人物牌 `69.00px`、姓名字号 `13.12px`、读数/状态字号 `11.04px`。
+- 聚焦模式左上弧线进一步重排：
+  - `seatLayout` 为 `10+` 人聚焦模式左上横向位增加独立下沉通道，修复 `10 AI` 时左上两张人物卡/座位卡互相压住的问题。
+  - `PlayerPortrait` 的 `panel` 立绘本体继续放大，保持外框尺寸不变，仅提升脸部与上半身占比，避免再推高布局风险。
+  - 更新后的 `validate-focus-seat-readability.mjs` 现在会额外校验 `seatPanelOverlapCount` 和 `portraitOverlapCount`，覆盖 `AI 1~10` 聚焦模式座位卡与人物牌互不重叠。
+  - 最新回归结果：`maxSeatPanelOverlapCount = 0`、`maxPortraitOverlapCount = 0`。
+- 聚焦模式统一人物卡收口：
+  - 新增 8 套可选人类角色皮肤，主菜单改为较大的面板式预览。
+  - 人物画像增加 `思考 / 过牌 / 跟注 / 加注 / 全下 / 获胜 / 淘汰` 等动作情绪态，并在 `SeatPanel` 中按 `active + lastAction` 自动切换。
+  - 聚焦模式座位卡改为统一人物卡：人物、名字、风格、状态、手牌、筹码和当前下注都收进同一卡片，不再使用分离的悬浮头像。
+  - `seatLayout` 的 8/10/11 人 `MANUAL_FOCUS_LAYOUTS` 重新扇开左链、右链和底部邻接位，修复 8-11 人高密度聚焦模式互相重叠。
+- 最新验证：
+  - `npm run test` 通过，`81/81`
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `node output/focus-seat-readability/validate-focus-seat-readability.mjs` 通过
+  - 回归结果：`AI 1~10` 聚焦模式 `seatPanelOverlapCount = 0`、`portraitOverlapCount = 0`、`cardBoardOverlapCount = 0`、`cardPotOverlapCount = 0`。
+- 人物卡继续增强：
+  - 人类可选皮肤从 8 套扩展到 12 套，新增 `human-sable / human-mistral / human-velvet / human-summit`。
+  - `PortraitArt` 增加 `figure / backdrop`，不同皮肤现在不只是配色不同，还会影响人物体型轮廓和背景纹样。
+  - `PlayerPortrait` 重构为更满框的半身像：减少 panel 内边距、放大头肩占比，并把立绘内容扩展到更接近满框。
+  - 不同行动状态现在有独立姿态和动作层：`思考 / 过牌 / 跟注 / 加注 / 全下 / 获胜 / 弃牌 / 淘汰` 会切换不同的手部动作、筹码动作和轻量动画，不再只是状态徽记变化。
+- 最新验证：
+  - `npm run test` 通过，`81/81`
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `node output/focus-seat-readability/validate-focus-seat-readability.mjs` 通过
+  - `output/focus-seat-readability/focus-seat-report.json` 确认 `AI 1~10` 聚焦模式依旧 `seatPanelOverlapCount = 0`、`portraitOverlapCount = 0`、`panelViewportOverflowCount = 0`。
+- 头像与角色扩展继续增强：
+  - AI 名字池扩展到 16 个，并按局配置做确定性轮换，不再固定永远是同一组 10 名 AI。
+  - AI 画像新增 6 组原型：`河牌诗眼 / 筹塔突刺 / 毡面统筹 / 灰焰切线 / 镜像算子 / 风暴追注`。
+  - 聚焦模式不再给 AI 显示风格标签，保留更简洁的姓名、称号、状态与人物牌信息。
+  - 人物牌继续向满框半身像方向推进：缩小 panel 内边距、放大立绘视口，并增加更多动作层与筹码动作。
+- 最新验证补充：
+  - `npm run test` 通过，`81/81`
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `node output/focus-seat-readability/validate-focus-seat-readability.mjs` 通过，低人数桌的人类位底部越界已通过 `bottomClampMax` 微调修复。
+- 新增独立斗地主模式：
+  - 作为与德州并列的独立玩法接入，不复用德州下注/回放状态机。
+  - 新增模块：`src/doudizhu/{types,cards,rules,ai,engine}.ts`，涵盖 54 张牌、叫分、地主确认、底牌加入、基础倍率、炸弹/王炸翻倍、春天结算、连续对局。
+  - 牌型识别与比牌已支持：单张、对子、三张、三带一、三带对、顺子、连对、飞机、飞机带单、飞机带对、四带二、四带两对、炸弹、王炸。
+  - 新增独立控制器 `src/state/useDouDizhuController.ts`，包含 AI 节奏、手动/自动下一局和 `advanceTime(ms)` 支持。
+  - 新增独立 UI：`src/ui/components/{DouDizhuMenu,DouDizhuTable,DouDizhuCard}.tsx`。
+  - `App.tsx` 现在支持从德州主菜单切换到斗地主大厅，并在 `render_game_to_text` 中输出斗地主状态。
+- 斗地主 AI：
+  - 叫分依据高牌、2、王、炸弹和难度档位评估。
+  - 出牌会区分领出/接牌，并对炸弹与王炸做保留倾向；农民位会尽量避免无意义压过同阵营队友。
+- 斗地主验证：
+  - 新增测试：`tests/doudizhuRules.test.ts`、`tests/doudizhuAi.test.ts`。
+  - `npm run test` 通过（87/87）。
+  - `npm run lint` 通过。
+  - `npm run build` 通过。
+  - 浏览器回归：
+    - `output/doudizhu-flow/menu-ready.png`
+    - `output/doudizhu-flow/table-bid.png`
+    - `output/doudizhu-flow/table-playing.png`
+    - `output/doudizhu-flow/table-after-play.png`
+    - `output/doudizhu-flow/state.json`
+  - 回归结果：从德州大厅切换到斗地主大厅、开始对局、完成叫分、进入出牌并由人类完成提示/出牌链路，`errors = []`。
+- 新增独立 21 点 / Blackjack 模式：
+  - 作为与德州、斗地主并列的独立玩法接入，新增模块 `src/blackjack/{types,cards,engine}.ts`。
+  - 规则覆盖：标准发牌、A 软硬点数、Blackjack 3:2、Hit / Stand / Double、庄家补牌、S17/H17 切换、单局结算、连续多局。
+  - 新增独立控制器 `src/state/useBlackjackController.ts`，支持自动下一局和 `advanceTime(ms)`。
+  - 新增 UI：`src/ui/components/{BlackjackMenu,BlackjackTable,BlackjackCard}.tsx`。
+  - `App.tsx` 扩展为三模式菜单切换：德州 / 斗地主 / 21 点，并在 `render_game_to_text` 中输出 21 点状态。
+- 21 点验证：
+  - 新增测试 `tests/blackjackEngine.test.ts`，覆盖软点数、Blackjack 派彩、H17/S17、Double、停牌流。
+  - `npm run test` 通过（92/92）。
+  - `npm run lint` 通过。
+  - `npm run build` 通过。
+  - 浏览器回归产物：
+    - `output/blackjack-flow/menu.png`
+    - `output/blackjack-flow/table-betting.png`
+    - `output/blackjack-flow/table-dealt.png`
+    - `output/blackjack-flow/table-result.png`
+    - `output/blackjack-flow/state.json`
+  - 回归结果：完成 `主菜单 -> 21 点大厅 -> 发牌 -> 玩家操作 -> 庄家结算` 全链路，`errors = []`。
+- 新增独立百家乐 / Punto Banco 模式：
+  - 作为与德州、斗地主、21 点并列的独立玩法接入，新增模块 `src/baccarat/{types,cards,engine}.ts`。
+  - 规则覆盖：闲 / 庄 / 和下注、标准点数取个位、自然 8/9 停牌、闲家第三张规则、完整庄家补牌表、庄赢 5% 佣金、和局退回闲/庄下注。
+  - 新增独立控制器 `src/state/useBaccaratController.ts`，支持自动推进开牌/补牌、自动下一局与 `advanceTime(ms)`。
+  - 新增 UI：`src/ui/components/{BaccaratMenu,BaccaratTable,BaccaratCard}.tsx`。
+  - `App.tsx` 与菜单路由扩展为四模式：德州 / 斗地主 / 21 点 / 百家乐；`render_game_to_text` 已输出百家乐状态。
+- 百家乐验证：
+  - 新增测试 `tests/baccaratEngine.test.ts`，覆盖点数取模、自然牌停牌、庄家补牌表、庄佣与和局退回。
+  - `npm run test` 通过（97/97）。
+  - `npm run lint` 通过。
+  - `npm run build` 通过。
+  - `develop-web-game` 技能烟测：`output/baccarat-skill-smoke/shot-0.png`、`output/baccarat-skill-smoke/state-0.json`。
+  - 浏览器定向回归：
+    - `output/baccarat-flow/menu.png`
+    - `output/baccarat-flow/table-betting.png`
+    - `output/baccarat-flow/table-staked.png`
+    - `output/baccarat-flow/table-dealing.png`
+    - `output/baccarat-flow/table-settlement.png`
+    - `output/baccarat-flow/state.json`
+  - 回归结果：完成 `主菜单 -> 百家乐大厅 -> 下注 -> 开牌 -> 自动补牌 -> 结算` 全链路，`state.screen = baccarat`、`phase = settlement`、`errors = []`。
+- 斗地主模式优化：
+  - 大小王牌面不再显示 `SJ/BJ`，`src/doudizhu/cards.ts` 的 `shortLabel` 已改为 `小王/大王`，`DouDizhuCard` 进一步改为专用 Joker 视觉：角标显示 `小/大 + JOKER`，中心显示 `王 + 小王/大王`。
+  - 斗地主桌面新增 `ddz-status-strip`，在中区直接显示牌权、轮到谁、当前可出解数和当前叫分，减少靠 banner 判断。
+  - 叫分阶段新增 `ddz-bid-track`，直接展示三家当前叫分进度与当前行动位。
+  - 人类区新增 `ddz-human-selection-strip`，实时显示当前选牌是否合法、当前目标牌型和已选张数。
+  - `App.tsx` 为 `DouDizhuTable` 传入 `legalPatternCount`，用于局内即时提示。
+- 斗地主验证：
+  - `npm run test` 通过（98/98）。
+  - `npm run lint` 通过。
+  - `npm run build` 通过。
+  - `develop-web-game` 烟测：`output/doudizhu-opt-skill/shot-0.png`。
+  - 浏览器定向回归：
+    - `output/doudizhu-optimizations/table-bidding.png`
+    - `output/doudizhu-optimizations/table-playing.png`
+    - `output/doudizhu-optimizations/table-joker-selected.png`
+    - `output/doudizhu-optimizations/state.json`
+  - 回归结果：小王已在真实画面中显示为 Joker 专用牌面，`jokerText = "小JOKER王小王"`，并且 `errors = []`。
+- 斗地主继续增强（显示页 + 可玩性）：
+  - `useDouDizhuController` 新增 `humanSelectPattern(cardIds)`，允许 UI 直接选中建议牌型。
+  - `DouDizhuTable` 新增“推荐出牌”区，显示最多 8 个建议牌型，点击后会自动选中对应牌组。
+  - `DouDizhuTable` 结算区新增 `ddz-settlement-grid`，按三家展示本局分数变化与当前总分。
+  - 样式补充：推荐牌型胶囊、结算明细卡片、移动端适配。
+- 验证：
+  - `npm run test` 通过（98/98）。
+  - `npm run lint` 通过。
+  - `npm run build` 通过。
+  - 浏览器定向回归：
+    - `output/doudizhu-enhance/playing-before-suggestion.png`
+    - `output/doudizhu-enhance/playing-after-suggestion.png`
+    - `output/doudizhu-enhance/settlement-forced.png`
+    - `output/doudizhu-enhance/state.json`
+    - `output/doudizhu-enhance/settlement-state.json`
+  - 回归结果：推荐出牌实际出现 `suggestionCount = 8`，点击后 `selectedCountAfterSuggestion = 1`，并且 `errors = []`。
+  - 自动脚本在限定步数内未自然推进到结算，因此结算明细网格已完成代码接入，但本轮浏览器自动链路未自然截到 settlement 画面。
+- 斗地主倍率结算继续增强：
+  - `src/doudizhu/types.ts` 新增 `DdzMultiplierEvent / DdzMultiplierBreakdown`，正式记录叫分、炸弹、王炸、春天的倍率来源链。
+  - `src/doudizhu/engine.ts` 现在会在：
+    - 地主确定时写入 `叫分` 事件
+    - 打出 `炸弹 / 王炸` 时追加倍率事件并更新总倍率
+    - 结算触发 `春天 / 反春` 时追加最终倍率事件
+  - `DouDizhuTable` 中区新增“倍率来源”面板，实时显示事件 chip 和最终倍率公式。
+  - 结算区新增“倍率明细”区，准备按事件链展示最终倍率构成。
+  - `theme.css` 新增倍率面板与结算特效样式，`炸弹 / 王炸 / 春天` 分别有不同的 glow / pulse / sweep 演出。
+  - `App.tsx` 的 `render_game_to_text` 已输出 `doudizhu.multiplierBreakdown`。
+- 测试与验证：
+  - `tests/doudizhuRules.test.ts` 新增倍率链测试，覆盖地主叫分写入倍率链、炸弹 + 春天会进入事件链。
+  - `npm run test` 通过（99/99）。
+  - `npm run lint` 通过。
+  - `npm run build` 通过。
+  - 浏览器回归：
+    - `output/doudizhu-enhance/breakdown-final.png`
+    - `output/doudizhu-enhance/breakdown-state.json`
+  - 回归结果：中区“倍率来源”面板已在真实页面展示，`multiplierBreakdown.events = [{ kind: 'bid', label: '叫分 3', ... }]`，`multiplierChipCount = 1`，`errors = []`。
+  - 自动浏览器链路这轮仍未自然打到 settlement，因此结算态的倍率特效主要由代码实现 + 单测覆盖保证，未在真实浏览器截图中自然截到 `王炸/春天` 结算画面。
+- 斗地主继续完善（托管到结算 + 真实结算回归 + 结算特效增强）：
+  - `src/doudizhu/engine.ts` 新增 `runAutoPlayerAction(runtime, playerId)`，把自动叫分 / 自动出牌抽成通用入口；AI 继续复用同一套逻辑，人类托管也走这条链。
+  - `src/state/useDouDizhuController.ts` 新增 `trustee` 状态与 `toggleTrustee()`：
+    - 进入斗地主牌桌后可开启“托管到结算”。
+    - 托管开启时，人类回合也会自动推进；`advanceTime(ms)` 同样支持托管链路，便于浏览器脚本稳定跑完整局。
+    - 托管状态会在新开局时重置，避免跨局误留。
+  - `src/ui/components/DouDizhuTable.tsx` 新增托管 UI：
+    - 顶栏按钮：`托管到结算 / 关闭托管`
+    - 人类区按钮：`托管`
+    - 人类头部徽记：`托管中`
+    - 托管接管当前回合时会出现 `ddz-trustee-strip` 提示条。
+    - 托管开启后，提示/重选/不出/出牌/点牌/推荐选牌都会禁用，避免手动操作与托管抢状态。
+  - 斗地主结算区新增 `ddz-settlement-spotlight`：
+    - 会根据倍率来源高亮不同 headline：`平稳结算 / 炸弹加倍 / 王炸引爆 / 春天 / 反春`
+    - 补了 `ddz-settlement-specials` 徽记区，直接列出命中的特殊事件。
+    - 样式层 `theme.css` 已新增对应 glow / pulse / gradient 演出，`rocket` 与 `spring` 会有更强高亮。
+  - `App.tsx` 的 `render_game_to_text` 已输出 `doudizhu.trustee`，并把托管回调接进 `DouDizhuTable`。
+- 斗地主测试补强：
+  - `tests/doudizhuAi.test.ts` 新增“人类位托管能在存在收官牌时自动打到 settlement”的单测。
+- 本轮验证：
+  - `npm run test` 通过（100/100）。
+  - `npm run lint` 通过。
+  - `npm run build` 通过。
+  - `develop-web-game` 技能烟测：`output/doudizhu-trustee-skill-v2/shot-0.png`、`output/doudizhu-trustee-skill-v2/state-0.json`。
+  - 浏览器定向回归脚本：`output/doudizhu-enhance/validate-doudizhu-trustee-settlement.mjs`
+    - 完成 `主菜单 -> 斗地主 -> 开启托管 -> 自动多局推进 -> 自然结算` 链路。
+    - 第 1 局即命中自然结算截图：`output/doudizhu-enhance/settlement-natural.png`
+    - 第 8 局命中真实 `王炸` 特殊结算截图：`output/doudizhu-enhance/settlement-special.png`
+    - 状态结果：`output/doudizhu-enhance/trustee-settlement-state.json`
+  - 回归结果：
+    - `errors = []`
+    - `settlementRound = 1`
+    - `specialSettlement = { round: 8, kinds: ['bid', 'rocket'], multiplier: 4 }`
+    - `settlementSpotlightCount = 1`
+    - `trusteeBadgeVisible = 1`
+- 斗地主托管模式继续增强（单回合 / 整局拆分）：
+  - `src/state/useDouDizhuController.ts`：
+    - 原布尔 `trustee` 升级为 `trusteeMode: 'off' | 'turn' | 'round'`。
+    - `setTrusteeMode(mode)` 取代旧切换函数。
+    - `turn` 模式只接管当前这一次人类操作，动作完成后自动恢复 `off`。
+    - `round` 模式持续接管直到本局结算或用户手动关闭。
+  - `src/App.tsx`：`render_game_to_text` 已输出 `doudizhu.trusteeMode`，牌桌 props 也改为新模式接口。
+  - `src/ui/components/DouDizhuTable.tsx`：
+    - 顶栏与人类区都拆成两个按钮：`托管一回合` / `托管整局`
+    - 状态徽记和提示条会区分“单回合托管”与“整局托管”
+    - 托管开启时继续禁用点牌 / 推荐 / 提示 / 不出 / 出牌
+- 斗地主事件特效继续增强：
+  - `src/ui/components/DouDizhuTable.tsx` 新增局内 `ddz-fx-burst` 爆发层，不再只等结算区显示：
+    - `炸弹`：橙色爆发文案
+    - `王炸`：紫色爆发文案
+    - `春天 / 反春`：绿色爆发文案
+  - 爆发层根据最新倍率事件重挂载，CSS 动画会在事件发生当下重新触发。
+  - 结算区 spotlight 保留，形成“局内触发 + 结算收尾”双层演出。
+- 斗地主音效 cue 继续增强：
+  - `src/audio/soundBus.ts` 新增 `ddzBomb` / `ddzRocket` / `ddzSpring`。
+  - `src/App.tsx` 新增斗地主声音快照：
+    - 特殊倍率事件出现时播放对应 cue
+    - 斗地主进入结算时播放 `heroWin / heroLose`
+    - 开启托管时播放 `panelOpen`
+- 验证：
+  - `npm run test` 通过（100/100）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - 浏览器定向回归脚本：`output/doudizhu-enhance/validate-doudizhu-trustee-modes.mjs`
+    - `托管一回合` 验证：
+      - `output/doudizhu-enhance/trustee-turn-armed.png`
+      - `output/doudizhu-enhance/trustee-turn-complete.png`
+      - `output/doudizhu-enhance/trustee-turn-state.json`
+      - 结果：人类叫完 `2 分` 后 `trusteeMode` 自动恢复为 `off`
+    - `王炸` 爆发层验证：
+      - `output/doudizhu-enhance/fx-burst-live.png`
+      - `output/doudizhu-enhance/fx-burst-settlement.png`
+      - `output/doudizhu-enhance/fx-burst-state.json`
+      - 结果：`burstHit = { round: 8, kinds: ['bid', 'rocket'], trusteeMode: 'round' }`，并且 `errors = []`
+- 斗地主牌桌继续增强（最近战报 + 结算结果条）：
+  - `src/ui/components/DouDizhuTable.tsx` 新增 `history` 输入，右侧时间线下方增加 `最近战报` 区：
+    - 显示最近 6 局
+    - 每局展示：局号、胜负阵营、倍率、你本局盈亏、叫分与特殊事件标签
+  - 斗地主结算区新增 `ddz-settlement-result-bar`，直接展示“谁拿下本局 + 你本局盈亏”，避免只看结算网格。
+  - `src/App.tsx` 现在会把 `ddzState.history` 传给 `DouDizhuTable`，并在 `render_game_to_text` 中输出 `doudizhu.recentHistory`。
+  - `src/ui/styles/theme.css` 新增 `ddz-history-*` 和 `ddz-settlement-result-bar` 样式，右侧日志区改成“时间线 + 战报”双区块；时间线最大高度收缩，给战报留出稳定空间。
+- 验证：
+  - `npm run test` 通过（100/100）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `develop-web-game` 烟测：`output/doudizhu-history-skill/shot-0.png`
+  - 浏览器定向回归：`output/doudizhu-enhance/validate-doudizhu-history-panel.mjs`
+    - `output/doudizhu-enhance/history-panel-first-settlement.png`
+    - `output/doudizhu-enhance/history-panel-filled.png`
+    - `output/doudizhu-enhance/history-panel-state.json`
+  - 回归结果：
+    - 自动托管推进 3 局后，右侧 `最近战报` 已真实出现 3 张历史卡（`historyCardCount = 3`）
+    - `render_game_to_text.doudizhu.recentHistory` 已同步输出最近对局摘要
+    - 浏览器 `errors = []`
+- 斗地主收官补完（完整局史抽屉 + 回看详情）：
+  - `src/doudizhu/types.ts`：
+    - `DdzRoundSummary` 补充 `landlordName` / `winnerName` / `heroDelta` / `players[]`，不再只保留倍率和胜负字段。
+    - 新增 `DdzRoundPlayerSummary`，用于持久化三家结算明细。
+  - `src/doudizhu/engine.ts`：
+    - `settleRound()` 现在会把三家 `delta / score / role / winner` 写入 `roundCompleted.players`。
+    - 同时写入 `landlordName` / `winnerName` / `heroDelta`，供完整局史直接读取。
+  - `src/state/useDouDizhuController.ts`：
+    - 新增受控局史视图状态：`historyViewerOpen` / `historyViewerRound`
+    - 新增方法：`openHistoryViewer(round?)` / `closeHistoryViewer()` / `selectHistoryViewerRound(round)`
+    - 结算后如果当前没有选中局，会自动把局史焦点落到最新完成局。
+  - `src/App.tsx`：
+    - 斗地主桌面 props 已接入完整局史开关与选中局控制。
+    - `render_game_to_text` 新增：
+      - `doudizhu.historyViewerOpen`
+      - `doudizhu.historyViewerRound`
+      - `doudizhu.selectedHistoryEntry`
+      - `recentHistory.heroDelta`
+  - `src/ui/components/DouDizhuTable.tsx`：
+    - 右侧 `最近战报` 新增 `查看完整局史` 按钮。
+    - 历史卡现在可点击，直接打开并定位到对应对局。
+    - 新增 `完整局史` 抽屉：
+      - 左侧：会话摘要 + 所有已完成对局列表
+      - 右侧：当前选中局详情
+      - 详情包含：地主/赢家、叫分、最终倍率、倍率时间轴、三家结算
+    - 支持 `Esc` 关闭。
+  - `src/ui/styles/theme.css`：
+    - 新增 `ddz-history-overlay` / `ddz-history-sheet` / `ddz-history-detail-*` / `ddz-history-timeline-*` / `ddz-history-player-*` 样式。
+    - 补充响应式布局，窄屏下抽屉改为单列。
+  - `tests/doudizhuRules.test.ts`：
+    - 新增局摘要字段断言，覆盖 `heroDelta` / `winnerName` / `players[]`。
+- 验证：
+  - `npm run test` 通过（100/100）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - 浏览器定向回归：`output/doudizhu-finale/validate-doudizhu-history.mjs`
+    - 自动托管连续完成 3 局
+    - 打开 `完整局史`
+    - 切换到第 1 局详情
+    - 产物：
+      - `output/doudizhu-finale/history-viewer.png`
+      - `output/doudizhu-finale/history-viewer-state.json`
+      - `output/doudizhu-finale/settlement-round-1.png`
+      - `output/doudizhu-finale/settlement-round-2.png`
+      - `output/doudizhu-finale/settlement-round-3.png`
+  - 回归结果：
+    - `completedRounds = [1, 2, 3]`
+    - `historyViewerOpen = true`
+    - `historyViewerRound = 1`
+    - `selectedHistoryEntry = { round: 1, winnerName: '筹塔毒蛇', landlordName: '你', heroDelta: -8, multiplier: 2 }`
+    - 浏览器 `errors = []`
+- iPad / PWA 适配收口：
+  - `index.html`：
+    - 替换站点图标为项目自带 `app-icon.svg`
+    - 新增 `manifest.webmanifest`
+    - 新增 `apple-touch-icon`
+    - 新增 `theme-color`、`apple-mobile-web-app-*`、`viewport-fit=cover`
+  - `public/`：
+    - 新增 `app-icon.svg`
+    - 新增 `apple-touch-icon.png`
+    - 新增 `icon-192.png` / `icon-512.png` / `maskable-512.png`
+    - 新增 `manifest.webmanifest`
+    - 新增 `sw.js`，为外壳资源和导航提供基础离线缓存
+  - `src/platform/runtime.ts`：
+    - 新增平台运行时检测：`isTouch / isIpadLike / isStandalone / isPortrait`
+    - 维护 `documentElement.dataset`：`touchDevice / ipadLike / displayMode / deviceOrientation`
+    - 维护 `--app-height`
+    - 提供 `watchPlatformRuntimeState()` 和 `registerAppServiceWorker()`
+  - `src/main.tsx`：
+    - 启动时预写平台 dataset
+    - 生产构建下注册 `service worker`
+  - `src/App.tsx`：
+    - 新增 `IpadSupportLayer`
+    - iPad 浏览器态显示“添加到主屏幕”提示
+    - iPad 竖屏显示“建议横屏游玩”提示
+    - `render_game_to_text` 现输出 `device`（ipadLike / standalone / portrait / touch）
+  - `src/index.css` / `src/ui/styles/theme.css`：
+    - `body / app-shell / menu-screen / screen-loader` 统一改为 `--app-height` + `safe-area` padding
+    - 补充触控优化：`overscroll-behavior: none`、`touch-action: manipulation`、关闭高亮/长按 callout
+    - 新增 `ipad-install-hint` / `ipad-orientation-guard` 样式
+- 文档：
+  - `README.md` 新增 `iPad 运行` 章节，给出局域网打开 + Safari 添加到主屏幕的安装路径
+- 验证：
+  - `npm run test` 通过（100/100）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `$WEB_GAME_CLIENT` 烟测：`output/ipad-web-smoke/shot-0.png`
+  - iPad PWA 定向验证：`output/ipad-pwa/validate-ipad-pwa.mjs`
+    - `output/ipad-pwa/ipad-landscape.png`
+    - `output/ipad-pwa/ipad-portrait.png`
+    - `output/ipad-pwa/summary.json`
+  - 结果：
+    - `landscape.rootDataset = { ipadLike: 'true', displayMode: 'browser', orientation: 'landscape' }`
+    - `portrait.orientationGuardVisible = true`
+    - `manifestHref = './manifest.webmanifest'`
+    - `appleTouchIcon = './apple-touch-icon.png'`
+    - `serviceWorkerRegistrations = 1`
+    - 浏览器 `errors = []`
+- iPad / App Store 方向切换为原生 iOS 壳：
+  - 判定：Electron 不能走 iPad App Store，这套项目改走 `Capacitor iOS shell`。
+  - 官方参考已确认：
+    - Apple App Review Guidelines（游戏/壳应用边界）
+    - Capacitor 官方 iOS 工作流（`add ios` / `sync ios`）
+- 原生壳接入：
+  - `package.json`
+    - 新增依赖：`@capacitor/core` / `@capacitor/ios` / `@capacitor/cli`
+    - 新增脚本：
+      - `mobile:ios:add`
+      - `mobile:ios:copy`
+      - `mobile:ios:sync`
+      - `mobile:ios:open`
+  - 新增 `capacitor.config.ts`
+    - `appId = com.klaywei.neoncardclub`
+    - `appName = 霓虹牌桌`
+    - `webDir = dist`
+  - 已执行：`npx cap add ios`
+    - 成功生成 `ios/App`
+  - 已执行：`npm run mobile:ios:sync`
+    - 成功完成 `build + copy + update ios`
+- PWA / iPad Web App 侧同步补齐：
+  - `index.html`：新增 `manifest`、`apple-touch-icon`、`apple-mobile-web-app-*`、`viewport-fit=cover`
+  - `public/`：新增
+    - `manifest.webmanifest`
+    - `sw.js`
+    - `app-icon.svg`
+    - `apple-touch-icon.png`
+    - `icon-192.png`
+    - `icon-512.png`
+    - `maskable-512.png`
+  - `src/platform/runtime.ts`
+    - 新增平台探测：`isTouch / isIpadLike / isStandalone / isPortrait`
+    - 维护 `documentElement.dataset` 和 `--app-height`
+    - 生产环境注册 `service worker`
+  - `src/main.tsx`：接入平台初始化与 `service worker` 注册
+  - `src/App.tsx`：新增 `IpadSupportLayer`
+    - 浏览器态 iPad 显示“添加到主屏幕”提示
+    - 竖屏显示“建议横屏游玩”提示
+    - `render_game_to_text` 输出 `device` 摘要
+  - `src/index.css` / `src/ui/styles/theme.css`
+    - 安全区 padding
+    - 动态高度 `--app-height`
+    - 触控优化
+    - iPad 提示条样式
+- iOS 原生项目上架向设置：
+  - `ios/App/App.xcodeproj/project.pbxproj`
+    - `TARGETED_DEVICE_FAMILY = 2`（iPad only）
+  - `ios/App/App/Info.plist`
+    - 新增 `ITSAppUsesNonExemptEncryption = false`
+    - 新增 `UIRequiresFullScreen = true`
+  - 新增文档：`iOS上架说明.md`
+- 环境检查结果：
+  - 当前机器没有完整 `Xcode.app`
+  - `xcodebuild` 指向的是 CommandLineTools，不可直接 Archive
+  - 当前机器没有 `pod`
+  - 所以本机已做到“生成并同步 iOS 工程”，但还不能在本机直接完成 `Archive / Upload to App Store Connect`
+- 验证：
+  - `npm run test` 通过（100/100）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `npm run mobile:ios:sync` 通过
+  - `develop-web-game` 烟测：`output/ios-shell-smoke/shot-0.png`
+  - iPad PWA 定向验证：`output/ipad-pwa/validate-ipad-pwa.mjs`
+    - `output/ipad-pwa/ipad-landscape.png`
+    - `output/ipad-pwa/ipad-portrait.png`
+    - `output/ipad-pwa/summary.json`
+  - 回归结果：
+    - `manifestHref = './manifest.webmanifest'`
+    - `appleTouchIcon = './apple-touch-icon.png'`
+    - `serviceWorkerRegistrations = 1`
+    - iPad 竖屏提示存在，横屏安装提示存在
+    - 浏览器 `errors = []`
+- App Store / iPad 收口增强：
+  - 主菜单层新增应用内说明入口：
+    - `src/ui/components/LegalOverlay.tsx`
+    - `src/App.tsx`
+    - `src/ui/styles/theme.css`
+  - 菜单右下角新增 `应用说明` 入口，弹层内含：
+    - `隐私说明`
+    - `离线与存档`
+  - `render_game_to_text` 现输出 `legal.overlayOpen` 与 `legal.tab`
+  - 新增静态页面：
+    - `public/privacy.html`
+    - `public/support.html`
+  - 新增 App Store 准备材料：
+    - `app-store/AppStore元数据-zh-CN.md`
+    - `app-store/AppReviewNotes.md`
+    - `app-store/上架检查清单.md`
+  - 新增 iPad 13 寸截图脚本：
+    - `scripts/capture-app-store-ipad.mjs`
+    - `package.json` 新增 `npm run appstore:shots:ipad`
+  - 截图脚本已模拟 `standalone` 模式，避免把 Safari 的“添加到主屏幕”提示拍进商店图
+  - README 与 `iOS上架说明.md` 已同步补上：
+    - 应用内说明入口
+    - 静态隐私/支持页
+    - App Store 文案与截图脚本路径
+- 测试修复：
+  - 修正 `tests/blackjackEngine.test.ts` 中 `standing moves the hand to dealer turn` 的随机牌靴抖动
+  - 原因：原测试可能起手自然 Blackjack，导致直接结算
+  - 处理：改为固定起手牌序
+- 验证：
+  - `npm run test` 通过（100/100）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `develop-web-game` 烟测：
+    - `output/appstore-menu-smoke/shot-0.png`
+    - `output/appstore-menu-smoke/state-0.json`
+  - 法务说明弹层验证：
+    - `output/legal-overlay-check/legal-overlay.png`
+    - `output/legal-overlay-check/summary.json`
+    - 结果：`errors = []`，`legal.overlayOpen = true`
+  - App Store iPad 13 寸截图批量生成：
+    - `output/app-store-ipad-13/01-menu-hub.png`
+    - `output/app-store-ipad-13/02-holdem-focus.png`
+    - `output/app-store-ipad-13/03-doudizhu-table.png`
+    - `output/app-store-ipad-13/04-blackjack-table.png`
+    - `output/app-store-ipad-13/05-baccarat-table.png`
+    - `output/app-store-ipad-13/summary.json`
+    - 回归结果：`device.standalone = true`
+  - 静态隐私/支持页验证：
+    - `output/appstore-static-pages/privacy.png`
+    - `output/appstore-static-pages/support.png`
+    - `output/appstore-static-pages/summary.json`
+    - 结果：`errors = []`
+- 仍需外部条件才能真正完成的部分：
+  - 完整 `Xcode.app`
+  - Apple Developer Program 账号与签名
+  - 真正可用的外部 `Support URL` 联系信息（邮箱或工单入口）
+
+## 2026-03-13 - 掼蛋接入 / 旧独立模式下线 / 斗地主与 iPad 收口
+- 主菜单与根路由已调整为 `德州 / 斗地主 / 掼蛋` 三大入口。
+  - `App.tsx` 删除 21 点与百家乐的 surfaced route / menu branch，新增 `useGuandanController`、`GuandanMenu`、`GuandanTable`。
+  - `MainMenu.tsx`、`DouDizhuMenu.tsx` 已移除 21 点/百家乐入口，改为掼蛋入口。
+- 新增独立掼蛋模式（基础完整玩法，不与德州状态机混用）。
+  - 新增 `src/guandan/{types,cards,rules,ai,engine}.ts`。
+  - 新增 `src/state/useGuandanController.ts`。
+  - 新增 `src/ui/components/GuandanMenu.tsx`、`src/ui/components/GuandanTable.tsx`。
+  - 首版范围：4 人对家、双牌组、级牌推进、单张/对子/三张/三带二/顺子/连对/钢板/炸弹/天王炸弹、AI 托管与整局推进。
+  - 明确不含：进贡、还贡、红桃配。
+- 修正了掼蛋的真实规则 bug：级牌提升后顺子/连对/钢板枚举此前被 `rankPower` 排序干扰，导致 `5-9` 这类连续牌不会被识别。现在顺子类改为按自然 rank 排序判断，单测已覆盖。
+- 斗地主叫分阶段现在可以直接看到完整手牌。
+  - `DouDizhuTable.tsx` 已在 `bidding` 阶段渲染人类手牌区，并增加叫分提示条。
+  - 叫分阶段手牌可见但不可误选，避免叫分和出牌选择状态串扰。
+- `DouDizhuCard.tsx` 已泛化为可供斗地主与掼蛋共用的本地牌面组件。
+  - 新增 `backLabel`，掼蛋背牌可显示“掼蛋”而非“斗地主”。
+- 统一做了一轮 iPad / 1024 高度视口压缩。
+  - `theme.css` 新增 `html[data-ipad-like='true']` 简化规则：顶部副文案隐藏、时间线/战报下移为整行、状态块压成 2 列、手牌与人类区强制保留在屏内。
+  - 斗地主与掼蛋桌面改为固定视口高 `var(--app-height)`，中区内部滚动，避免底部人类手牌被推出视口。
+  - 掼蛋在 iPad 横屏下将 3 个对手位改成 3 列紧凑卡，避免纵向堆叠挤压头像和手牌区。
+- 文案与 PWA / 上架材料已同步到当前玩法结构。
+  - `README.md`、`public/manifest.webmanifest`、`public/privacy.html`、`app-store/AppStore元数据-zh-CN.md`、`app-store/AppReviewNotes.md` 已改成 `德州 / 斗地主 / 掼蛋`。
+  - `scripts/capture-app-store-ipad.mjs` 已改拍德州、斗地主、掼蛋，不再依赖 21 点与百家乐入口。
+- 新增测试：
+  - `tests/guandanRules.test.ts`
+  - `tests/guandanEngine.test.ts`
+- 本轮浏览器验证：
+  - `output/guandan-web-client/shot-0.png`：`WEB_GAME_CLIENT` 快速采样，确认可切到掼蛋大厅。
+  - `output/guandan-ddz-flow/guandan-table.png`：掼蛋开桌后 4 人桌面正常显示，人类 27 张手牌可见。
+  - `output/guandan-ddz-flow/doudizhu-bidding.png`：斗地主叫分阶段可直接看到 17 张起手牌。
+  - `output/app-store-ipad-13/03-doudizhu-table.png`：iPad 横屏下斗地主已简化并保留人类手牌。
+  - `output/app-store-ipad-13/04-guandan-table.png`：iPad 横屏下掼蛋已改为紧凑对手卡 + 人类手牌保留。
+- 本轮验证结果：
+  - `npm run lint` 通过
+  - `npm run test` 通过，`106/106`
+  - `npm run build` 通过
+  - 自定义 Playwright 流程 `output/guandan-ddz-flow/summary.json`：`errors = []`
+  - iPad 截图脚本 `output/app-store-ipad-13/summary.json`：`device.ipadLike = true`，已抓到当前三模式画面
+- 现状说明：
+  - 21 点与百家乐代码目录仍保留在仓库中，但已从当前应用路由、主菜单、商店文案与截图脚本中移除，不再是 surfaced 模式。
+
+## 2026-03-13 - 掼蛋规则与演出增强
+
+- 补强掼蛋规则层：
+  - 新增 `straightFlush` / 同花顺牌型识别与枚举。
+  - 调整压制关系：同花顺可压普通牌型与 4/5 张炸弹，6 张及以上炸弹可反压同花顺，天王炸弹仍最高。
+  - AI 选牌排序已把同花顺视作高价值牌型，和炸弹一样默认更谨慎使用。
+- 补强掼蛋结算层：
+  - 结算摘要新增 `victoryType` / `victoryLabel`，明确区分 `双下 / 单下 / 险胜`。
+  - 回合摘要和运行时状态都记录 `specialBurst / specialHistory`，用于桌面高能事件和历史摘要。
+- 补强掼蛋桌面显示：
+  - 中区新增“本局高能”条，显示炸弹、同花顺、双下等事件。
+  - 打牌阶段新增 `gd-fx-burst` 爆发层，用于炸弹 / 同花顺 / 天王炸弹提示。
+  - 结算区改成英雄条 + 特殊事件 chip + 四家结果卡，更明确展示双下/单下结果和升级幅度。
+  - 最近战报卡新增特殊事件 tags。
+- 修复真实浏览器 bug：
+  - 结算时若桌上已无可复用手牌，掼蛋对手背牌栈会给 `DouDizhuCard` 传入 `undefined` 导致页面崩溃。
+  - 改为从手牌 / 台面牌 / 最近出牌里安全回退隐藏牌参考对象，若完全没有则显示“本位已清空”。
+- 测试与验证：
+  - `npm run lint` 通过。
+  - `npm run test` 通过，`107/107`。
+  - `npm run build` 通过。
+  - 浏览器回归产物：
+    - `output/guandan-polish-flow/table-playing.png`
+    - `output/guandan-polish-flow/table-settlement.png`
+    - `output/guandan-polish-flow/summary.json`
+  - 浏览器结果：`phase=settlement`、`victoryType=doubleDown`、`specialHistoryCount=6`、`settlementHeroExists=1`、`errors=[]`。
+
+TODO / Suggestions for next agent:
+- 如果要继续把掼蛋做深，下一步最值钱的是：
+  - 进贡 / 还贡
+  - 红桃配与配牌逻辑
+  - 独立掼蛋局史回看 / 复盘
+
+## 2026-03-13 - 全局显示效果优化
+
+- 做了一轮跨模式显示效果统一优化，覆盖主菜单、德州、斗地主、掼蛋：
+  - 提升 `glass-panel` 的层次、边框高光和内部明暗分层。
+  - 提升按钮的主次感、按压感和发光反馈。
+  - 统一顶栏数据胶囊、表单控件和面板标题行表现。
+  - 提升德州/斗地主/掼蛋底部与侧栏面板的对比度、内层背景和信息块边界。
+  - 提升德州与斗地主/掼蛋卡牌的边框、阴影、字号和镜面高光，增强牌面清晰度。
+- 组件结构小改：
+  - `ActionLogPanel` 新增标题行右侧计数。
+  - `SessionInsightsPanel` 新增模式标签（现金局 / 锦标赛）。
+- 独立模式页面做了整体背景优化：
+  - 斗地主桌面背景新增低强度网格感和更明显的分区光效。
+  - 掼蛋页面延续同一套层级语言，减少“黑盒子堆叠感”。
+- 验证：
+  - `npm run lint` 通过。
+  - `npm run test` 通过，`107/107`。
+  - `npm run build` 通过。
+  - 浏览器截图产物：
+    - `output/display-polish-pass/menu.png`
+    - `output/display-polish-pass/holdem.png`
+    - `output/display-polish-pass/doudizhu.png`
+    - `output/display-polish-pass/guandan.png`
+    - `output/display-polish-pass/summary.json`
+  - 浏览器结果：`errors=[]`。
+
+## 2026-03-13 - iPad 显示优化收口
+
+- 针对 iPad 横屏做了一轮信息密度重排，目标是“保留主决策信息，减少次级说明文案”。
+- 主菜单：
+  - `menu-card` 改为 iPad 下纵向有序布局，`开始游戏` 提前到皮肤/主题预览之前，回到首屏主操作区。
+  - iPad 下主菜单表单改成更紧凑的 3 列布局（竖屏保留 2 列）。
+  - 生涯卡压缩为 3 个核心统计，隐藏玩法拆分和最近结果列表。
+  - 角色皮肤 / 主题皮肤改成横向可滚预览带，隐藏长描述，降低纵向占用。
+  - 横屏下隐藏首页副标题，进一步收回首屏高度。
+- 德州 iPad HUD / 阶段条：
+  - `TopHud` 新增语义类名，iPad 下只保留玩法、局制、AI、盲注、底池等核心胶囊。
+  - 隐藏节奏、跨注、奖励圈、前注、升盲预告等低优先级胶囊。
+  - 隐藏 AI 下拉、音效、动效、重新开局等次级操作，保留暂停、历史、主题、下一手、返回菜单。
+  - 阶段条隐藏 `手牌编号` 和 `跨注`，保留阶段、玩法、行动玩家、自动动作和核心开关。
+- 斗地主 / 掼蛋 iPad：
+  - 顶栏进一步压缩，隐藏 AI 难度下拉，按钮统一成更紧凑的 mini 操作条。
+  - 缩短日志区最大高度，把更多高度让给中央桌面和手牌区。
+  - 斗地主隐藏最近战报副文案、建议出牌副文案、人类最后行动长文本；会话面板收成 2 项。
+  - 掼蛋保持 3 列对手卡，但继续隐藏低价值副说明，维持中心区可读性。
+- 验证：
+  - `npm run lint` 通过。
+  - `npm run test` 通过，`107/107`。
+  - `npm run build` 通过。
+  - `WEB_GAME_CLIENT` 回归通过，产物：
+    - `output/ipad-web-game-client/shot-0.png`
+    - `output/ipad-web-game-client/state-0.json`
+    - 无 `errors-*.json`
+  - iPad 截图回归产物：
+    - `output/app-store-ipad-13/01-menu-hub.png`
+    - `output/app-store-ipad-13/02-holdem-focus.png`
+    - `output/app-store-ipad-13/03-doudizhu-table.png`
+    - `output/app-store-ipad-13/04-guandan-table.png`
+    - `output/app-store-ipad-13/summary.json`
+  - 结果：
+    - 主菜单首屏可见 `开始游戏` 主按钮。
+    - 德州 HUD 在 iPad 横屏下显著降噪，主牌桌区域更完整。
+    - 斗地主 / 掼蛋都保留了主决策信息，没有新增遮挡或错误。
+    - 浏览器错误：`errors=[]`。
+
+TODO / Suggestions for next agent:
+- 如果继续做 iPad 专项优化，优先考虑：
+  - 德州底部三栏在 iPad 横屏下进一步做标签页/抽屉化。
+  - 为 iPad 11 寸和 13 寸分别做一套更细的 spacing token，而不是共用一套。
+  - 给斗地主和掼蛋的人类手牌区补一层更明显的固定底部安全区视觉边界。
+
+## 2026-03-13 - 占位与残留功能清理
+
+- 对当前交付范围做了一次占位扫描：
+  - 使用 `rg` 检查了 `TODO / FIXME / placeholder / stub / Not implemented / 开发中 / 暂未` 等标记。
+  - 结论：当前 `src` 的活跃运行时代码里没有新的占位功能入口；命中的 `暂未叫分`、`暂未生成回放归档` 属于真实状态文案，不是未实现功能。
+- 清理已下线但仍残留在仓库中的旧模式代码：
+  - 删除 `src/blackjack/*`
+  - 删除 `src/baccarat/*`
+  - 删除 `src/state/useBlackjackController.ts`
+  - 删除 `src/state/useBaccaratController.ts`
+  - 删除 `src/ui/components/Blackjack*.tsx`
+  - 删除 `src/ui/components/Baccarat*.tsx`
+  - 删除 `tests/blackjackEngine.test.ts`
+  - 删除 `tests/baccaratEngine.test.ts`
+- 清理旧产物：
+  - 删除 `output/app-store-ipad-13/04-blackjack-table.png`
+  - 删除 `output/app-store-ipad-13/05-baccarat-table.png`
+- 验证：
+  - `npm run lint` 通过。
+  - `npm run test` 通过，清理后为 `97/97`。
+  - `npm run build` 通过。
+  - 再次确认当前 surfaced 模式只剩：德州 / 斗地主 / 掼蛋。
+
+TODO / Suggestions for next agent:
+- 如果要继续做仓库级收口，可考虑：
+  - 清理 `progress.md` 中关于已下线 21 点 / 百家乐的历史记录段，改成单独归档文档。
+  - 清理 `output/` 下旧模式截图目录，避免误导物料整理流程。
+
+## 2026-03-13 - iPad 画面遮挡深度优化
+
+- 针对 iPad 上德州主桌“底部三栏长期占高、压缩牌桌”的问题，做了结构级调整，而不是继续缩字号：
+  - `TableScene` 新增 `compactBottomDock` 分支。
+  - iPad 且非聚焦模式下，不再渲染整块 `bottom-row` 三栏常驻布局。
+  - 改成牌桌下方独立的抽屉式底栏：`操作 / 时间线 / 态势` 三按钮，按需展开单层面板。
+- 这样处理后的效果：
+  - 默认态：牌桌垂直可用高度明显增加，人物卡、公共牌、主底池更完整。
+  - 展开态：操作面板出现在牌桌下方，不再盖住公共牌、座位卡或手牌区。
+- 样式补充：
+  - 新增 `.ipad-bottom-stack`、`.focus-dock.ipad-dock`、`.ipad-compact-panel`。
+  - iPad 下进一步压缩非聚焦 `table-wrap` 底部留白，保留牌桌高度。
+  - 抽屉面板中隐藏低优先级教学/策略块，优先保留主操作与关键信息。
+- 验证：
+  - `npm run lint` 通过。
+  - `npm run test` 通过，`97/97`。
+  - `npm run build` 通过。
+  - iPad 专项截图：
+    - `output/ipad-holdem-deep-pass/holdem-ipad-default.png`
+    - `output/ipad-holdem-deep-pass/holdem-ipad-controls-open.png`
+    - `output/ipad-holdem-deep-pass/summary.json`
+  - 结果：`dockButtons=3`、`panelVisible=1`、`errors=[]`。
+  - iPad 全局截图回归继续通过：`output/app-store-ipad-13/*.png`。
+
+TODO / Suggestions for next agent:
+- 如果继续做 iPad 深化优化，最值钱的是：
+  - 给斗地主 / 掼蛋也做同类的抽屉式日志区，而不是常驻侧栏。
+  - 针对 11 寸 iPad 再做一轮 tighter spacing 校准。
+- 补了一次 iPad 底部安全区修正：
+  - `html[data-ipad-like='true'] .table-wrap:not(.focus-mode)` 的底部留白提高到 `78px`。
+  - 修正了首版抽屉式底栏与人类座位卡下沿轻微重叠的问题。
+  - 最新截图：
+    - `output/ipad-holdem-deep-pass/holdem-ipad-default.png`
+    - `output/ipad-holdem-deep-pass/holdem-ipad-controls-open.png`
+  - 结果：默认态与展开态都不再压住底部人物卡，`errors=[]`。
+
+## 2026-03-13 - iPad 顶部信息压缩与弹层收口
+- 为德州、斗地主、掼蛋新增统一 `IpadInfoSheet` 顶部信息弹层：
+  - `src/ui/components/IpadInfoSheet.tsx`
+  - 德州 `TopHud` 新增 `更多` 按钮，隐藏的 AI/节奏/跨注/锦标赛结构等信息移入弹层。
+  - 斗地主/掼蛋顶部统计条改成 iPad 紧凑摘要 + `更多` 弹层，不再常驻占位。
+- iPad 顶部按钮文案进一步压缩：
+  - 德州：`历史回放 -> 回放`、`返回菜单 -> 菜单`、主题按钮简写。
+  - 斗地主/掼蛋：`重新开局 -> 重开`、`返回大厅 -> 大厅`、托管按钮改成短标签。
+- 样式新增：
+  - `theme.css` 中新增 `ipad-info-sheet` / `ipad-info-grid` / `ipad-info-card` / `ipad-mode-summary`
+  - 为 `top-hud` / `ddz-topbar` / `gd-topbar` 增加 `isolation + z-index`，修复弹层被下层玻璃面板压住的问题。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（97/97）
+  - `npm run build` 通过
+  - iPad 定向截图：
+    - `output/ipad-top-info-pass/holdem-info-open.png`
+    - `output/ipad-top-info-pass/doudizhu-info-open.png`
+    - `output/ipad-top-info-pass/guandan-info-open.png`
+    - `output/ipad-top-info-pass/summary.json`
+  - App Store iPad 截图链路复跑通过：`output/app-store-ipad-13/summary.json`
+  - `develop-web-game` skill client 复跑：`output/ipad-info-web-client/`
+- 结果：
+  - iPad 首屏顶部常驻信息进一步收缩。
+  - 低优先级信息改为按需打开，不再长期挤占顶部空间。
+  - 三套模式的 `更多` 弹层都已实测可打开，且无新的 console/page error。
+
+## 2026-03-13 - iPad 人物卡模式与清晰度增强
+- 德州 iPad 非聚焦牌桌切到“人物卡视觉模式”而不是小头像普通座位卡：
+  - `TableScene` 对 iPad 非聚焦桌启用 `characterCardMode`
+  - `SeatPanel` 新增 `characterCardMode`，复用人物卡结构但保持比聚焦模式更紧凑的尺寸
+- 手牌/人物尺寸分档修正：
+  - `SeatPanel` 在 `characterCardMode` 下按 `dense/compact/balanced` 调整人物大小与手牌尺寸
+  - 高人数桌不再强制使用过大的 `seat-roomy` 双手牌尺寸
+- iPad 清晰度强化：
+  - `theme.css` 为 iPad 人物卡模式补强边框、阴影、文字对比度、牌面边框和 rank/suit 字号
+  - 德州 iPad 非聚焦底部安全区从 `78px` 提到 `96px`，适配更高的人物卡
+- 高人数 iPad 座位布局修正：
+  - 9+ 人 iPad 非聚焦桌改用更外扩的 `focus` 座位分布，解决左侧人物卡贴边问题
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（97/97）
+  - `npm run build` 通过
+  - 定向截图：
+    - `output/ipad-clarity-pass/holdem-ipad-6p.png`
+    - `output/ipad-clarity-pass/holdem-ipad-11p.png`
+    - `output/ipad-clarity-pass/summary.json`
+  - App Store iPad 截图复跑：`output/app-store-ipad-13/02-holdem-focus.png`
+- 结果：
+  - iPad 非聚焦德州桌现在保留人物卡识别度，卡面与数字更清楚。
+  - 11 人桌截图已确认 `seatCount = 11`，没有新的 console/page error。
+
+## 2026-03-13 - 锦标赛积分皮肤商店
+- 新增锦标赛积分链路：`CareerProfile` / `CareerSessionRecord` 增加 `tournamentPointsEarned`，锦标赛完赛按名次、人数、手数、AI 难度发放积分。
+- 扩展人物偏好存档：`portraitPreferences` 现在持久化 `humanPortraitKey + ownedPortraitKeys + tournamentPointsSpent`，兼容旧档迁移。
+- 主菜单“玩家主形象”升级为“人物商店”：
+  - 显示累计赢得积分、当前可用积分、已拥有数量
+  - 初始免费皮肤 3 套
+  - 其余皮肤可用锦标赛积分购买并自动装备
+  - 最近锦标赛结果与生涯中心会显示积分收益
+- 修复真实交互 bug：购买成功后菜单反馈条错误显示为失败，现已改为同步计算购买结果并正确展示扣分文案。
+- 验证：
+  - `npm run test` 通过（101/101）
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `develop-web-game` skill client 已运行：`output/shop-skill-smoke/`
+  - Playwright 定向验证：`output/shop-flow/summary.json`
+    - desktop / ipad 都完成“560 -> 120 积分，购买 human-summit，自动装备”
+    - `errors = []`
+  - 截图：
+    - `output/shop-flow/desktop-before.png`
+    - `output/shop-flow/desktop-after.png`
+    - `output/shop-flow/ipad-before.png`
+    - `output/shop-flow/ipad-after.png`
+
+## 2026-03-13 - 商店第二步：主题商店与锦标赛积分展示
+- 牌桌主题已并入锦标赛积分商店：`themePreferences` 现在持久化 `tableThemeKey + ownedThemeKeys + tournamentPointsSpent`，兼容旧档 `{ tableThemeKey }` 自动迁移。
+- 商店货币统一：可用积分改为 `career.tournamentPointsEarned - portraitSpent - themeSpent`，人物皮肤与牌桌主题共用同一余额，不会双重透支。
+- `TopHud` 主题轮换改为仅在已拥有主题中循环，不再能在桌内切到未解锁主题。
+- 主菜单主题区升级为“牌桌主题商店”，支持：
+  - 免费初始主题：霓虹深海、祖母绿毡
+  - 积分购买主题：黑金高厅、绯红王座
+  - 购买后自动装备，并展示消费反馈
+- 锦标赛终局冠军 banner 新增 `本局积分` 摘要 chip，玩家可在终局直接看到本次奖励，不必回菜单核对。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（103/103）
+  - `npm run build` 通过
+  - 商店双消费验证：`output/shop-flow/summary.json`
+    - desktop / ipad 都完成 `900 -> 460 -> 280` 的“买皮肤 + 买主题”链路
+    - `theme.key = noir-gold`
+    - `errors = []`
+  - 锦标赛终局验证：`output/tournament-champion-spotlight/summary.json`
+    - `championSummaryCount = 5`
+    - `pointsChipExists = true`
+    - `errors = []`
+  - 轻量菜单烟测：`output/shop-theme-skill-smoke/`
+
+## 2026-03-13 - Windows 便携版重新打包
+- 修复 `scripts/build-win-portable.sh`：优先复用本地 Electron Windows 缓存，避免首次下载卡死。
+- 为 Electron Packager 补齐 `package.json` 的 `author` / `description`，修复 `Could not locate a package.json ... author` 打包报错。
+- 修复 zip 打包方式：从 `ditto` 改为 `COPYFILE_DISABLE=1 zip -r -X`，移除 Windows 包内无用的 `__MACOSX` 和 `._` 元数据。
+- 成功产出 Windows 便携版：`release/local-holdem-neon-v1.0.0-windows-portable.zip`。
+- 同步生成上传副本：`release/upload/霓虹牌桌俱乐部-v1.0.0-Windows便携版.zip`。
+
+## 2026-03-14 - iPad UI 深修与商店弹窗化
+- 主菜单商店从长列表内嵌区改为独立弹窗页：新增 `MenuShopOverlay`，将人物皮肤、人物牌面、牌桌主题三类商品统一收进单独居中的模态层。
+- 新增牌面皮肤系统：`cardSkinPreferences` / `cardSkins` / `cardSkin` 类型落地，牌面支持 `classic-court`、`neon-royal`、`velvet-opera`、`jade-legends` 四套样式，并接入锦标赛积分购买与持久化。
+- J / Q / K 与大小王已改成本地矢量人物牌面：新增 `FaceCardFigure`，德州 `CardView` 与斗地主/掼蛋 `DouDizhuCard` 都会按当前牌面皮肤渲染人物图而不是纯字母。
+- 德州 HUD 继续压缩：顶部常驻信息压到 5 个 pill、2 行内，详情/音效/动效/主题/重开等次级项迁入 `详情` 弹层。
+- `IpadInfoSheet` 改为通过 `createPortal(document.body)` 渲染，修复了此前被带 `backdrop-filter` 的 HUD 容器劫持定位、弹层始终偏在顶部的问题。
+- 德州结算层改为视口级居中层：通过 `createPortal(document.body)` + `settlement-shell` 居中壳层，修复了结算卡在 iPad 上偏右下、继续按钮不在视觉中心的问题。
+- 斗地主 / 掼蛋当前出牌区、座位信息区继续压缩字体和最小高度；iPad 专项回归中两者文本溢出都为 0。
+- 新增 iPad 定向回归脚本 `scripts/validate-ipad-ui-pass.mjs`：
+  - 验证商店弹窗居中
+  - 验证人物牌面 tab 中人物图渲染
+  - 验证德州 `详情` / `结算` 两个弹层居中与按钮数量
+  - 验证斗地主 / 掼蛋无文字溢出
+- 验证：
+  - `npm run test` 通过（107/107）
+  - `npm run build` 通过
+  - iPad UI 定向回归：`output/ui-ipad-pass/summary.json`
+    - `shopCenter = { x: 0, y: 0 }`
+    - `faceFigureCount = 16`
+    - `infoCenter = { x: 0, y: 0 }`
+    - `settlementCenter = { x: 0, y: 0 }`
+    - `settlementButtons = 2`
+    - `ddzOverflowCount = 0`
+    - `gdOverflowCount = 0`
+    - `errors = []`
+  - 截图：
+    - `output/ui-ipad-pass/menu-shop.png`
+    - `output/ui-ipad-pass/holdem-info.png`
+    - `output/ui-ipad-pass/holdem-settlement.png`
+    - `output/ui-ipad-pass/doudizhu.png`
+    - `output/ui-ipad-pass/guandan.png`
+
+## 2026-03-14 - 导航改成一级模式大厅 + 二级配置页
+- 新增 `GameHubMenu` 作为一级主页面：首屏只展示 3 个主模式卡片（德州、斗地主、掼蛋），不再直接展开某一类玩法的详细参数。
+- `menuGame` 状态扩为 `hub | holdem | doudizhu | guandan`，默认进入 `hub`。
+- 德州 `MainMenu` 现在是二级配置页：
+  - 顶部新增 `返回模式大厅`
+  - 去掉原先直接切到斗地主 / 掼蛋的入口
+  - 保留原有德州参数配置、商店、生涯、续局
+- 斗地主 / 掼蛋菜单也都改成二级配置页：
+  - 去掉互相切换按钮
+  - 统一改为 `返回模式大厅`
+- `render_game_to_text` 新增 `menu.page`，便于浏览器回归断言当前所在菜单层级。
+- 样式新增：
+  - `game-hub-card`
+  - `game-hub-grid`
+  - `game-hub-mode-card-*`
+  - `submenu-head`
+  并补了移动端 / iPad 下的大厅三卡布局规则。
+- 验证：
+  - `npm run test` 通过（107/107）
+  - `npm run build` 通过
+  - 导航链路回归：`output/game-hub-flow/summary.json`
+    - `hub.menuPage = hub`
+    - `hub.cardCount = 3`
+    - 可进入 `holdem / doudizhu / guandan` 三个二级配置页
+    - `errors = []`
+  - 截图：
+    - `output/game-hub-flow/hub.png`
+    - `output/game-hub-flow/holdem-menu.png`
+    - `output/game-hub-flow/doudizhu-menu.png`
+    - `output/game-hub-flow/guandan-menu.png`
+- `develop-web-game` 的官方 `$WEB_GAME_CLIENT` 已按要求尝试执行，但当前会卡在 Playwright 内部 `page.screenshot` 超时；本轮改用自定义 Playwright 回归脚本完成真实导航验证，应用本身无 page/console errors。
+
+## 2026-03-14 - 商店改成大厅级入口并补齐筛选/预览/积分明细
+- 商店不再只属于德州二级页：
+  - `App` 新增全局 `shopOpen/shopInstance`，通过 `withMenuLayer` 在所有菜单页共享同一套 `MenuShopOverlay`
+  - 一级大厅 `GameHubMenu` 顶部新增 `积分商店` 按钮，并补了一条独立的 `锦标赛商店` 摘要条
+- 德州二级页不再保留大块商店卡：
+  - 原 `menu-shop-summary-card` 改成更轻的 `menu-shop-ribbon`
+  - 只保留当前人物 / 牌面 / 主题和积分摘要，不再重复承载整个商店 UI
+- `MenuShopOverlay` 完整重构：
+  - 左侧改成大预览区：实时组合预览人物皮肤、人物牌面、牌桌主题
+  - 新增三张余额卡：当前可用 / 累计赢得 / 累计支出
+  - 新增按类支出明细：人物皮肤 / 人物牌面 / 牌桌主题
+  - 右侧货架新增筛选：`全部 / 已拥有 / 待解锁`
+  - 保留三分类 tab：`人物皮肤 / 人物牌面 / 牌桌主题`
+  - 每张商品卡 hover 会同步刷新左侧实时预览
+- `render_game_to_text` 新增 `shop` 输出：
+  - `open`
+  - `availablePoints`
+  - `totalEarnedPoints`
+  - `portraitsOwned`
+  - `cardSkinsOwned`
+  - `themesOwned`
+- 样式收口：
+  - 新增 `game-hub-actions` / `game-hub-store-strip`
+  - 新增 `menu-shop-layout` / `menu-shop-preview-panel` / `menu-shop-showcase` / `menu-shop-balance-grid` / `menu-shop-spend-breakdown`
+  - iPad 和窄屏下都补了对应的响应式规则
+- 验证：
+  - `npm run test` 通过（107/107）
+  - `npx eslint src/App.tsx src/ui/components/MainMenu.tsx src/ui/components/GameHubMenu.tsx src/ui/components/MenuShopOverlay.tsx --max-warnings=0` 通过
+  - `npm run build` 通过
+  - 定向浏览器回归：`output/shop-optimization-flow/summary.json`
+    - `hubCardCount = 3`
+    - `shopOpen = true`
+    - `previewExists = true`
+    - `balanceCardCount = 3`
+    - `spendBreakdownCount = 3`
+    - `holdemRibbonCount = 1`
+    - `holdemSummaryCardCount = 0`
+    - `errors = []`
+  - 截图：
+    - `output/shop-optimization-flow/hub.png`
+    - `output/shop-optimization-flow/shop-portrait.png`
+    - `output/shop-optimization-flow/shop-card-skin.png`
+    - `output/shop-optimization-flow/holdem-menu.png`
+- `develop-web-game` 官方 `$WEB_GAME_CLIENT` 本轮继续按要求执行：
+  - 一次在点击商店按钮时卡在 Playwright 的 `locator.click` 稳定性等待
+  - 一次在截图阶段卡在 `page.screenshot` 30s 超时
+  - 因此本轮的真实页面验证仍然由自定义 Playwright 脚本完成，页面本身 `errors = []`
+
+## 2026-03-14 - 商店扩到 AI 形象包、数字牌改成 pip、非聚焦德州底栏压缩
+
+- 新增 `AI 形象包` 商店分类：
+  - 新增类型和库存：`src/types/aiPack.ts`、`src/content/aiPacks.ts`、`src/state/aiPackPreferences.ts`
+  - 当前共 4 组 AI 名字包：`会所常驻 / 午夜行会 / 玉电回路 / 晚霞突袭`
+  - 商店现在支持购买、装备、持久化 AI 包
+  - 德州开局会把当前已装备 AI 包写入 `GameConfig.aiPackKey`
+  - `handEngine` 会按当前 AI 包名池生成整桌 AI roster，不再写死单一名字池
+- 商店重构继续深化：
+  - `MenuShopOverlay` 从 3 分类扩到 4 分类：`人物皮肤 / 扑克牌皮肤 / 牌桌主题 / AI 形象包`
+  - 左侧预览区和右侧货架都改为独立滚动，解决商店内容显示不全的问题
+  - iPad 下商店布局切成单列，避免左右双栏把内容裁掉
+  - 支出明细增加第 4 项：`AI 形象包`
+- 扑克牌皮肤增强：
+  - 牌面皮肤从 4 套扩到 7 套：
+    - `经典宫廷`
+    - `霓虹皇室`
+    - `绒幕歌剧`
+    - `玉辉传奇`
+    - `午夜假面`
+    - `落霞神话`
+    - `冰峰纹章`
+  - 每套皮肤新增独立的牌背主色、辅色、强调色和纹样
+  - `CardView` 和 `DouDizhuCard` 的背牌都会跟随当前牌面皮肤切换
+- 牌桌主题增强：
+  - 牌桌主题从 4 套扩到 7 套：
+    - `霓虹深海`
+    - `黑金高厅`
+    - `祖母绿毡`
+    - `绯红王座`
+    - `月白沙龙`
+    - `紫域回路`
+    - `琥珀金库`
+  - `theme.css` 已补齐 3 套新主题的完整 CSS 变量
+- 数字牌显示修正：
+  - `CardView` 不再用居中的大数字/大花色占位
+  - A/2-10 改成真正的 pip 布局
+  - 新增中心/上下/左右 pip 定位，`A` 使用单大 pip 展示
+  - 浏览器回归里 `rankCenterCount = 0`，说明旧的占位数字已移除
+- 德州非聚焦模式压缩：
+  - `SeatPanel` 的普通座位卡去掉原来的 `seat-meta + seat-status` 两行文本
+  - 改成单条 `seat-info-strip`：`码 / 注 / 状态`
+  - 浏览器回归里 `seatMetaCount = 0`，说明旧底部文案已清掉
+- 验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（110/110）
+  - `npm run lint` 通过
+  - 定向 Playwright 回归：`output/shop-card-ui-pass/summary.json`
+    - `shopState.tabCount = 4`
+    - `shopState.cardSkinCardCount = 7`
+    - `shopState.cardPipCount = 9`
+    - `shopState.rankCenterCount = 0`
+    - `holdemState.seatInfoStripCount = 6`
+    - `holdemState.seatMetaCount = 0`
+    - `desktop.errors = []`
+    - `ipad.errors = []`
+  - 截图：
+    - `output/shop-card-ui-pass/hub.png`
+    - `output/shop-card-ui-pass/shop-overview.png`
+    - `output/shop-card-ui-pass/shop-card-skins.png`
+    - `output/shop-card-ui-pass/shop-ipad.png`
+    - `output/shop-card-ui-pass/holdem-non-focus.png`
+- `develop-web-game` 官方 `$WEB_GAME_CLIENT` 本轮重新执行：
+  - 这次能正常返回，但输出仍然过于轻量，不足以覆盖商店四分类、数字牌 pip 和非聚焦德州卡片压缩这类定向问题
+  - 因此最终验收继续用自定义 Playwright 脚本补足，页面 `errors = []`
+
+## 2026-03-14 - 牌面皮肤重做、商店单列、德州非聚焦底栏继续压缩
+- 扑克牌皮肤继续重做：
+  - `CardSkinKey` 从 7 套扩到 9 套，新增 `曜黑密纹`、`玫瑰画室`
+  - 每套牌皮肤新增纸张底色、阴影层、边框色、角标色、牌背字母徽记
+  - `CardView` 数字牌的 pip 布局按尺寸分级，`seat-compact / dense / omaha` 会使用更保守的位置和更小字号，修正小尺寸重叠问题
+  - `DouDizhuCard` 背牌也开始复用当前牌皮肤的字母徽记，不再只是单一文字背面
+- 商店继续修正：
+  - 商店扑克牌皮肤货架预览改成 `seat-compact` 尺寸并禁止换行，解决货架卡片被裁切的问题
+  - 新增 `@media (max-width: 1366px)` 单列规则，桌面窄窗口和 iPad 都会回到单列展示，避免左右双栏压缩内容
+- 德州非聚焦模式底栏继续压缩：
+  - 非聚焦底栏左侧不再常驻完整下注控件，未轮到你时切成 `等待态摘要卡`
+  - `ActionLogPanel` 在非聚焦底栏中改成最近 16 条，整体 padding、标题和列表字号继续下调
+  - `SessionInsightsPanel` 在非聚焦底栏中进一步压缩 KPI、奖励圈、排名列表字号和高度
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（110/110）
+  - `npm run build` 通过
+  - 定向 Playwright 回归：`output/card-table-polish-pass/summary.json`
+    - `desktop.errors = []`
+    - `desktop.cardPipCount = 90`
+    - `desktop.cardBackGlyphs = 10`
+    - `desktop.bottomRowHeight = 560.859375`
+    - `ipad.layoutColumns = "1142px"`
+    - `ipad.errors = []`
+  - 截图：
+    - `output/card-table-polish-pass/shop-card-skins-desktop.png`
+    - `output/card-table-polish-pass/shop-card-skins-ipad.png`
+    - `output/card-table-polish-pass/holdem-non-focus-desktop.png`
+- 说明：
+  - 官方 `$WEB_GAME_CLIENT` 本轮已执行，但没有输出足够细的画面验证信息；最终仍用定向 Playwright 脚本检查扑克牌皮肤、商店和非聚焦德州底栏。
+
+## 2026-03-14 - 随机姓名、牌面/牌桌皮肤扩展、单行姓名显示
+- 随机姓名系统落地：
+  - 新增 `src/content/randomNames.ts`，用可复现的打散逻辑为德州、斗地主、掼蛋生成更自然的随机中文姓名。
+  - 德州 AI roster 不再固定顺序吃名字池，斗地主/掼蛋也改为随机组合名。
+- 姓名显示统一压成单行：
+  - 德州 `seat-name-stack`、斗地主 `ddz-seat-head`、掼蛋 `gd-seat-head` 统一使用 `nowrap + ellipsis`，避免多行挤压卡片。
+- 牌面/牌桌皮肤继续扩充：
+  - 扑克牌皮肤新增 `霓虹花束 (arcade-bloom)`，牌桌主题新增 `烬火会所 (cinder-club)`。
+  - 当前累计：扑克牌皮肤 10 套、牌桌主题 10 套。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（110/110）
+  - `npm run build` 通过
+  - 定向 Playwright 验证：
+    - 德州姓名已随机且为单行 `nowrap`
+    - 斗地主/掼蛋姓名也为单行 `nowrap`
+    - 产物：`output/card-table-polish-pass/summary.json`
+- 说明：
+  - 本轮官方 `$WEB_GAME_CLIENT` 也已执行；由于输出仍偏轻，最终定向验收继续以自定义 Playwright 脚本为准。
+
+## 2026-03-14 - 出牌特效商店与三模式联动
+- 新增统一特效包系统：
+  - `src/types/effectSkin.ts`
+  - `src/state/effectSkinPreferences.ts`
+  - `src/ui/effectSkins.ts`
+  - 当前包含 5 套：`会所标准 / 霓虹彗尾 / 炽焰重击 / 莲辉梦幕 / 棱镜脉冲`
+- 商店新增第 5 类：`出牌特效`
+  - 可购买、切换、持久化
+  - 商店左侧新增特效实时预览舞台
+  - 商店积分支出明细新增 `出牌特效`
+- 局内联动：
+  - 德州 `TableEffectsLayer` 现在按当前特效包切换光环、粒子、扫光色调
+  - 斗地主 `ddz-fx-burst` 现在按当前特效包切换视觉风格
+  - 掼蛋 `gd-fx-burst` 现在按当前特效包切换视觉风格
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（114/114）
+  - `npm run build` 通过
+  - 定向 Playwright 回归：`output/effect-shop-pass/summary.json`
+    - `tabCount = 5`
+    - `effectCards = 5`
+    - 购买后 `effectSkin.key = neon-comet`
+    - 德州桌面类名 `table-effects-layer fx-style-neon-comet`
+    - 斗地主/掼蛋爆发层类名已支持 `fx-style-*`
+    - `errors = []`
+- 说明：
+  - 官方 `$WEB_GAME_CLIENT` 本轮再次执行，首页点击链可跑通，但输出仍不足以覆盖购买/装备/爆发层这类定向场景，最终验收继续以自定义 Playwright 回归为准。
+
+## 2026-03-14 - 多语言界面首轮接入
+- 新增语言偏好与字典，当前支持 zh-CN / en / ja / fr / de。
+- 已接入主模式大厅、德州菜单、德州 HUD、商店弹层、斗地主菜单、掼蛋菜单。
+- 默认语言保持简体中文，render_game_to_text 已输出 language.key。
+- lint/test/build 通过；深层回放/桌内细项文案仍可继续扩充。
+
+## 2026-03-14 - 多语言覆盖扩展到桌内主路径
+- 新增全局 LanguageProvider / useLanguage，上下文贯通菜单与牌桌。
+- 已覆盖：主模式大厅、德州菜单、德州 HUD、商店弹层、斗地主菜单、掼蛋菜单、行动时间线、操作区、座位状态、iPad 信息抽屉、部分回放顶部。
+- 浏览器验证：英文德州桌内 HUD 与按钮已切换成功，errors=0。
+- 尚可继续扩展：历史中心、回放时间线明细、SkillCoach 深层提示、部分状态机 banner/engine reason。
+
+## 2026-03-14 - 多语言覆盖扩展到历史中心主路径
+- 回放/历史中心主界面已接入语言上下文：
+  - `ReplayCenter.tsx`
+  - `ReplayHandsPanel.tsx`
+  - `ReplaySessionsPanel.tsx`
+  - `ReplaySessionArchivePanel.tsx`
+  - `ReplayCareerPanel.tsx`
+  - `replayCenterShared.ts`
+- 新增 replay 专用多语言词表并合并到全局 i18n。
+- 已覆盖：
+  - 历史中心标题、页签、导出/返回按钮
+  - 手牌视图筛选器、统计卡、手牌列表、赢家/盲注/底池文案
+  - 会话视图加载态、结果中心、局制/难度/会话摘要
+  - 导入预检主按钮、统计块、会话差异表、会话详情、对比组、关键节点预览主标签
+- 共享格式化函数已支持按语言输出：
+  - `modeLabel`
+  - `sessionModeLabel`
+  - `difficultyLabel`
+  - `formatCareerEntry`
+  - `replayImportStatusLabel`
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（114/114）
+  - `npm run build` 通过
+- 浏览器验证：
+  - 官方 `$WEB_GAME_CLIENT` 已再次执行；一次因旧首页选择器假设超时，另一次无点击运行可出图，但输出不足以覆盖回放链路
+  - 本轮新增截图：`output/i18n-final-pass/hub-en.png`
+- 剩余建议：
+  - 继续清理 `engine/state` 直接返回给 UI 的中文 reason/status 文案
+  - 将 replay 剩余的教学标签、事件 note、以及更深层时间线描述也改成 key 驱动
+
+## 2026-03-14 - 多语言收尾延伸到商店反馈与主菜单
+- 商店购买结果从直接返回中文文案改为 `messageKey + vars`，UI 按当前语言渲染反馈。
+- 覆盖模块：`portraitPreferences`、`cardSkinPreferences`、`effectSkinPreferences`、`themePreferences`、`aiPackPreferences`、`MenuShopOverlay`。
+- 德州主菜单补齐主要可见文案国际化：生涯导入/清空反馈、模式/局制/难度/商店摘要、奖励结构与盲注预览。
+- `MainMenu` 中可见的主路径硬编码中文大幅减少，恢复到 `t(language, key)` 驱动。
+- 追加 i18n key：主菜单摘要、会话文案、商店反馈、阶段文案、长玩法文案。
+- 修正 `holdemText.ts` 中带中文标点的未加引号对象键，恢复 build 通过。
+- 清理 `ControlsPanel` 的 lint 警告，去除 effect 中不稳定依赖。
+- 验证：`npm run lint`、`npm run test`（114/114）、`npm run build` 全通过。
+- 页面回归：`output/i18n-wrap-pass/hub.png`、`output/i18n-wrap-pass/shop.png`，`summary.json` 中 `errors = []`。
+- 仍建议后续继续清的尾项：斗地主/掼蛋桌内文案、SkillCoach 深层建议、部分 engine/state 中文 reason 在非德州 UI 场景中的最后残留。
+
+## 2026-03-14 - 牌面异常修复与皮肤差异化收尾
+- 牌面显示异常已重做：`CardView` 改为 3x7 网格布局渲染点数牌，去除旧的绝对定位 pip 方案，修复小尺寸下点数重叠错位。
+- 修复 `A` 与回退布局逻辑中的坐标类型错误，统一使用 `col/row`。
+- 新增 3 套卡牌皮肤并接入样式类：
+  - `onyx-regent`
+  - `mint-casino`
+  - `scarlet-ink`
+- 新增 3 套牌桌主题并补齐 CSS 变量映射：
+  - `aurora-frost`
+  - `royal-plum`
+  - `bronze-harbor`
+- 德州非聚焦底栏压缩：
+  - 默认宽度下调（时间线/态势）
+  - 列最小宽度下调，释放牌桌空间
+  - 行动时间线默认项从 16 调整为 12
+  - 底栏卡片内边距、标题字号、事件项高度继续收紧
+  - 底栏中教学长文案改为折叠显示（隐藏 teaching-note）避免挤压
+- 斗地主卡组件已挂载卡牌皮肤 class，保证跨模式卡面风格一致。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（114/114）
+  - `npm run build` 通过
+  - 本地自动截图回归：`.tmp-holdem-table.png`（无控制台报错）
+- 备注：本轮尝试调用图像生成类 skill 进行外部素材生成，但当前环境未配置 `OPENAI_API_KEY`，因此改为纯本地可运行的样式重构方案。
+
+## 2026-03-14 - 商店牌面预览 / 德州牌层级 / 斗地主布局压缩
+- 通用卡片组件 `CardView` 新增 `animated` 开关：
+  - 商店与静态预览改用 `animated={false}`，避免 hover 与筛选切换时入场动画造成牌层叠感。
+  - `StaticCardView` 改为直接复用 `CardView` 的静态渲染，保证所有场景的牌面结构一致。
+- 德州牌面层级修正：
+  - `card-view` 增加 `isolation: isolate`
+  - `card-front::before/::after` 明确置于底层
+  - `card-face-stage` / `card-pip-stage` / `face-card-figure` 提升到内容层
+  - 目的：解决皮肤扫光层、人物插画层、角标层之间的遮盖异常
+- 商店扑克牌皮肤预览重排：
+  - 左侧大预览与右侧商品卡都改为“两行结构”
+  - 第一行展示德州牌背 + 9/J/Q/K
+  - 第二行单独展示大小王
+  - 避免德州牌与斗地主王牌混排时高度不同造成的视觉碰撞
+- 斗地主显示优化：
+  - 顶栏、对手区、中区、日志区、底部手牌区统一压缩字号和内边距
+  - 中区布局改为更偏向出牌区，右侧日志栏缩窄
+  - 手牌、明牌区、当前牌面区的卡牌尺寸与间距同步下调
+  - 人物头像和底部人类操作区继续保留可读性，但不再挤压牌面
+- 测试服积分注入：
+  - `App.tsx` 在本地 `localhost/127.0.0.1 + import.meta.env.DEV` 下自动把生涯积分补到 `10000`
+  - 不影响正式构建与非本地环境
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（114/114）
+  - `npm run build` 通过
+  - 自定义截图：
+    - `.tmp-shop-cardskin-fix.png`
+    - `.tmp-ddz-fix.png`
+    - `.tmp-holdem-now.png`
+  - `$WEB_GAME_CLIENT`：
+    - `output/shop-holdem-ddz-wrap/shot-0.png`
+    - `output/shop-holdem-ddz-wrap/state-0.json`
+
+## 2026-03-14 - SVG 资产版 / Figma 设计板版双预览
+- 新增卡牌设计预览组件：
+  - `src/ui/components/CardSkinDesignPreview.tsx`
+  - 在商店“扑克牌皮肤”分类中可切换：
+    - `SVG 资产版`
+    - `Figma 设计板`
+- `SVG 资产版` 方向：
+  - 更偏正式落地资产
+  - 展示牌面、牌背、王牌、徽章与舞台式构图
+  - 适合继续强化为局内正式渲染资源
+- `Figma 设计板` 方向：
+  - 更偏设计协作视图
+  - 展示 Page / Tokens / Components / Cover Artboard
+  - 适合后续拿去做完整 Figma 体系、组件和皮肤规范
+- 商店头部新增预览模式切换按钮，多语言 key 已补齐。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（114/114）
+  - `npm run build` 通过
+  - 视觉截图：
+    - `.tmp-shop-svg-mode.png`
+    - `.tmp-shop-figma-mode.png`
+- 继续优化（本轮）：修复德州/商店数字牌角标与花色叠加异常。
+  - `CardView` 的点数牌改为 `SVG` 单一坐标系渲染，角标与中区花色统一在 60x88 基准牌面内布局，再由外层整体缩放。
+  - 修复关键根因：数字牌原先在切到 SVG 后仍保留旧的 HTML 角标，导致同一张牌出现双重角标与花色重叠；现仅脸牌保留 HTML 角标，数字牌完全由 SVG 负责。
+  - `card-view-surface` 继续承担整张牌的统一缩放，避免“外层缩了、内部元素没有同步缩”的情况。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（114/114）
+  - `npm run build` 通过
+  - 浏览器截图：
+    - `/Users/klaywei/Documents/local-holdem-neon/.tmp-shop-cardskins-fixed.png`
+    - `/Users/klaywei/Documents/local-holdem-neon/.tmp-holdem-table-fixed.png`
+- 多语言专项检查（zh-CN / en / ja / fr / de）：
+  - 运行时校验 `t(language, key)`，5 种语言均无缺失键回退到 key 本身。
+  - Playwright 逐语种检查 3 个核心场景：模式大厅、积分商店、德州配置页。
+  - 生成多语言审查产物：`output/lang-audit/*`。
+- 本轮修复：
+  - `App.tsx`：浏览器 `document.title` 跟随语言和当前主模式切换，不再固定中文标题。
+  - `DouDizhuCard.tsx` + `theme.css`：压缩商店紧凑大小王预览，移除紧凑 joker 的额外中心标签并缩小头像/主字，修复 5 种语言下统一存在的竖向溢出。
+- 复检结果：
+  - 5 语种标题已本地化：zh-CN=`霓虹牌桌俱乐部`，en/fr/de=`Neon Card Club`，ja=`ネオンカードクラブ`
+  - 商店紧凑大小王卡 `scrollHeight == clientHeight`，溢出已清除。
+- 2026-03-14 多语言深度审查与修复：
+  - 为 `GameConfig / DdzConfig / GdConfig` 传入 `language`，补齐菜单启动类型。
+  - 商店与菜单素材元数据本地化：`playerPortraits/cardSkins/effectSkins/tableThemes/aiPacks` 支持按语言返回；非中文先用英文 fallback，避免中英日法德混排。
+  - 随机 AI 名字与 DDZ/GD 人类名支持非中文语言下的英文回退，清除桌面上最突兀的中文名字残留。
+  - `DouDizhuTable` / `GuandanTable` 增补语言化显示，覆盖顶栏、状态条、按钮、结算和部分运行时文本翻译。
+  - `i18n.t()` 回退策略改为：非中文语言缺 key 时先回退英文，再回退中文，解决法语/德语/日语页面偶发中文漏出。
+  - 验证：`npm run build`、`npm run lint`、`npm run test` 全部通过；Playwright 实机巡检确认 `en/fr/de` 的 hub / hold’em menu / ddz menu / gd menu 不再混入中文；日语页面的 CJK 统计仍会命中日文汉字词，但不再出现中文 fallback 片段。
+
+2026-03-14
+- 做了一轮“界面文案瘦身 + 弹窗/表格统一”清理，优先去掉与玩法无关的长说明，保留核心状态与操作信息。
+- 主要改动：
+  - 德州底栏操作面板标题下辅助说明移除，减少非玩法文本。
+  - 应用说明弹窗改成更短的本地版说明文案。
+  - 德州顶部详情弹窗统一中英标签（音效/动效/主题/重开、锦标赛字段）。
+  - 回放页去掉多余 Extras=None，压缩标题与控制按钮文案。
+  - 斗地主/掼蛋历史空状态与历史详情标题改短。
+  - 模式大厅、德州配置页、商店页删除多余副标题，并把保留文案缩短。
+  - 技巧教学从最多 5 条压到 3 条，并统一成短句提示。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `npm run test` 通过（114/114）
+  - Playwright/截图检查产物：
+    - `output/ui-copy-cleanup-hub/shot-0.png`
+    - `output/ui-copy-cleanup-pages/hub.png`
+    - `output/ui-copy-cleanup-pages/holdem-menu.png`
+    - `output/ui-copy-cleanup-pages/holdem-table.png`
+    - `output/ui-copy-cleanup-pages/ddz-table.png`
+    - `output/ui-copy-cleanup-pages/guandan-menu.png`
+- 后续可继续：
+  - 再压一轮德州牌桌顶部 pill 文案，把“玩法/局制/AI/盲注”继续做成更短标签。
+  - 对斗地主/掼蛋的中区状态文案做二次精简，减少“最近/本地保留/提示”类辅助字样。
+- 继续优化一轮 UI 与斗地主提示：
+  - 德州座位卡 AI 姓名改为更完整显示：非专注模式默认不再显示人物副标题，姓名支持两行折行；同时微增 seat 宽度。
+  - 专注模式底部三按钮与时间线/态势浮层整体右移，避免压住主角手牌区。
+  - 斗地主出牌阶段改成单行工具带：选牌状态 / 目标 / 推荐出牌 / 操作按钮合并，压缩底部高度。
+  - 斗地主牌型提示去重：三带一、三带二等附带型现在只保留一个代表方案，提示和推荐不会再把所有附带单张/对子全部列出来。
+  - 扑克牌脸牌人物不再只是换色：按皮肤家族增加不同的 motif（霓虹、歌剧、玉饰、假面、落霞、冰晶、街机等），并按积分档位增加额外华丽层级。
+- 新增测试：`tests/doudizhuRules.test.ts` 覆盖三带一/三带对去重。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - `$WEB_GAME_CLIENT` 截图：`output/ui-followup-webclient/shot-0.png`
+  - 实拍截图：
+    - `output/ui-followup-pages/holdem-table.png`
+    - `output/ui-followup-pages/holdem-focus.png`
+    - `output/ui-followup-pages/ddz-play.png`
+    - `output/ui-followup-pages/shop-card-skins.png`
+- 继续做两项收尾：
+  - 德州顶部 HUD 再压缩一轮：顶部 pill 改成短标签（如标准 / 现 / 20/40 / AI 标准 / 池 60），按钮改成更短文案（信息 / 回放 / 下手 / 菜单），并同步缩小字号、间距与内边距。
+  - 高价牌面人物继续角色化：在原有 motif/tier 基础上，为 J/Q/K/Joker 增加不同的角色装饰（王冠宝石、耳饰、胡须、披肩、权杖、铃帽等），让同一皮肤内的脸牌区别更明显。
+- 验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - 截图：
+    - `output/ui-final-pass/holdem-hud-tight.png`
+    - `output/ui-final-pass/shop-skin-figures.png`
+2026-03-15
+- 继续完成“德州顶部 HUD 压缩 + 高价牌面差异增强”后的语言审查收尾，重点检查 `hub / shop / hold'em menu / hold'em table / info sheet / replay center` 在 `zh-CN/en/ja/fr/de` 下是否混用。
+- 本轮代码收口：
+  - `TopHud` 再做一轮短标签本地化与压缩：不同语言的 `信息/回放/下手/菜单`、`现/赛`、`池/Pot`、锦标赛详情字段、音效/动效/主题/重开` 全部改为统一字典驱动，避免 `isZh ? ... : ...` 带来的中英混用。
+  - `theme.css` 继续压缩顶部 HUD 与 stage strip 的 padding/gap/font-size，让第二行占高再降一档。
+  - `LegalOverlay` 改为 5 语种本地 copy，不再固定中文。
+  - `holdemText` 新增对“直达某阶段”“诈唬成功线”“未摊牌收池建议复盘”“回放快照缺失”等回放/关键节点提示的翻译，避免 replay key moment note 在非中文下回落中文。
+  - `replayCenterShared` / `ReplaySessionArchivePanel` 补齐关键节点 label/note/stage 的翻译显示，修复会话视图中的 quick jump 中文残留。
+  - `TableEffectsLayer` 加入 `language`，把“筹码入池 / 翻牌落桌 / 摊牌对决”等桌面特效文案本地化。
+  - `handEngine.createPlayers` 按 `config.language` 生成人类玩家名称，避免德州新开局仍固定显示“你”。
+  - `i18n/index.ts` 增加运行时 override：补齐 `ja/fr/de` 在 `modeShort/stage/shop feedback`、Replay 首屏筛选与统计、Hold'em 常用动作/盲注文案上的缺口；同时补加 `replay.onlyHeroWins / replay.onlyHeroNonWins`，修复历史筛选中直接显示 key 的问题。
+  - `playerPortraits` 为人类默认头像在非中文下提供非中文 sigil，减少桌面上“你 + You/Vous/Du/あなた”叠加的混乱感。
+- 验证：
+  - `npm run build` 通过
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `$WEB_GAME_CLIENT` 通过，产物：`output/web-game-lang-pass-final/`
+  - Playwright 五语种截图巡检：`output/lang-audit-pass-5/`
+    - 重点复检 `ja/fr/de` 的 hold'em table / history 首屏，确认此前的 `replay.onlyHeroWins`、`筹码入池`、`Blind {amount}`、中文法务弹窗等问题已修正。
+- 当前仍保留的少量“非母语文本”主要是扑克专有名词（如 `Texas Hold'em / PLO / Replay / Board`）与角色化称号/符号，不再是随机中文 fallback；后续若要做成完全母语化，可继续把扑克专有名词也按语言风格细化一遍。
+- 继续收口（本轮）：德州底栏重排 + 商店 SVG-only + 桌面材质/特效差异化。
+  - `ControlsPanel` 重构为更紧凑的顶栏结构：动作按钮与自动行动选择移到同层顶部；加注确认按钮并入主动作排，滑杆留在下一行，策略卡进一步压缩。
+  - `TableScene` 底栏布局默认值更新为更紧凑的 `layout.v3`，行动时间线默认 248、牌桌态势默认 228，并把底栏时间线条目回退到 10 条，给牌桌更多横向空间。
+  - `CardSkinDesignPreview` / `MenuShopOverlay` 去掉 Figma 预览入口，商店扑克牌皮肤只保留 SVG 方案；截图巡检确认 `summary.json` 中 `figmaVisible=false`。
+  - `theme.css` 新增桌面材质变量层：`shell/felt/ring/ornament` 四类纹理，按主题分别补充会所金纹、经典绿毡、紫域电路、月白颗粒、皇家暗纹、古铜拉丝等差异，不再只是换色；商店牌桌主题预览复用同一套纹理变量。
+  - `theme.css` 新增特效皮肤 motif 层：为 `club-classic / neon-comet / ember-strike / lotus-dream / prism-pulse` 补充不同的伪元素图案、波纹线型与筹码形态，商店特效预览和牌桌桌面特效共用同一套视觉变量。
+  - 底栏两侧模块继续压缩：行动时间线、态势面板、切换按钮、列表间距、字体和 padding 继续收紧。
+- 本轮验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - `$WEB_GAME_CLIENT` 回归产物：`output/web-game-round-svg-materials/`
+  - 手工 Playwright 截图巡检：`output/ui-round-svg-materials/`
+    - `shop-cardskin-svg.png`：确认仅 SVG，无 Figma 切换
+    - `shop-table-theme.png`：确认牌桌主题预览有材质/花纹差异
+    - `shop-effect-skin.png`：确认特效皮肤 motif 差异可见
+    - `holdem-table-controls-v2.png`：确认自动行动已移动到操作区顶部并与动作区同层，底部三模块整体更紧凑
+- 2026-03-15 本轮继续优化：斗地主桌面布局 + 德州非专注头像 + 结算节奏。
+  - 斗地主：
+    - 对手出牌区改到人物卡右侧，空白区被用作已出牌展示。
+    - 对手已出牌与中区当前牌加入花色显示（`DouDizhuCard` 新增 `showSuitLabel`）。
+    - 中区/倍率区/日志区继续压缩：`ddz-banner`、`ddz-multiplier-panel`、`ddz-log-panel` 缩小 padding/gap/font，保证单屏更稳。
+  - 德州：
+    - `SeatPanel` 非专注模式头像尺寸再上调一档：dense/compact -> `seat-lg`，balanced/default -> `seat-xl`。
+    - `theme.css` 提升 `size-seat/seat-lg/seat-xl` 的 portrait scale，非专注桌面头像可读性明显提升。
+    - 结算弹窗动画进一步提速，冠军补充动画的 delay/duration 再收紧。
+    - AI 思考节奏按街道下调：preflop/flop/turn/river/showdown/settlement 使用更短 delay profile，结算更快出现。
+    - 自动行动延迟从 `180ms` 调整为 `140ms`。
+  - 斗地主控制器：AI/托管推进节奏从 `780/560ms` 下调到 `580/420ms`，并同步 `advanceTime` 步长。
+- 当前验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - `$WEB_GAME_CLIENT` 已跑：`output/web-game-round-final-pass/`
+  - 自定义回归截图：
+    - `output/ui-round-final-pass/holdem-table.png`
+    - `output/ui-round-final-pass/holdem-menu.png`
+    - `output/ddz-ui-check/ddz-play.png`
+    - `output/ddz-ui-check/ddz-menu.png`
+- 观察结论：
+  - 德州非专注模式头像已显著放大，顶部与左右 AI 头像可识别。
+  - 斗地主对手已出牌成功落到右侧，花色可见，中区与右栏均能在 1440x1024 单屏完整显示。
+- 2026-03-15 本轮继续增强：结算人物卡放大 + 德州非专注模式卡片化。
+  - `PortraitSpotlightCard`：
+    - 新增 `featured` 模式。
+    - 结算/冠军/斗地主结算的 spotlight 统一改为 `variant='panel'` 的卡片人物，不再使用圆头像。
+    - featured 模式使用更大的 panel 角色卡，并扩大 copy 区和卡片间距。
+  - `TableScene`：
+    - 德州结算区 `settlementSpotlights`、锦标赛冠军卡、次级 spotlight 全部启用 `featured`。
+    - 非专注模式新增 `tableCharacterCards`：在非 focus 且 `seatDensity !== 'dense'` 时，座位卡默认走人物卡片布局；dense 9-10 人桌仍保留紧凑方案防止挤压。
+  - `DouDizhuTable`：结算人物卡启用 `featured`，结算页头像升级为放大版角色卡。
+  - `SeatPanel`：
+    - 普通桌面的人物卡模式隐藏 AI 副标题与次级 detail，把空间让给名字和核心信息。
+    - 进一步提升非专注头像可读性。
+  - `theme.css`：
+    - `settlement-portrait-strip` 扩大到 `minmax(248px, 1fr)`。
+    - `portrait-spotlight-card.featured` 新增更大的高度、padding 和文字层级。
+- 当前验证补充：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - `$WEB_GAME_CLIENT`：`output/web-game-round-cardified/`
+  - 关键截图：
+    - `output/ui-round-cardified/holdem-table-cardified.png`
+    - `output/ui-round-cardified/ddz-settlement-cardified.png`
+- 观察结论：
+  - 结算页已明显改为放大版人物卡片，不再是单纯头像。
+  - 德州普通桌面 6 人桌已切为卡片式人物座位，名字和状态可读性优于上一版。
+- 2026-03-15 本轮继续收尾：10 人桌微型人物卡 + 掼蛋结算统一。
+  - 德州普通桌面：
+    - `TableScene` 的非专注模式统一启用人物卡布局；`seat-density-dense` 单独收成“微型人物卡”版本。
+    - `theme.css` 中 dense 人物卡宽高收窄到 `150x104` 左右，并压缩 portrait wrap / metric / badges / footer。
+    - 实测 10 人桌已进入微型人物卡布局，未出现明显撞位。
+  - 掼蛋结算：
+    - `GuandanTable` 引入 `PortraitSpotlightCard`，新增结算人物卡条带 `gd-settlement-portrait-strip`。
+    - 结算按钮文案统一为“确认继续 / Confirm & Continue”。
+    - 保留原有结算网格，补充上方人物卡结果层，风格与德州/斗地主保持一致。
+- 本轮验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - `$WEB_GAME_CLIENT`：`output/web-game-round-next-pass/`
+  - 关键截图：
+    - `output/ui-round-10p-gd/holdem-10p.png`
+    - `output/ui-round-10p-gd/guandan-settlement.png`
+- 观察结论：
+  - 10 人桌普通模式已切入微型人物卡方案，头像和姓名辨识度比旧版明显更高。
+  - 掼蛋结算页已统一到放大人物卡体系，三种玩法的结算风格基本一致。
+- 继续优化（本轮）：非专注德州稳画面 + 商店 AI/特效层级化 + 模式命名收口。
+  - 德州非专注模式：
+    - `PlayerPortrait` 新增 `motionProfile`，牌桌座位统一使用 `stable` 档，关闭头像内部漂移/闪烁/粒子动画。
+    - `TableEffectsLayer` 新增 `stabilized`，非专注模式关闭 pot burst 与环境漂浮球，保留更稳的牌桌演出。
+    - `pot-display` 在非专注模式改为静态容器，不再按底池变化触发缩放动画。
+    - 顶部阶段条加固定宽度（阶段 / 模式 / 当前行动者），避免 AI 名字变化引起横向 reflow。
+    - 非专注模式下关闭 `table-felt` 环形脉冲与扫光动画，减少“左右晃”的视觉错觉。
+  - 商店：
+    - 本地 localhost / 127.0.0.1 预览统一自动补足 10000 积分，不再依赖 `import.meta.env.DEV`。
+    - 去掉大厅与德州配置页中的“已解锁”摘要块，主界面更简洁。
+    - AI 形象包加入 tier 分层（starter / club / premium / signature / collector），高价包增加专属边饰、徽章、金纹 / 电路线条，不再只是换色。
+    - 已接入新增 AI 包：`皇家歌剧`、`信号疾行`，并同步到实际德州 AI 名称 / 人物 / 风格分配。
+    - 已接入新增特效：`鎏金礼炮`、`虚空印记`，补齐 `fx-style-gilded-burst` / `fx-style-void-sigil` 样式与商店 sigil 结构。
+    - 特效预览加入 tier 差异：低阶更简洁，高阶加入 sigil / 礼炮 / 裂隙纹样层。
+  - 命名：
+    - 统一模式入口品牌名：`冠军桌·德州` / `抢地主·夜场` / `升级场·掼蛋`，并同步到 `main.title` / `top.title` 与多语言入口标题。
+- 本轮验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - `$WEB_GAME_CLIENT` 运行完成：
+    - `output/web-game-shop-pass`
+    - `output/web-game-holdem-menu-pass`
+  - 定向截图：
+    - `output/ui-round-stable-pass/holdem-table.png`
+    - `output/ui-round-shop-pass/shop-ai-pack.png`
+    - `output/ui-round-shop-pass/shop-effect-skin.png`
+  - 横向抖动测量：`output/jitter-check/holdem-horizontal-summary-v2.json`
+    - `tableStage / stageActor / potDisplay / tableWrap / seat anchors` 的 left/width delta 均为 `0`
+
+TODO / Suggestions for next agent:
+- 如果用户还感知到“抖”，优先做录像级检查：连续帧录屏对比，而不是只看静态 DOM box；当前布局测量已经稳定，剩余更可能是视觉动效体感问题。
+- 可继续给高价 AI 包加独有名字前缀 / 卡面徽记，让 `皇家歌剧`、`信号疾行` 的稀有度再拉开一档。
+- 可继续给 `鎏金礼炮` / `虚空印记` 补实际桌面上的独有粒子形状（礼花碎屑 / 六边印章），让实战特效和商店预览更一致。
+- iPad 真机调试准备（本轮）：
+  - 已确认设备连接：`iPad (5) (26.2) (00008122-000A68E10E33801C)`
+  - 已执行 `npm run mobile:ios:sync`，最新 Web 产物已同步到 iOS 工程。
+  - 已确认工程存在并自动签名已配置：`DEVELOPMENT_TEAM = 4N4YT764RZ`，bundle id 为 `com.klaywei.neoncardclub`。
+  - 已执行 `xcodebuild -prepareDeviceSupport`，设备支持拷贝与解包完成。
+  - 当前阻塞：CLI 构建仍报 `iOS 26.2 is not installed. Please download and install the platform from Xcode > Settings > Components.`
+  - 已用 `open -a Xcode ios/App/App.xcodeproj` 打开工程，后续更适合直接在 Xcode UI 内完成平台组件刷新和首次真机运行。
+
+TODO / Suggestions for next agent:
+- 先在 Xcode 里确认 `Settings > Components` 中 iOS 平台组件是否完整，并等待 Xcode 首次设备处理完成；必要时重启 Xcode 后再试真机 Run。
+- 若 Xcode UI 可以识别 iPad 但 Run 仍失败，再复查 `Signing & Capabilities` 是否显示可用开发证书与自动生成的开发 profile。
+- 2026-03-15 iPad 版式收口（本轮）：
+  - 全局：
+    - `App.tsx` 中移除了 iPad 顶部安装建议，仅保留竖屏提示层；横屏下不再多占顶部空间。
+    - `theme.css` 中对 iPad 的菜单、HUD、信息弹层、德州底部 dock 做了统一压缩，目标是“单屏优先 + 主牌桌优先”。
+    - `capture-app-store-ipad.mjs` 的入口选择器更新到当前模式命名，方便继续做 iPad 回归截图。
+  - 德州：
+    - `TopHud.tsx` 在 iPad 下不再显示横幅说明句，只保留标题、核心 pill 和顶部动作按钮。
+    - iPad 专用 HUD / stage / bottom dock padding、字号、最大高度进一步压缩；非专注模式底部保留更薄的操作条。
+    - 非专注模式主牌桌底部预留从 `96px` 收到 `82px`，桌面主体空间回升。
+  - 斗地主：
+    - `DouDizhuTable.tsx` 在 iPad 下隐藏顶部 banner、右侧时间线/战报面板、中心会话统计条，把局史入口挪进 `更多` 信息弹层。
+    - `更多` 弹层补了最近行动摘要和“查看局史”按钮，保证压缩布局后功能仍可达。
+    - 顶部 summary chip、对手卡、中心状态条、倍率面板、下方操作区继续压缩，整体更接近单屏。
+  - 掼蛋：
+    - `GuandanTable.tsx` 在 iPad 下隐藏 banner、级牌条、队伍进度条、右侧战报栏。
+    - `更多` 弹层补了最近战报摘要和本局高能摘要，替代右侧常驻信息区。
+    - 同步修复了 iPad 信息弹层中原先残留的中文固定标题，至少英/中场景下不再混用。
+- 本轮验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - iPad 浏览器截图回归已完成：
+    - `output/app-store-ipad-13/01-menu-hub.png`
+    - `output/app-store-ipad-13/02-holdem-focus.png`
+    - `output/app-store-ipad-13/03-doudizhu-table.png`
+    - `output/app-store-ipad-13/04-guandan-table.png`
+    - `output/app-store-ipad-13/05-guandan-progress.png`
+- 观察结论：
+  - iPad 顶部安装建议已完全消失。
+  - 模式大厅、德州、斗地主、掼蛋都能在当前横屏尺寸下更稳定地保持单屏，不再靠常驻边栏挤占主对局区。
+  - 斗地主/掼蛋的主要战况信息已从常驻侧栏转移到 `更多` 弹层，主视图更清爽，但功能入口仍保留。
+- 2026-03-16 iPad 深度收口（本轮）：
+  - 德州：
+    - `TableScene.tsx`：
+      - iPad 下无论专注/非专注都统一走底部模块条，专注模式不再在牌桌内弹整块侧板。
+      - 修掉了 iPad 专注模式仍然附带 `focus-controls-open/focus-controls-right` 预留边距的问题；右侧黑空白已消失。
+      - iPad 座位锚点统一追加 `seatScaleMultiplier`，专注/非专注都进一步缩小一档。
+    - `SeatPanel.tsx`：
+      - iPad 下人物卡和手牌尺寸改走更小档位；角色副标题和 focus detail 在 iPad 场景进一步收掉。
+    - `theme.css`：
+      - iPad 顶部 HUD、阶段条、底部模块再次压缩。
+      - iPad 非专注人物卡缩到约 `126~154px` 宽区间，专注人物卡缩到约 `142~158px`。
+      - iPad 专注模式底部抽屉高度继续收窄，控制区不再压住公共牌/手牌。
+  - 大厅 / 主页面：
+    - 不再依赖 iPad 固定底部工具条承载语言与商店；改为直接嵌入 `GameHubMenu` 头部工具区。
+    - `GameHubMenu.tsx` 新增 `menuTools` 槽位，`App.tsx` 在 iPad 下把 `LanguageSwitcher` 直接塞到标题右侧，并与商店按钮并排。
+    - 这样大厅不再需要额外底部入口，也更接近单屏无滚动。
+  - 回归脚本：
+    - `capture-app-store-ipad.mjs` 新增两张德州截图：
+      - 普通模式
+      - 专注模式且已打开操作面板
+    - 并更新了专注按钮文案匹配（`专注牌桌 / 退出专注`）。
+- 本轮验证：
+  - `npm run lint` 通过
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - 按 skill 要求已运行 `$WEB_GAME_CLIENT`：
+    - `output/web-game-ipad-hub-v3/`
+  - iPad 浏览器截图回归：
+    - `output/app-store-ipad-13/01-menu-hub.png`
+    - `output/app-store-ipad-13/02-holdem-table.png`
+    - `output/app-store-ipad-13/03-holdem-focus-controls.png`
+- 观察结论：
+  - 德州 iPad 专注模式的右侧黑边和遮挡已消失，操作区改成底部抽屉后仍保留完整牌桌。
+  - 德州非专注模式人物卡明显缩小，公共牌区和中心区域更完整。
+  - 主页面的语言切换与商店入口已稳定出现在标题右侧，不再需要依赖屏幕下方入口。
+
+2026-03-16
+- iPad 深度排版优化（本轮，按实机截图定点收口）：
+  - 德州 Hold'em：
+    - `TableScene` 新增 `ipad-holdem-compact` / `ipad-panel-open` 状态类，iPad 下进一步缩小座位卡缩放倍率。
+    - iPad 专用样式将公共牌区上移、主底池与边池改为靠右独立定位，避免与公共牌重叠。
+    - 专注模式底部抽屉打开时，进一步降低牌桌最小高度，给 `操作面板 / 时间线 / 态势` 留出可视空间。
+    - `SeatPanel` 的 iPad 牌尺寸与头像尺寸继续收紧，减少非专注和专注两种模式的拥挤感。
+  - 德州菜单：
+    - iPad 横屏下将配置页压成真正单屏：四列设置网格、六列续局信息、缩小标题与资产摘要，不再依赖纵向滚动。
+  - 斗地主：
+    - iPad 下对手区改成双列更紧凑卡片，缩小头像、状态胶囊和右侧出牌/背牌堆尺寸，修复头像/名字/出牌堆互相压住的问题。
+    - 压缩人类操作区和当前出牌区，保留完整手牌显示的同时减少上下拥挤。
+  - 掼蛋：
+    - iPad 下继续压缩对手卡、已出牌区和人类操作区，降低头像与牌堆尺寸，修复顶部对手卡信息与牌面重叠。
+  - 工具：
+    - `scripts/capture-app-store-ipad.mjs` 支持通过 `VIEWPORT_WIDTH/VIEWPORT_HEIGHT` 注入调试尺寸，并新增德州菜单截图，便于用接近真机的 1194x834 视口回归。
+- 本轮验证：
+  - `npm run lint` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run build` 通过
+  - `develop-web-game` skill 客户端已运行：`output/web-game-ipad-reflow-check`
+  - iPad 专项截图（1194x834）已回归并人工检查：
+    - `output/app-store-ipad-13/02-holdem-menu.png`
+    - `output/app-store-ipad-13/03-holdem-table.png`
+    - `output/app-store-ipad-13/04-holdem-focus-controls.png`
+    - `output/app-store-ipad-13/05-doudizhu-table.png`
+    - `output/app-store-ipad-13/06-guandan-table.png`
+- 结论：
+  - 德州底池与公共牌不再重叠。
+  - 德州菜单在 iPad 横屏下可以单屏显示完整主要设置。
+  - 斗地主 / 掼蛋的 iPad 对手卡重叠问题已经明显收口。
+- TODO / Suggestions for next agent:
+  - 如果用户继续按真机截图微调，优先盯德州专注模式“轮到你”时的底部下注抽屉，确认完整动作按钮在 1194x834 下是否都无需内滚动。
+  - 如果用户给出更小尺寸 iPad（如 1024 宽）截图，再补一套 `data-device-width` 或更窄横屏断点。
+
+2026-03-16
+- iPad 历史 / 回放 / 掼蛋 / 德州底部切换条专项收口（本轮）：
+  - 历史 / 回放：
+    - `ReplayCareerPanel.tsx`
+      - iPad 下“本地结果中心”改成默认紧凑态，仅先展示核心 KPI；玩法拆分 / 局制分布 / 最近难度 / 最近完成会话折叠到二级内容，通过通用 `展开 / 收起` 按钮进入。
+    - `ReplayViewer.tsx`
+      - iPad 下“筹码变化 / 关键节点 / 时间线筛选”改成默认摘要态，先保留当前回放、焦点人物和事件列表，把非首屏信息折叠到二级层。
+      - 保留展开入口，展开后仍可查看完整 chips flow、关键节点列表和时间线筛选。
+    - `theme.css`
+      - iPad 专用样式压缩 `history-screen / replay-screen` 内边距、顶部头区、统计卡、会话详情卡。
+      - `career-center-grid` 改成五列 KPI，紧凑态首屏直接看到“本地结果中心”核心数据。
+      - `replay-main` 进一步压缩 table felt、控制条、focus card、insights 区块，右侧时间线首屏优先展示摘要与事件列表。
+  - 掼蛋：
+    - `GuandanTable.tsx`
+      - iPad 下“本局高能”和“当前出牌区”改用更短的空态文案，减少大块留白。
+    - `theme.css`
+      - `gd-center-zone` 在 iPad 下改成 `状态条全宽 + 高能/当前出牌双列` 布局，减少原先右上大块深色空场。
+      - 压缩高能卡与当前出牌卡的空态高度，让中部战况信息更贴近真实出牌。
+  - 德州：
+    - `theme.css`
+      - iPad 底部 `focus-dock` 改成更明显的分段控件风格，增大热区、强化激活态高亮和按下反馈。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4174 npm run appstore:shots:ipad` 通过
+  - 新的 iPad 历史 / 回放专项截图：
+    - `output/ipad-history-replay-audit-v2/history-sessions.png`
+    - `output/ipad-history-replay-audit-v2/history-sessions-expanded.png`
+    - `output/ipad-history-replay-audit-v2/replay-viewer.png`
+    - `output/ipad-history-replay-audit-v2/replay-viewer-expanded.png`
+- 结论：
+  - iPad `会话视图` 默认态已经回到单屏可读，展开后再进入更深的数据层。
+  - iPad `回放页` 右栏从“全部堆满”改成了“摘要优先 + 时间线优先”，首屏信息层级更清晰。
+  - 掼蛋中部信息区的空场感明显减弱，德州底部切换条激活态更像可点的大热区。
+- TODO / Suggestions for next agent:
+  - 如果用户继续深抠 iPad，可补一轮 `历史回放` 多语言截图，重点看 `fr / de / ja` 在“展开态”下的长文案密度。
+  - 如果用户想继续做平板最佳体验，可考虑给回放页加“时间线 / 洞察”双模式切换，而不只是折叠摘要。
+
+2026-03-16
+- iPad 优先级继续收口（回放双模式 / 掼蛋顶部工具 / 校验脚本修复，本轮）：
+  - 回放：
+    - `ReplayViewer.tsx`
+      - iPad 右栏正式改成 `行动时间线 / 牌桌态势` 双模式切换，保留桌面端双栏信息密度，同时让 iPad 首屏只承载一类核心内容。
+      - 为双模式补充切换状态、tab 语义、pane 容器，避免先前“摘要折叠很多，但首屏仍然偏满”的问题。
+    - `theme.css`
+      - 新增 `replay-sidebar-head / replay-view-switch / replay-insight-pane / replay-timeline-pane` 样式。
+      - 强化切换按钮热区，并给回放右栏标题、小字说明、时间线条目补 `overflow-wrap`，进一步降低长文案错位风险。
+  - 掼蛋：
+    - `GuandanTable.tsx`
+      - iPad 顶部工具从 `更多 / 单托 / 整托 / 暂停 / 重开 / 大厅` 压成 `更多 / 暂停 / 大厅`。
+      - AI 难度、托管切换、重开下沉到 `IpadInfoSheet`，减少顶部拥堵。
+      - 顶部 iPad 摘要 chip 改成真正可显示的 `局数 / 当前轮到 / 级牌`，不再只存在于 DOM 里。
+    - `theme.css`
+      - 新增 `ipad-info-control-card / ipad-info-select-row / ipad-info-segmented` 等样式，保证抽屉里的控制项在 iPad 下也是大热区、低密度。
+  - 通用文字修正：
+    - 修正 iPad 选择器：原来 `.ddz-topbar > div:first-child span` / `.gd-topbar > div:first-child span` 会把 `ipad-mode-summary` 的 chip 一并隐藏；现在只隐藏首行说明文案，不再误伤嵌套摘要。
+    - 顶部 copy、信息抽屉、回放右栏补充 `overflow-wrap`，用于兜住长人名、长标签和多语言文案。
+  - 校验脚本：
+    - `scripts/validate-ipad-ui-pass.mjs`
+      - 对齐当前 UI 文案和流程，移除对旧“商店弹层”按钮的依赖。
+      - 改成验证当前 hold'em 菜单、德州信息抽屉、掼蛋信息抽屉，并新增对抽屉控制项的 overflow 扫描。
+      - 修复从德州菜单回到 hub、再进入斗地主 / 掼蛋的路径，使整条 iPad 校验链路重新可用。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4175 npm run appstore:shots:ipad` 通过
+  - `APP_URL=http://127.0.0.1:4175 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass/summary.json`
+    - `ddzOverflowCount = 0`
+    - `gdInfoOverflowCount = 0`
+    - `gdOverflowCount = 0`
+  - 自定义 iPad 历史 / 回放专项巡检通过：
+    - `output/ipad-history-replay-audit-v3/history-hands.png`
+    - `output/ipad-history-replay-audit-v3/history-sessions.png`
+    - `output/ipad-history-replay-audit-v3/history-sessions-expanded.png`
+    - `output/ipad-history-replay-audit-v3/replay-timeline.png`
+    - `output/ipad-history-replay-audit-v3/replay-insights.png`
+    - `output/ipad-history-replay-audit-v3/summary.json`
+    - 各区块 overflow 计数均为 0，且 `replaySwitchCount = 2`
+  - `develop-web-game` 客户端已补跑：
+    - `output/web-game-pad-priority-pass/shot-0.png`
+    - `output/web-game-pad-priority-pass/state-0.json`
+- 结论：
+  - iPad 回放页双模式已经成形，`行动时间线 / 牌桌态势` 能稳定切换，不再只能靠折叠块勉强压密度。
+  - 掼蛋顶部工具区明显减负，低频按钮成功下沉到抽屉，信息区文字也没有新增裁切或错位。
+  - `validate-ipad-ui-pass.mjs` 已恢复可复用状态，后续继续做 PAD 收口时可以直接当回归基线。
+- TODO / Suggestions for next agent:
+  - 如果用户继续做“平板最佳体验”，下一优先级建议转向 `10.2 / 11 寸更窄横屏`，补一轮真图，确认德州回放右栏与掼蛋信息抽屉在更窄宽度下是否仍然无需额外滚动。
+  - 多语言方面，当前主路径 `zh-CN` 已稳定；如果继续深抠，可针对 `fr / de / ja` 的历史展开态与回放右栏再补一轮专项截图。
+
+2026-03-16
+- iPad 窄宽度与多语言巡检补完（本轮）：
+  - 掼蛋信息抽屉：
+    - `GuandanTable.tsx`
+      - 修复 iPad 信息抽屉摘要在对局未结束时出现 `第 N 局 · null` 的问题。
+      - 现在优先显示 `第 N 局 · 当前轮到 X`，若本局已有胜负结论再回退到 `第 N 局 · 胜负摘要`。
+      - 顺手抽出 `openingLeadName`，避免顶部 copy 和抽屉内“先手位”分别重复查询。
+  - iPad 校验脚本：
+    - `scripts/validate-ipad-ui-pass.mjs`
+      - 修正德州 HUD 行数统计：原先会把 `display:none` 的 pill 一并算进 `rows`，导致 10.2 / 11 寸出现“假两行”。
+      - HUD 现在只统计可见 pill，并额外记录 `hiddenPillCount`。
+      - 新增 `findLiteralLeaks`，会在德州/斗地主/掼蛋/iPad 抽屉中扫描可见文字里的 `null / undefined` 泄漏。
+      - `summary.json` 新增 `holdemTextLeakCount / gdInfoSummary / gdInfoTextLeakCount` 等字段，后续继续做 PAD 收口时更容易发现“没溢出但文案错了”的问题。
+  - 多语言历史 / 回放巡检：
+    - 新增 `scripts/audit-ipad-history-replay-languages.mjs`
+      - 以 `1024x768` iPad 视口跑 `fr / de / ja`。
+      - 路径是真实用户流：切语言 -> 德州打一手 -> 进历史中心 -> 切会话视图 -> 展开本地结果中心 -> 回到手牌视图并打开回放 -> 依次截图 `时间线 / 牌桌态势`。
+      - 产物输出到 `output/ipad-history-replay-language-audit/<lang>/`，并汇总到 `summary.json`。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4175/ node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass/summary.json`
+    - 德州 HUD：`rows = 1`、`hiddenPillCount = 1`
+    - `holdemTextLeakCount = 0`
+    - `gdInfoSummary = 第 1 局 · 轮到 你`
+    - `gdInfoTextLeakCount = 0`
+  - `APP_URL=http://127.0.0.1:4175/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass-10p2/summary.json`
+    - 德州 HUD：`rows = 1`
+    - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+    - `holdemTextLeakCount / ddzTextLeakCount / gdInfoTextLeakCount / gdTextLeakCount = 0`
+  - `APP_URL=http://127.0.0.1:4175/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 三种语言的 `historyHands / historySessions / historySessionsExpanded / replayTimeline / replayInsights` overflow 均为 `0`
+    - `fr / de / ja` 三种语言的 literal leak 计数也均为 `0`
+  - `APP_URL=http://127.0.0.1:4175/ npm run appstore:shots:ipad` 通过
+    - 新截图产物已更新：`output/app-store-ipad-13/summary.json`
+- 结论：
+  - 掼蛋 iPad 抽屉的“文字内容错误”问题已修掉，且后续已经有脚本兜底。
+  - 10.2 寸 iPad 下德州 HUD 实际仍是单行，之前的“2 行”属于脚本误报，不再作为后续优化依据。
+  - `fr / de / ja` 的历史中心展开态和回放双模式在 `1024x768` 下都没发现真实裁切、溢出或 `null/undefined` 泄漏。
+- TODO / Suggestions for next agent:
+  - 如果继续追求“平板最佳体验”，下一个更值的方向不是修 bug，而是做视觉层级：`本地结果中心` 展开态在 10.2 寸下仍偏长，可考虑进一步改成分段抽屉或二级页，而不只是整页下推。
+  - 掼蛋信息抽屉虽然已无错误文案和溢出，但 10.2 寸下底部控制区视觉上仍偏满；后续可考虑把 `AI 策略 / 托管控制 / 重开` 再做成更轻的两段结构。
+
+2026-03-16
+- iPad 抽屉可见性与结果中心分段收口（本轮）：
+  - 本地结果中心：
+    - `ReplayCareerPanel.tsx`
+      - iPad 展开态改成分段浏览，不再把“按模式 / 赛制分布 / 难度样本 / 最近对局”整段一次性堆成长页面。
+      - 新增 `Modes / Formats / Difficulty / Recent` 分段切换，并在没有最近对局时自动回退到 `Modes` 视图。
+    - `theme.css`
+      - 补充 `career-center-panel-switch / career-center-panel-button / career-center-section-shell` 样式，让分段标签在 iPad 上保持大热区和明确激活态。
+  - 掼蛋 iPad 信息抽屉：
+    - `GuandanTable.tsx`
+      - 将“已完成局数 / 我方胜局 / 最佳名次”合并成一张 `会话进展` 宽卡，降低抽屉纵向密度。
+      - 当本局尚未触发高能事件、且没有最近战报时，不再渲染空占位卡，直接把首屏空间留给 `AI 策略 / 托管控制 / 重新开局`。
+    - `theme.css`
+      - iPad 抽屉补充更高的 `max-height`，同时压缩分段按钮高度、补上 body 底部留白，避免底部操作区在首屏下沿显得被压住。
+  - iPad 校验脚本：
+    - `scripts/validate-ipad-ui-pass.mjs`
+      - 新增 `gdInfoActionVisible` 校验，确保掼蛋 iPad 信息抽屉里的底部操作按钮在默认首屏内完整可见。
+    - `scripts/audit-ipad-history-replay-languages.mjs`
+      - 扩展结果中心展开态巡检逻辑，会逐个点击 iPad 分段标签，分别统计每个 tab 的 overflow / literal leak，而不是只扫默认展开态。
+  - i18n：
+    - `src/i18n/index.ts`
+      - 补齐本地结果中心分段标签与相关 career copy 的 `ja / fr / de` 文案，保证多语言下也能完整走通新分段结构。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4175/ node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass/summary.json`
+    - `gdInfoOverflowCount = 0`
+    - `gdInfoActionVisible = true`
+    - `gdInfoTextLeakCount = 0`
+  - `APP_URL=http://127.0.0.1:4175/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass-10p2/summary.json`
+    - `gdInfoOverflowCount = 0`
+    - `gdInfoActionVisible = true`
+    - `gdInfoTextLeakCount = 0`
+  - `APP_URL=http://127.0.0.1:4175/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 三种语言下，结果中心展开态各个 tab 的 `overflow / leak` 计数均为 `0`
+  - `APP_URL=http://127.0.0.1:4175/ npm run appstore:shots:ipad` 通过
+    - `output/app-store-ipad-13/summary.json`
+- 结论：
+  - 掼蛋 iPad 信息抽屉已经从“无 overflow 但底部操作压边”收口到“默认首屏即可完整操作”。
+  - 本地结果中心在 iPad 上已经从长页面浏览调整成分段浏览，多语言也通过了逐 tab 巡检。
+  - 当前 PAD 端剩余空间更偏体验层级优化，而不是明显 bug。
+- TODO / Suggestions for next agent:
+  - 如果继续往“平板最佳体验”推进，下一优先级建议转向 `结果中心 / 回放` 的结构层级，把部分深层统计进一步做成二级页或抽屉，而不是继续在同一屏里压密度。
+  - 掼蛋信息抽屉虽然已经不卡首屏，但如果后续还想更轻，可以考虑把 `AI 策略` 和 `托管控制` 再做成两段式切换，减少同屏控件数量。
+
+2026-03-16
+- iPad 会话归档详情二级化（本轮）：
+  - `ReplaySessionArchivePanel.tsx`
+    - 会话详情右栏在 iPad 下改成分段内容区，新增 `概览 / 逐手 / 对比` tab，不再把概览 KPI、对比组、逐手列表整段同时压在同一块面板里。
+    - `概览` 页保留核心指标、时间范围、筛选入口和标记统计；点击筛选 chip 会直接切到 `逐手` 页，保持操作连贯。
+    - 有对比组时，概览页会给出对比入口；桌面端仍保持原来的完整堆叠结构，不影响大屏复盘效率。
+  - `theme.css`
+    - 新增 `session-detail-panel-switch / session-detail-panel-button / session-detail-panel-shell` 样式，并补充 iPad 专用压缩参数。
+    - 补了 `session-detail-overview-callout`，让会话详情在平板上更像二级浏览而不是缩小版桌面长页。
+  - `i18n/index.ts`
+    - 新增会话详情 tab 文案：`replay.sessionTabOverview / replay.sessionTabHands / replay.sessionTabCompare`，并补齐 `ja / fr / de`。
+  - `scripts/audit-ipad-history-replay-languages.mjs`
+    - 历史中心巡检现在会逐个点击 iPad 会话详情 tab，分别统计 overflow / literal leak。
+    - 汇总结果新增 `sessionDetailTabAudits`，后续再改会话详情结构时可以直接看每个 tab 是否稳定。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4175/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 三种语言下，`sessionDetailTabAudits` 中已覆盖的详情 tab overflow / leak 全为 `0`
+    - 结果中心分段 tab 与回放双模式仍保持 `overflow = 0`
+  - `APP_URL=http://127.0.0.1:4175/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+- 结论：
+  - iPad 历史中心已经从“桌面双栏压缩版”进一步收口到“左侧选会话、右侧分段看详情”的结构。
+  - 新增分段后，多语言和窄宽度都没有引入文字溢出、错位或空值泄漏。
+- TODO / Suggestions for next agent:
+  - 如果继续深抠 `结果中心 / 回放`，下一优先级可以转向“对比组”单独强化，让 `compare` tab 在有多手固定时也有同等级专项巡检和更明显的差异导航。
+  - 回放页右栏已经有 `行动时间线 / 牌桌态势` 双模式；下一步如果还想提升平板体感，可以继续把低频洞察项拆成二级抽屉，而不是放在同一列里。
+
+2026-03-16
+- iPad 会话详情 compare tab 继续强化（本轮）：
+  - `ReplaySessionArchivePanel.tsx`
+    - iPad 下切换不同会话时，会话详情页现在会自动回到 `概览`，避免停留在上一个会话的 `逐手 / 对比` 子页里造成上下文错位。
+    - `compare` tab 继续保留“空态可进入”设计，因此即使尚未加入对比手牌，用户也能先看到该区域的用途与入口。
+  - `scripts/audit-ipad-history-replay-languages.mjs`
+    - 抽出 `SESSION_DETAIL_OVERFLOW_SELECTORS`，统一详情 tab 的文字溢出巡检范围。
+    - 会话详情巡检现在分两段执行：
+      - 先跑 `概览 / 逐手 / 对比` 的默认空态巡检。
+      - 再从 `逐手` 页自动加入第一手到对比组，切到 `对比` 页继续跑一次“有内容态”巡检，并额外输出 `history-sessions-compare.png`。
+    - `summary.json` 里的 `sessionDetailTabAudits` 现在会记录 `state = empty / filled`，后续再改 compare 结构时可以直接看两种态是否同时稳定。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4175/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 三种语言下，`sessionDetailTabAudits` 已覆盖：
+      - `overview(empty)`
+      - `hands(empty)`
+      - `compare(empty)`
+      - `compare(filled)`
+    - 上述所有态的 `overflow / leak` 计数均为 `0`
+    - 新增截图：`output/ipad-history-replay-language-audit/fr/history-sessions-compare.png`
+  - `APP_URL=http://127.0.0.1:4175/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass-10p2/summary.json`
+    - 德州 HUD 仍为 `rows = 1`
+    - 斗地主 / 掼蛋 overflow 与文字泄漏计数仍为 `0`
+    - `gdInfoActionVisible = true`
+- 结论：
+  - iPad 会话详情里的 compare 区已经不只是“有 tab”，而是空态和有内容态都被自动化回归真正覆盖到了。
+  - 历史中心在 iPad 上当前没有明显的文字裁切、错位或空值泄漏问题，剩余空间更多是 compare 信息层级和回放深层洞察的体验优化。
+- TODO / Suggestions for next agent:
+  - 如果继续做 iPad 历史中心，下一优先级可以把 compare tab 里的差异导航再强化一层，例如增加更明显的“核心差异 / 关键标签 / 跳转点”分段，而不是继续堆在一屏里。
+  - 回放页右栏若还要继续收口，建议优先把低频洞察做成二级抽屉或单独面板，而不是继续压缩现有文字密度。
+
+2026-03-16
+- iPad compare 摘要分段收口（本轮）：
+  - `ReplaySessionArchivePanel.tsx`
+    - compare 页在 iPad 下新增 3 张首屏摘要卡：
+      - `差异摘要`：优先展示最值得先看的核心差异字段
+      - `标记`：集中展示当前对比组里的 marker / teaching 标签
+      - `关键节点`：集中展示 quick jumps，方便先判断要跳哪类场景
+    - 首屏摘要卡下方仍保留原来的逐手并排卡，不影响已有 compare 功能。
+    - 修正 compare 摘要标题文案，避免误用通用 `summary` key 导致法语下出现“当前装备”这类语义错误。
+  - `theme.css`
+    - 新增 `session-compare-digest-*` 一组样式，控制摘要卡的网格、徽标数字、信息块和 iPad 压缩参数。
+    - 目标是让 compare 在平板上更像“先扫重点，再钻细节”，而不是一进来就被整片卡片信息淹没。
+  - `scripts/audit-ipad-history-replay-languages.mjs`
+    - 会话详情巡检新增 `session-compare-digest-head / item / empty` 等选择器，确保新摘要卡也纳入 overflow / literal leak 扫描。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4176/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 三种语言下，`overview(empty) / hands(empty) / compare(empty) / compare(filled)` 全部 `overflow = 0`、`leak = 0`
+    - 新图复核：`output/ipad-history-replay-language-audit/fr/history-sessions-compare.png`
+  - `APP_URL=http://127.0.0.1:4176/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass-10p2/summary.json`
+    - 德州 HUD 仍为 `rows = 1`
+    - 斗地主 / 掼蛋 overflow 与文字泄漏仍为 `0`
+    - `gdInfoActionVisible = true`
+- 结论：
+  - iPad 历史中心的 compare 页已经从“能用”继续收口到“先看重点摘要，再看逐手对比”的结构。
+  - 多语言和 10.2 寸窄宽度下都没有引入新的文字裁切、错位或空值泄漏。
+- TODO / Suggestions for next agent:
+  - 如果继续抠 compare，下一步最值的是把“摘要卡 -> 对应明细区域”的联动做出来，例如点 `关键节点` 里的某类 jump 后，直接聚焦到下方对应手牌或回放入口。
+  - 若继续做 PAD 端历史/回放，可转向回放右栏，把低频洞察拆成二级面板，进一步减少主列的文字密度。
+
+2026-03-16
+- iPad 高价值优化继续收口（本轮）：
+  - `compare` 摘要卡联动：
+    - `ReplaySessionArchivePanel.tsx`
+      - compare 页新增 `CompareDigestFocus`，支持点选 `差异摘要 / 标记 / 关键节点` 三类摘要项后，自动滚动到对应明细区域。
+      - 点 `差异摘要` 会聚焦到下方 diff summary 板块；点 `标记 / 教学 / 关键节点` 会滚动到首个匹配的 compare 卡片。
+      - 命中的摘要项与卡片会进入 `focused` 态；存在筛选时，未命中的 compare 卡片会进入 `dimmed` 态。
+      - 切换会话、清空 compare 组时会同步清除聚焦态，避免把上一次 compare 上下文残留到当前会话。
+    - `theme.css`
+      - 新增 `session-compare-digest-button / pill / focused / dimmed` 等样式，确保摘要卡点击后在 iPad 上有足够明确的视觉反馈。
+  - 回放右栏二级化：
+    - `ReplayViewer.tsx`
+      - iPad 的 `牌桌态势` 右栏新增二级切换：`概览 / 深度洞察`。
+      - `概览` 默认只保留当前焦点人物卡、核心 KPI、当前教学提示，以及两张进入深度区的摘要卡。
+      - `深度洞察` 承接原来的低频内容：`筹码变化 / 关键节点`，默认从主列下沉，减少首屏文字密度。
+      - 桌面端仍保持原来的完整信息结构，不影响大屏回放效率。
+    - `theme.css`
+      - 新增 `replay-insight-layer-switch / replay-insight-summary-grid / replay-insight-summary-card / replay-insight-deep-pane` 等样式，并补齐 iPad 尺寸压缩。
+  - 多语言：
+    - `i18n/index.ts`
+      - 新增 `replay.insightViewOverview / replay.insightViewDetails`，并补齐 `zh-CN / en / ja / fr / de`。
+  - iPad 巡检脚本：
+    - `scripts/audit-ipad-history-replay-languages.mjs`
+      - 回放右栏巡检现在会逐个点开 `概览 / 深度洞察` 两层，分别统计 overflow / literal leak。
+      - 新增 `replayInsightPanelAudits` 汇总，并额外输出 `replay-insights-deep.png`。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4176/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 下：
+      - `sessionDetailTabAudits` 的 `overview(empty) / hands(empty) / compare(empty) / compare(filled)` 全为 `overflow = 0 / leak = 0`
+      - `replayInsightPanelAudits` 的 `overview / deep` 两层也全为 `overflow = 0 / leak = 0`
+    - 新增截图：
+      - `output/ipad-history-replay-language-audit/fr/replay-insights.png`
+      - `output/ipad-history-replay-language-audit/fr/replay-insights-deep.png`
+  - `APP_URL=http://127.0.0.1:4176/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass-10p2/summary.json`
+    - 德州 HUD `rows = 1`
+    - 斗地主 / 掼蛋 overflow 与文字泄漏仍为 `0`
+    - `gdInfoActionVisible = true`
+  - 额外人工点击验证：
+    - 使用 Playwright 真机语义流在法语环境下点击 compare 摘要 pill，确认会命中并聚焦到对应 compare 卡。
+    - 产物：`output/ipad-history-replay-language-audit/fr/history-sessions-compare-focused.png`
+- 结论：
+  - `compare` 现在已经不是静态摘要，而是能把用户直接带到对应明细的联动入口。
+  - 回放右栏在 iPad 上已经完成一层真正的二级化，首屏更偏“当前态势”，低频分析则收进第二层。
+- TODO / Suggestions for next agent:
+  - 若继续做 compare，下一步可以把“摘要项 -> 精准字段高亮”再做细一层，例如点 `盈亏` 后只强化卡片中的 profit 小块，而不是整张 compare 卡。
+  - 若继续做回放右栏，下一步可考虑让 `深度洞察` 中的关键节点点击后自动切到时间线对应步骤，进一步减少来回切 pane 的成本。
+
+2026-03-16
+- iPad 历史 / 回放高价值项继续收口（本轮）：
+  - `compare` 字段级高亮：
+    - `ReplaySessionArchivePanel.tsx`
+      - 在已有摘要卡联动的基础上，新增 `digest-focused / digest-dimmed` 字段级状态。
+      - 现在点 `差异摘要` 里的核心项时，不只会滚动到 diff summary，还会在 compare 卡里精准高亮对应字段块，例如 `mode / session / blindInfo / profit / totalPot / result`。
+      - 非命中的同类字段会降饱和、降透明度，方便在平板上一眼聚焦当前比较维度。
+    - `theme.css`
+      - 新增 `session-compare-field.digest-focused / digest-dimmed` 与 `session-compare-summary-chip.digest-focused / digest-dimmed` 样式。
+  - 回放深度洞察联动时间线：
+    - `ReplayViewer.tsx`
+      - iPad 下切到 `深度洞察` 时，现在会默认展开 `筹码变化 / 关键节点`，不再停留在全折叠态。
+      - 点击 `关键节点` 列表项后，会：
+        - 跳到对应 replay step
+        - 自动切回 `行动时间线`
+        - 自动带上匹配的时间线筛选（`pressure / bluff / elimination / showdown`）
+      - 这样在平板上不会出现“点了洞察，还得自己再切回时间线找位置”的断链感。
+  - iPad 巡检脚本：
+    - `scripts/audit-ipad-history-replay-languages.mjs`
+      - 回放深度洞察现在会自动点首个关键节点，并校验是否真的切回时间线。
+      - 汇总结果新增 `replayInsightTimelineLinked`，并额外输出 `replay-insights-linked.png`。
+      - compare 审计脚本已尝试补入字段级高亮计数，但当前默认审计流只会生成 1 手牌，因此不会自然产出“多手核心差异”，这一项在 `summary.json` 中当前仍可能是 `null`。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4176/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 三种语言下：
+      - `replayInsightPanelAudits` 的 `overview / deep` 两层 overflow / leak 均为 `0`
+      - `replayInsightTimelineLinked = true`
+      - `sessionDetailTabAudits` 仍保持 `overview(empty) / hands(empty) / compare(empty) / compare(filled)` 全绿
+    - 新增截图：
+      - `output/ipad-history-replay-language-audit/fr/replay-insights-linked.png`
+  - `APP_URL=http://127.0.0.1:4176/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass-10p2/summary.json`
+    - 德州 HUD `rows = 1`
+    - 斗地主 / 掼蛋 overflow 与文字泄漏仍为 `0`
+    - `gdInfoActionVisible = true`
+- 结论：
+  - 回放右栏的“深度洞察 -> 时间线”现在已经形成完整闭环，且被自动化验证覆盖。
+  - compare 的字段级高亮已经实现，但要做真正的自动化强验证，还需要一条会生成至少 2 手牌的历史流，当前默认巡检数据量不足。
+- TODO / Suggestions for next agent:
+  - 若要把 compare 字段级高亮也纳入强验证，下一步建议扩展历史审计流：自动连打两手，再进会话详情固定两手进行 compare。
+  - 目前 PAD 端更偏体验优化而非 bug 修复；如果继续做，优先级更高的是“二手以上 compare 自动验证”而不是继续改 UI 外观。
+
+2026-03-16
+- iPad 使用体验继续优化（本轮）：
+  - `ReplaySessionArchivePanel.tsx`
+    - 在 compare 摘要区下方新增 `session-compare-focus-bar`。
+    - 当用户点中某个差异摘要 / 标记 / 关键节点后，iPad 现在会显示一个轻量的“当前聚焦项 + 清除”条，不用再回头猜自己当前高亮的是哪一类信息。
+    - 这个交互对平板尤其有用，因为 compare 页本来就是滚动浏览场景，用户滚到下方后依然能快速理解“当前过滤上下文”。
+  - `ReplayViewer.tsx`
+    - 新增 iPad 时间线自动定位：当用户从 `深度洞察` 点关键节点跳回 `行动时间线` 时，当前高亮事件会自动 `scrollIntoView` 到可视区中央附近。
+    - 同时给时间线项补了 `scroll-margin`，减少顶部吸附区域把当前事件顶住的感觉。
+  - `theme.css`
+    - 补了 `session-compare-focus-bar` 的基础样式和 iPad 压缩样式。
+    - 补了时间线项的滚动留白，iPad 上切 pane 后更容易一眼落到当前事件。
+  - `scripts/audit-ipad-history-replay-languages.mjs`
+    - 尝试把“自动连打两手 -> 固定两手 compare -> 验字段高亮”补进脚本。
+    - 目前已把脚本入口改成更稳的版本：操作面板与结算继续按钮都加了重试/DOM 级触发兜底。
+    - 但这条 headless 历史链路仍有抖动，主要卡在 iPad 牌桌底部操作坞与结算切换的偶发状态竞争；这不是 UI 本身的新回归，更像审计脚本还不够稳。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4176/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - 现有 iPad 主路径回归仍然全绿
+  - `scripts/audit-ipad-history-replay-languages.mjs`
+    - 已完成脚本稳健性增强，但“两手 compare 强验证”这一段还没有稳定跑通，下一轮应继续只收这条链路，不建议把 UI 再大改。
+- 结论：
+  - 这一轮真正落地的用户价值是：compare 页的“聚焦上下文”更清晰了，回放页的“洞察 -> 时间线”切换也更像平板原生体验。
+  - 当前剩余最值的工作已经很明确：不是继续改视觉，而是把历史 compare 的多手自动审计彻底跑稳。
+- TODO / Suggestions for next agent:
+  - 继续只攻 `audit-ipad-history-replay-languages.mjs` 的“两手归档 / 两手 compare”稳定性，优先用最短链路把 compare 字段高亮验证补齐。
+  - 若要再做一项纯体验优化，优先考虑让 `session-compare-focus-bar` 在 iPad 上随滚动保持更高可见性（例如轻量 sticky），但这件事优先级低于审计脚本稳定。
+
+2026-03-16
+- iPad 多手 compare 自动审计已跑稳（本轮）：
+  - `App.tsx`
+    - 新增仅在本地开发环境启用的 `window.__neonDebug.prepareHoldemHistoryAudit()` 调试钩子。
+    - 这条钩子会直接驱动控制器完成：
+      - 启动一桌 1v1 标准德州
+      - 连续生成 2 手已完成历史
+      - 自动切入 `history` 页面
+    - 这样历史审计不再依赖 iPad 牌桌底部操作坞的点击时序，规避了此前 headless 下的偶发抖动。
+  - `scripts/audit-ipad-history-replay-languages.mjs`
+    - 历史入口正式改成调用 `window.__neonDebug.prepareHoldemHistoryAudit({ hands: 2, openHistory: true })`。
+    - 现在 compare 审计会稳定得到“至少两手”的真实数据，因此 `compareDigestFieldFocus` 不再是 `null`。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4176/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 三语言全部通过：
+      - `historyHands / historySessions / historySessionsExpanded / replayTimeline / replayInsights` overflow 与 leak 均为 `0`
+      - `compareDigestFieldFocus` 已稳定产出，当前为：
+        - `focusedFields = 2`
+        - `dimmedFields = 14`
+        - `focusedSummary = 1`
+      - `replayInsightTimelineLinked = true`
+    - 新截图已覆盖三语言 compare 聚焦态：
+      - `output/ipad-history-replay-language-audit/fr/history-sessions-compare-focused.png`
+      - `output/ipad-history-replay-language-audit/de/history-sessions-compare-focused.png`
+      - `output/ipad-history-replay-language-audit/ja/history-sessions-compare-focused.png`
+  - `APP_URL=http://127.0.0.1:4176/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - 现有 iPad 主路径仍保持全绿
+- 结论：
+  - iPad 历史 / 回放这条线里，原先最大的测试缺口已经补上了：`compare` 的字段级高亮和 `深度洞察 -> 时间线` 都有了稳定自动化覆盖。
+  - 之后如果继续做 PAD 端，优先级可以从“把审计跑稳”切换回“做更好的体验”。
+- TODO / Suggestions for next agent:
+  - 如果继续做 iPad 体验优化，下一步最值的是把 `session-compare-focus-bar` 做成轻量 sticky，让 compare 长列表滚动时上下文更稳。
+  - 另一条高价值项是继续压缩回放右栏的低频文案，把 `深度洞察` 再做得更像平板二级面板。
+
+2026-03-16
+- iPad 体验继续细化（本轮）：
+  - `ReplaySessionArchivePanel / theme.css`
+    - `session-compare-focus-bar` 现在在 compare 面板里改成了轻量 sticky。
+    - 用户在 iPad 上滚动较长 compare 列表时，当前聚焦项和 `清除` 操作会始终留在顶部附近，不需要来回滚回摘要区确认上下文。
+  - `ReplayViewer.tsx / theme.css`
+    - 回放概览页的两张摘要卡不再只是“泛化地打开详情”，而是变成明确入口：
+      - `筹码变化` 卡会直接打开 `Chip Flow`
+      - `关键节点` 卡会直接打开 `Key Moments`
+    - 在 iPad 下，点其中一张卡时会优先展开目标模块并折叠另一块，减少深度页初次打开时的信息扑面感。
+    - 摘要卡底部新增轻量动作文案，帮助用户理解“点下去会去哪里”。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4176/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `fr / de / ja` 三语言仍保持：
+      - `historyHands / historySessions / replayTimeline / replayInsights` overflow 与 leak 全为 `0`
+      - `compareDigestFieldFocus` 稳定存在
+      - `replayInsightTimelineLinked = true`
+  - `APP_URL=http://127.0.0.1:4176/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - 主路径 iPad 校验仍然全绿
+- 结论：
+  - 现在 `compare` 页的上下文保持更稳，回放右栏的概览卡也更像真正的“二级导航”，iPad 使用体验又顺了一截。
+- TODO / Suggestions for next agent:
+  - 若继续抠体验，优先做 `sticky focus bar` 的阴影/边界在长滚动中的视觉平衡，确保和下方 compare 卡分层更自然。
+  - 第二优先级是继续压 `deep insights` 内部的文案密度，例如把 `key moments` 顶部筛选再做一层收纳。
+
+2026-03-16
+- iPad 回放页体验继续收口（本轮）：
+  - `ReplayViewer.tsx`
+    - 把 `Key Moments` 的 iPad 紧凑筛选文案抽成派生变量：
+      - `keyFilterLabel`
+      - `keyMomentControlsSummary`
+    - 修掉原先紧凑摘要里过重的内联条件拼接，避免 `pressure / bluff / elimination / settlement` 文案分支在多语言下继续变得难维护。
+    - `Key Moments` 的 iPad 紧凑摘要现在统一展示成 `筛选/Filter ... · NBB`，展开/收起逻辑保持不变，但阅读成本更低。
+  - `theme.css`
+    - 为 `replay-key-controls-compact / replay-key-controls-shell / replay-key-filter-primary` 补齐基础与 iPad 样式，让 `深度洞察 > 关键节点` 顶部控制区在 iPad 下更轻、更稳定。
+    - `session-compare-focus-bar` 进一步细化视觉层次：
+      - 背景改成更轻的渐层玻璃态
+      - sticky 偏移改为 `top: 4px`（iPad 为 `2px`）
+      - 阴影略减，长滚动时和下方 compare 卡的分层更自然
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4176/ node ./scripts/audit-ipad-history-replay-languages.mjs` 通过
+    - `output/ipad-history-replay-language-audit/summary.json`
+    - `fr / de / ja` 三语言继续保持：
+      - `historyHands / historySessions / historySessionsExpanded / replayTimeline / replayInsights` overflow 与 leak 全为 `0`
+      - `compareDigestFieldFocus` 稳定存在，当前仍为：
+        - `focusedFields = 2`
+        - `dimmedFields = 14`
+        - `focusedSummary = 1`
+      - `replayInsightTimelineLinked = true`
+  - `APP_URL=http://127.0.0.1:4176/ VIEWPORT_WIDTH=1024 VIEWPORT_HEIGHT=768 node ./scripts/validate-ipad-ui-pass.mjs` 通过
+    - `output/ui-ipad-pass/summary.json`
+    - `holdemHud.rows = 1`
+    - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+    - `gdInfoActionVisible = true`
+- 结论：
+  - 这轮主要是体验层打磨，没有引入新的结构复杂度，但把 iPad 回放页的筛选区和 compare sticky 条都做得更顺手了。
+  - 当前 PAD 端这条线已经进入“持续微调体验”的阶段，主流程和多语言回归都保持稳定。
+- TODO / Suggestions for next agent:
+  - 若继续做 iPad 体验，优先考虑把 `deep insights` 里更低频的控件继续下沉，让 `Key Moments` 默认只保留最常用的筛选入口。
+  - 另一条可做的细化是再补一轮针对 11 寸横屏的真图巡检，确认这套紧凑控件在更窄宽度下依然自然。
+
+2026-03-16
+- iPad 收尾优化（本轮）：
+  - `ReplayViewer.tsx / theme.css / i18n`
+    - `Key Moments` 在 iPad 下调整成“两层筛选”：
+      - 常用筛选常驻：`全部 / 高压 / 诈唬线`
+      - 低频筛选和阈值下沉到 `高级筛选`
+    - 这样深度洞察默认不再把 `淘汰 / 结算 / BB 阈值` 全部堆在首屏，11 寸横屏下信息密度明显更轻。
+    - 当用户主动切到 `淘汰 / 结算` 这类低频筛选时，会自动展开高级区，避免“当前选中态被藏起来”。
+    - 新增 `replay.advancedFilters` 多语言词条，`fr / de / ja` 也都覆盖。
+  - `scripts/validate-ipad-ui-pass.mjs`
+    - 支持通过 `OUTPUT_DIR` 指定输出目录，方便做 11 寸专项回归而不覆盖默认产物。
+  - `scripts/audit-ipad-history-replay-languages.mjs`
+    - 同样支持 `OUTPUT_DIR`。
+    - 回放深度洞察审计现在会主动展开 iPad 的高级筛选区，再统计 overflow / leak，确保新下沉结构被真正覆盖。
+  - `scripts/capture-app-store-ipad.mjs`
+    - 支持通过 `OUTPUT_DIR` 生成独立的 11 寸截图目录。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - 11 寸主路径专项：
+    - `APP_URL=http://127.0.0.1:4176/ OUTPUT_DIR=/Users/klaywei/Documents/local-holdem-neon/output/ui-ipad-pass-11 node ./scripts/validate-ipad-ui-pass.mjs`
+    - 结果：`output/ui-ipad-pass-11/summary.json`
+    - `holdemHud.rows = 1`
+    - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+    - `gdInfoActionVisible = true`
+  - 11 寸历史 / 回放多语言专项：
+    - `APP_URL=http://127.0.0.1:4176/ OUTPUT_DIR=/Users/klaywei/Documents/local-holdem-neon/output/ipad-history-replay-language-audit-11 VIEWPORT_WIDTH=1194 VIEWPORT_HEIGHT=834 node ./scripts/audit-ipad-history-replay-languages.mjs`
+    - 结果：`output/ipad-history-replay-language-audit-11/summary.json`
+    - `fr / de / ja` 三语言全部保持：
+      - `historyHands / historySessions / historySessionsExpanded / replayTimeline / replayInsights` overflow 与 leak 全为 `0`
+      - `compareDigestFieldFocus = { focusedFields: 2, dimmedFields: 14, focusedSummary: 1 }`
+      - `replayInsightTimelineLinked = true`
+  - 11 寸 App Store 真图：
+    - `APP_URL=http://127.0.0.1:4176 OUTPUT_DIR=output/app-store-ipad-11 VIEWPORT_WIDTH=1194 VIEWPORT_HEIGHT=834 node ./scripts/capture-app-store-ipad.mjs`
+    - 结果：`output/app-store-ipad-11/summary.json`
+    - 已人工看图：
+      - `output/app-store-ipad-11/04-holdem-focus-controls.png`
+      - `output/ipad-history-replay-language-audit-11/fr/replay-insights-deep.png`
+    - 结论：11 寸横屏下新结构没有出现按钮错位、文字裁切或首屏拥挤回退。
+- 结论：
+  - 这轮把“体验优化”和“11 寸专项验证”一起收尾了。当前 iPad 线已经不仅是代码层推断，而是有 11 寸真图、多语言历史/回放、主路径三套结果共同兜底。
+- TODO / Suggestions for next agent:
+  - 若还要继续抠体验，下一步更像纯视觉优化而不是功能修复，例如进一步压缩回放右栏顶部标题占高。
+  - 如果后续要做更高置信度的平板适配，可以补一条“横竖屏来回切换”的自动化链路，但这已经不属于当前高优先级。
+
+2026-03-16
+- iPad 视觉微调再收一轮（本轮）：
+  - `ReplayViewer.tsx`
+    - 回放页顶部从“标题 + 多行段落”改成了 `标题 + 元信息条`，时间、模式/难度、跨注说明都放进更紧凑的元信息行里。
+  - `theme.css`
+    - `replay-top` 在 iPad 下继续收紧了纵向间距，头部现在更像平板信息条，而不是桌面卡片直接缩放版。
+    - `replay-view-switch` 和 `replay-insight-layer-switch` 都补成更明确的分段控件底座，按钮之间的层级感更统一。
+    - `replay-key-controls-advanced` 新增了轻量分割线和内边距，让高级筛选区与常用筛选/正文列表分层更自然。
+    - `replay-sidebar-head` 的标题、说明文字和间距再压了一轮，右栏整体视觉更干净。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - 11 寸历史 / 回放专项：
+    - `APP_URL=http://127.0.0.1:4176/ OUTPUT_DIR=/Users/klaywei/Documents/local-holdem-neon/output/ipad-history-replay-language-audit-11 VIEWPORT_WIDTH=1194 VIEWPORT_HEIGHT=834 node ./scripts/audit-ipad-history-replay-languages.mjs`
+    - `fr / de / ja` 三语言继续保持：
+      - `historyHands / historySessions / historySessionsExpanded / replayTimeline / replayInsights` overflow 与 leak 全为 `0`
+      - `replayInsightTimelineLinked = true`
+  - 11 寸截图：
+    - `APP_URL=http://127.0.0.1:4176 OUTPUT_DIR=output/app-store-ipad-11 VIEWPORT_WIDTH=1194 VIEWPORT_HEIGHT=834 node ./scripts/capture-app-store-ipad.mjs`
+    - 已人工看图：
+      - `output/ipad-history-replay-language-audit-11/fr/replay-insights-deep.png`
+      - `output/app-store-ipad-11/04-holdem-focus-controls.png`
+    - 结论：回放头部高度下降后没有压缩到可读性，右侧深度洞察的切换条和筛选区也没有出现视觉拥挤或错位。
+- 结论：
+  - 这一轮已经是纯体验打磨了，iPad 回放线条、密度和层次感都比上一版更平稳，基本达到了可以收尾的状态。
+
+2026-03-16
+- 上线前品牌改名（本轮）：
+  - 产品主品牌正式改为 `夜局`。
+  - 对外可见名称统一完成：
+    - `hub.title`：zh-CN 改为 `夜局`
+    - 其他语言品牌名统一改为 `YEJU`
+    - `index.html` / `manifest.webmanifest` / `Capacitor appName` / `iOS Info.plist` 均已同步
+    - 隐私页、支持页、App Store 中文元数据、README、用户说明书、Windows 发布说明均已同步
+  - Windows 便携版产物名同步改为：
+    - 目录：`Yeju-win32-x64`
+    - 可执行文件：`Yeju.exe`
+    - 压缩包：`release/yeju-v1.0.0-windows-portable.zip`
+  - 打包脚本也已更新，后续继续发 Windows 便携版会直接沿用新名字。
+- 本轮验证：
+  - `npm run build` 通过
+  - `npm run test` 通过（115/115）
+  - `npm run lint` 通过
+  - `APP_URL=http://127.0.0.1:4176/ node ./scripts/validate-ipad-ui-pass.mjs` 通过
+  - `APP_URL=http://127.0.0.1:4176 node ./scripts/capture-app-store-ipad.mjs` 通过
+  - `npm run desktop:portable:win` 通过
+- 结论：
+  - 现在已经是可上线状态：品牌名、PWA、iOS 壳、Windows 便携包、帮助与隐私页都已经统一到 `夜局`。
+
+2026-03-17
+- iPad 专项牌桌 / 商店收尾（本轮）：
+  - `TableScene.tsx`
+    - iPad 下德州只保留单一牌桌模式，隐藏 `专注牌桌` 切换，避免和标准视图重复。
+    - iPad 底部操作区改为稳定壳体，打开操作面板时不再因为模块高度变化把整张牌桌顶来顶去。
+    - 德州公共牌在 iPad 下改用更紧凑尺寸，并重新压了牌桌中轴和底池区的位置，减少与玩家牌区的互相干扰。
+  - `theme.css`
+    - 压缩 iPad 德州底部操作面板、自动行动区、加注区和信息条高度，让操作区更紧凑。
+    - 调整 斗地主 / 掼蛋 AI 头像、名字、身份信息的横向留白，信息区倍率文字允许换行，避免被裁切。
+    - 调整 斗地主 / 掼蛋手牌点击态：缩短选牌过渡、增强抬起反馈，并补充按压态，修复“反应慢、不丝滑”的观感问题。
+    - 商店 iPad 预览中，人物皮肤展示时把扑克牌下移，避免挡住人物；扑克牌皮肤预览改成六张单排展示；AI 形象包预览改成更稳定的横向信息卡布局。
+  - `MenuShopOverlay.tsx`
+    - 商店实时预览区配合 iPad 布局改为更适合单排卡面的展示结构。
+- 本轮验证：
+  - `npm run build` 通过
+  - App Store iPad 真图回归：
+    - `output/app-store-ipad-13/03-holdem-table.png`
+    - `output/app-store-ipad-13/04-holdem-focus-controls.png`
+    - `output/app-store-ipad-13/05-doudizhu-table.png`
+    - `output/app-store-ipad-13/06-guandan-table.png`
+  - 补充 iPad 专项截图：
+    - `output/ipad-ui-verify/shop-portrait.png`
+    - `output/ipad-ui-verify/shop-card-skin.png`
+    - `output/ipad-ui-verify/shop-ai-pack.png`
+    - `output/ipad-ui-verify/ddz-selected.png`
+    - `output/ipad-ui-verify/gd-selected.png`
+    - `output/ipad-ui-verify/holdem-postflop-controls.png`
+    - `output/ipad-ui-verify/holdem-spacing.json`
+  - 结果：
+    - 德州翻牌后公共牌与玩家区实测 `verticalGap = 111.68px`，`overlap = false`
+    - 斗地主 / 掼蛋选牌抬起反馈已恢复，商店人物皮肤 / 扑克牌皮肤 / AI 形象包三个预览都已按 iPad 新布局显示，其中扑克牌皮肤大预览已确认六张单排展示
+- 结论：
+  - 这轮改动只落在 iPad 分支样式和 iPad 条件分支上，目标里的四块区域都做了收口，并且已经有翻牌后德州真图和商店真图一起兜底。
+
+2026-03-17
+- iPad 易用性再优化（本轮）：
+  - `TableScene.tsx`
+    - iPad 德州增加“轮到你时自动展开操作面板”的行为，但只在当前轮次第一次轮到你且面板原本关闭时触发，不会反复打断已经切到时间线 / 牌桌态势的用户。
+    - iPad 底部 `操作面板` 页签在你行动但当前不在操作页时增加提示态，降低漏看可行动作的概率。
+  - `MenuShopOverlay.tsx`
+    - 商店各类卡片现在支持直接点卡片本身来切换实时预览，不再依赖 hover；同时补上 Enter / Space 触发，触屏和键盘路径都更完整。
+    - 当前正在预览的商品卡会有独立高亮，不会和“已装备 / 当前使用”状态混在一起。
+  - `theme.css`
+    - iPad 商店页签和筛选按钮改成更大的触控目标，并支持横向顺滑滚动，筛选切换更容易点中。
+    - iPad 斗地主 / 掼蛋高频操作按钮进一步放大，并给横向按钮区补了更顺手的触摸滚动 / 吸附体验。
+    - iPad 信息弹层底部操作按钮也增大了点按面积。
+  - `scripts/validate-ipad-ui-pass.mjs`
+    - 同步到新的 iPad 德州交互：若操作面板已自动展开，校验脚本不再重复点一次，避免旧脚本误报。
+- 本轮验证：
+  - `npm run build` 通过
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-usability/shot-0.png`
+    - `output/web-game-ipad-usability/state-0.json`
+    - `state-0.json` 中 `shop.open = true`
+  - 13 寸 iPad 交互真图：
+    - `output/ipad-ui-verify/holdem-hero-turn-auto-panel.png`
+    - `output/ipad-ui-verify/shop-portrait.png`
+    - `output/ipad-ui-verify/shop-card-skin.png`
+    - `output/ipad-ui-verify/shop-ai-pack.png`
+    - `output/ipad-ui-verify/holdem-postflop-controls.png`
+    - `output/ipad-ui-verify/holdem-spacing.json`
+  - 结果：
+    - 德州“轮到你”时已自动带出操作面板，后续翻牌后公共牌与玩家区仍保持 `verticalGap = 103.71px`，`overlap = false`
+    - 商店三类截图都已验证触屏点卡切预览，且卡片预览高亮能明确指出当前浏览项
+  - 11 寸 iPad 自动校验：
+    - `APP_URL=http://127.0.0.1:4173 OUTPUT_DIR=/Users/klaywei/Documents/local-holdem-neon/output/ui-ipad-pass-usability node ./scripts/validate-ipad-ui-pass.mjs`
+    - `output/ui-ipad-pass-usability/summary.json`
+    - 结果继续保持：
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `gdInfoActionVisible = true`
+      - `errors = []`
+  - App Store iPad 图回归：
+    - `APP_URL=http://127.0.0.1:4173 OUTPUT_DIR=/Users/klaywei/Documents/local-holdem-neon/output/app-store-ipad-usability node ./scripts/capture-app-store-ipad.mjs`
+    - `output/app-store-ipad-usability/01-menu-hub.png`
+    - `output/app-store-ipad-usability/03-holdem-table.png`
+- 结论：
+  - 这轮主要是把“需要多点一步”的地方收掉了。现在 iPad 上到你行动时更难错过操作入口，商店也真正变成了可点卡浏览的触屏交互，整体更像平板原生使用节奏。
+
+2026-03-17
+- iPad 触控可达性再优化（本轮）：
+  - `GameHubMenu.tsx`
+    - 首页积分商店条和三张模式卡都改成 iPad 下整块可点，避免必须命中底部 CTA 小按钮。
+    - 保留原本视觉 CTA，但实际点击区域扩展到整个卡片 / 条带，更符合平板触屏习惯。
+  - `MainMenu.tsx`
+    - 德州主菜单里的 `外观资产` 折叠头在 iPad 下改成整条可点，展开 / 收起不再只依赖右侧小按钮。
+  - `theme.css`
+    - 新增整卡触控层样式、focus / active 反馈、轻微按压反馈和更稳定的 hit area。
+    - `外观资产` 标题条补成更大的触控目标，并把右侧 `展开 / 收起` 按钮改成纯视觉提示，避免嵌套交互冲突。
+  - 校验脚本同步：
+    - `.tmp-ipad-ui-verify.mjs` 适配首页新增的积分商店 hitbox，避免同名按钮选择器冲突。
+    - `scripts/validate-ipad-ui-pass.mjs` 改为点击 `外观资产` 整条标题，而不是旧的 `.menu-inline-toggle` 小按钮。
+- 本轮验证：
+  - `npm run build` 通过
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-usability/shot-0.png`
+    - `output/web-game-ipad-usability/state-0.json`
+  - 手工 Playwright iPad 触控验证：
+    - `output/ipad-touch-validation/hub-store-strip.png`
+    - `output/ipad-touch-validation/hub-mode-card.png`
+    - `output/ipad-touch-validation/menu-appearance-expanded.png`
+    - `output/ipad-touch-validation/menu-appearance-collapsed.png`
+    - `output/ipad-touch-validation/summary.json`
+    - 结果：
+      - `storeStripOpenedShop = true`
+      - `modeCardOpenedMenu = true`
+      - `appearanceExpandedByHeaderTap = true`
+      - `appearanceCollapsedByHeaderTap = true`
+  - iPad 现有专项回归重新通过：
+    - `output/ipad-ui-verify/shop-portrait.png`
+    - `output/ipad-ui-verify/shop-card-skin.png`
+    - `output/ipad-ui-verify/shop-ai-pack.png`
+    - `output/ipad-ui-verify/holdem-hero-turn-auto-panel.png`
+    - `output/ipad-ui-verify/holdem-postflop-controls.png`
+    - `output/ipad-ui-verify/holdem-spacing.json`
+    - 翻牌后公共牌与玩家区继续保持 `verticalGap = 111.68px`，`overlap = false`
+  - 11 寸 iPad 自动校验：
+    - `output/ui-ipad-pass-usability/summary.json`
+    - 结果保持：
+      - `appearanceExpandedBefore = 0`
+      - `appearanceExpandedAfter = 1`
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `gdInfoActionVisible = true`
+      - `errors = []`
+  - App Store iPad 图回归：
+    - `output/app-store-ipad-usability/01-menu-hub.png`
+    - `output/app-store-ipad-usability/02-holdem-menu.png`
+    - `output/app-store-ipad-usability/03-holdem-table.png`
+- 结论：
+  - 这轮主要把 iPad 首页和主菜单里最容易“点偏”的区域做成了更接近平板原生的整块触控区，同时把两份旧验证脚本也同步到了新交互，后续再继续压 iPad 体验时不容易被过时脚本拖住。
+
+2026-03-17
+- P0 基础层 + 第一批触控统一（本轮）：
+  - `src/platform/runtime.ts`
+    - iPad 运行时状态新增 `ipadSize`，当前按 `regular / roomy / none` 分档，并写入根节点 `data-ipad-size`。
+    - 现有 `data-ipad-like` 和 `data-device-orientation` 继续保留，后续 P0-2 / P0-3 可以直接基于这三个维度做参数分层，不需要再改组件判断。
+  - `src/ui/styles/theme.css`
+    - 新增 iPad 公共变量层：
+      - `--ipad-toolbar-target`
+      - `--ipad-chip-target`
+      - `--ipad-filter-target`
+      - `--ipad-action-target`
+      - `--ipad-dock-target`
+      - `--ipad-dense-chip-target`
+      - `--ipad-panel-shell-height`
+      - `--ipad-info-sheet-width`
+    - 变量已按 `data-ipad-size='roomy'` 和 `data-device-orientation='portrait'` 预留分档覆盖，后续尺寸 / 横竖屏优化可以只调参数，不和具体组件规则互相打架。
+    - 第一批高频 iPad 触控区已经接入变量：
+      - 首页 / 菜单工具按钮
+      - 外观资产 pills / inline toggle
+      - HUD 小按钮 / stage chips
+      - 德州底部 dock / action / raise preset / auto action select
+      - 斗地主 / 掼蛋顶部工具按钮和人类操作按钮
+      - 信息弹层头部按钮 / 分段按钮 / 操作按钮
+      - 商店 tabs / filter chips
+      - 斗地主倍率 chip
+    - `ipad-compact-panel` 高度开始吃统一变量，后续 P0-4 做“稳定壳体”时可以沿这套变量继续推进。
+- 本轮验证：
+  - `npm run build` 通过
+  - iPad 自动校验：
+    - `output/ui-ipad-pass-p0/summary.json`
+    - 结果：
+      - `appearanceExpandedAfter = 1`
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `gdInfoActionVisible = true`
+      - `errors = []`
+  - 尺寸档检查：
+    - 11 寸横屏：`ipadSize = regular`
+    - 13 寸横屏：`ipadSize = roomy`
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-p0/shot-0.png`
+    - `output/web-game-ipad-p0/state-0.json`
+    - 截图与状态都显示商店已正常打开；客户端日志里仍有一次首页商店按钮点击超时告警，但产物已生成，后续如继续沿 skill client 跑 iPad 流程，可优先切到更稳定的入口选择器。
+- 结论：
+  - P0 已经开始落地，而且先把“参数层”和“具体规则层”拆开了。接下来做 `11/13 寸分档`、`横竖屏分档`、`布局稳态` 时，应该不会再出现一改热区就把别的 iPad 规则冲掉的问题。
+
+2026-03-17
+- iPad 方向策略收敛 + P0-4 布局稳态（本轮）：
+  - 方向策略：
+    - 用户已确认 iPad 固定横屏，后续不再继续扩展竖屏优化分支；保留现有 portrait 提示层即可。
+  - `src/ui/styles/theme.css`
+    - 横屏 iPad 下的德州主菜单 `外观资产` 区改成稳定壳体：
+      - `menu-shop-ribbon` 固定最小高度
+      - `menu-store-summary` / `menu-preview-pills` 对齐到统一高度
+      - 展开 / 收起只在内部内容切换，不再推动整个菜单外壳变化
+    - 商店浮层改成更稳定的横屏壳体：
+      - `menu-shop-sheet` 直接固定整体高度
+      - `menu-shop-layout` 拉满高度
+      - `menu-shop-preview-panel` 改成固定行结构
+      - `menu-shop-catalog` 改成固定头部 + 内部滚动区
+      - `menu-shop-preview-copy` 增加最小高度，避免描述长短导致上半区抽动
+    - iPad 信息弹层：
+      - `ipad-info-sheet` 在横屏下固定高度
+      - `ipad-info-sheet-body` 改成稳定内容流
+      - `ipad-info-actions` 改为 sticky 底部操作区，减少切换信息时按钮上下跳
+    - 11/13 寸横屏继续细化：
+      - `regular`：主菜单 / 商店壳体更紧凑
+      - `roomy`：主菜单更宽、模式卡更舒展、商店更大、德州牌桌中轴和底部控制区更宽松
+- 本轮验证：
+  - `npm run build` 通过
+  - 11 寸横屏 iPad 自动校验：
+    - `output/ui-ipad-pass-p04/summary.json`
+    - 结果保持：
+      - `appearanceExpandedAfter = 1`
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `gdInfoActionVisible = true`
+      - `errors = []`
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-p04/shot-0.png`
+    - `output/web-game-ipad-p04/state-0.json`
+    - 本轮改为纯状态回归，产物已生成
+  - 横屏 11/13 寸稳态对照：
+    - `output/ipad-landscape-stability/ipad11-holdem-menu-collapsed.png`
+    - `output/ipad-landscape-stability/ipad11-holdem-menu-expanded.png`
+    - `output/ipad-landscape-stability/ipad13-holdem-menu-collapsed.png`
+    - `output/ipad-landscape-stability/ipad13-shop-portrait.png`
+    - `output/ipad-landscape-stability/ipad13-shop-ai-pack.png`
+    - `output/ipad-landscape-stability/summary.json`
+    - 关键结果：
+      - `ipad11`:
+        - `shopSheet = 1040 x 800`
+        - `previewPanel.height = 370.5`
+        - `catalogPanel.height = 340.5`
+      - `ipad13`:
+        - `shopSheet = 1200 x 860`
+        - `previewPanel.height = 400.5`
+        - `catalogPanel.height = 370.5`
+- 结论：
+  - 现在 iPad 横屏路径已经基本成型：11 寸更紧凑，13 寸更舒展，德州菜单 / 商店 / 信息弹层这三块也开始进入“外壳稳定、内部滚动”的状态。后续如果继续推进，就可以从 P1 的操作效率和交互细节往下压了。
+
+2026-03-17
+- P1 第一轮：iPad 德州操作区“决策摘要 + 主动作强调”
+  - 11/13 寸分档确认：
+    - 本轮继续沿用 `src/platform/runtime.ts` + `src/ui/styles/theme.css` 里的 `data-ipad-size=regular|roomy` 机制，未再回退成统一 iPad 参数。
+    - 当前 P1 改动只挂在 iPad 控制区局部，不会覆盖 P0 已完成的 11 寸 / 13 寸横屏壳体差异。
+  - `src/ui/components/ControlsPanel.tsx`
+    - 新增 iPad 专属 `controls-decision-brief` 决策摘要条，放在行动按钮和下注区之间。
+    - 摘要条只复用现有翻译与现有策略数据，不新增 i18n 词条：
+      - 当前阶段
+      - 当前推荐文案
+      - 当前最优先动作
+      - 底池
+      - 建议加注到
+    - 新增 `primaryActionType` 逻辑：
+      - 免费行动且可进攻时优先强调 bet / raise
+      - 免费行动但无进攻空间时强调 check
+      - 小赔率跟注时强调 call
+      - 低 SPR 压力点位且可全下时强调 all-in
+    - 行动按钮增加推荐态 class：
+      - `is-suggested`
+      - `is-recommended`
+  - `src/ui/styles/theme.css`
+    - 新增决策摘要条样式：
+      - `controls-decision-brief`
+      - `controls-decision-copy`
+      - `controls-decision-facts`
+    - 新增按钮推荐态视觉：
+      - `btn.action.is-suggested`
+      - `btn.action.primary.is-recommended`
+    - iPad 底部控制区继续吃现有尺寸变量，并在两个 iPad 压缩层级里都补了摘要条的紧凑规则，避免把 P0 的壳体稳定性打掉。
+- 本轮验证：
+  - `npm run build` 通过
+  - 11 寸横屏 iPad 自动校验：
+    - `output/ui-ipad-pass-p1/summary.json`
+    - 结果保持：
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `errors = []`
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-p1/shot-0.png`
+    - `output/web-game-ipad-p1/state-0.json`
+    - 本轮 skill client 只是标准首页状态回归，确认改动未引入新 console/page error；注意它仍是非 iPad 视口。
+  - iPad 真图复核：
+    - `output/ipad-ui-verify/holdem-hero-turn-auto-panel.png`
+    - 已确认新增决策摘要条和推荐按钮高亮正常出现，未把底部操作区撑爆。
+    - `output/ipad-ui-verify/holdem-postflop-controls.png`
+    - 这次流程在摊牌/结算层收尾，说明回合推进未因控制区改动出错，但未额外产出新的翻牌后控制区特写。
+- 下一步建议：
+  - 继续做 P1 第二轮时，可以顺着这次的摘要条往下补“下注滑杆更好抓 + 预设下注更像主操作”的优化，不需要再改 P0 的壳体与 11/13 尺寸层。
+
+2026-03-17
+- P1 第二轮：iPad 德州下注区“推荐预设 + 更厚滑杆命中区”
+  - `src/ui/components/ControlsPanel.tsx`
+    - 下注预设改成可复用数组，避免继续散写按钮。
+    - 新增 iPad 下注推荐按钮：
+      - 当 `recommendedRaise` 在合法范围内时，预设区会额外出现一枚“建议加注到 X”的快捷按钮。
+      - 当前滑杆值等于建议值时，推荐按钮会进入 active 态。
+    - 滑杆外包一层 `raise-slider-shell`，并在 iPad 下增加 `min / current / max` 标尺，让当前数值更容易扫到。
+  - `src/ui/styles/theme.css`
+    - 新增 `recommend-raise` / `recommend-raise.active` 样式，让推荐预设更像主操作而不是普通小按钮。
+    - 新增 `raise-slider-shell` / `raise-slider-scale` 样式，给滑杆更明显的触控壳体和数值标尺。
+    - iPad 下把滑杆最小高度从 `28px` 提到 `38px`，增强拖动命中。
+    - 危险动作视觉再拉开一点：
+      - `fold` 和 `all-in` 分别使用更明确的深红 / 深金背景
+      - iPad 下两者整体透明度略降，和安全动作保持区分
+- 本轮验证：
+  - `npm run build` 通过
+  - 11 寸横屏 iPad 自动校验：
+    - `output/ui-ipad-pass-p1b/summary.json`
+    - 结果保持：
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `errors = []`
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-p1b/shot-0.png`
+    - `output/web-game-ipad-p1b/state-0.json`
+    - 本轮仍是标准首页状态回归，用于确认无新增 console/page error。
+  - iPad 真图复核：
+    - `output/ipad-ui-verify/holdem-hero-turn-auto-panel.png`
+    - 已确认底部操作区继续稳定，新增下注增强没有把控制区高度打穿。
+- 下一步建议：
+  - P1 第三轮可以继续做“跟注 / 过牌 / 加注”的主次层级再细化，或者把自动行动区再压缩，给下注区腾出更多纵向空间。
+
+2026-03-17
+- P1 第三轮：iPad 德州操作区“自动行动压缩 + 安全主动作强化”
+  - `src/ui/components/ControlsPanel.tsx`
+    - 自动行动头部改成：
+      - 左侧保留标题
+      - 右侧展示当前自动行动状态胶囊
+      - 有自动行动时提供 `清除` 快捷按钮，不必再下拉选择后才能取消
+    - `check / call` 在被判断为当前安全主动作时会额外带上 `is-safe-primary`，和激进推荐动作形成区分。
+  - `src/ui/styles/theme.css`
+    - iPad 行动按钮改为不等宽列：
+      - `fold` / `all-in` 稍窄
+      - `check` / `call` / `raise` 更宽
+      - 让高频安全动作与主下注动作更容易点中
+    - 新增 `is-safe-primary` 样式，给安全主动作单独的青绿色层级。
+    - 自动行动头部新增：
+      - `auto-action-inline-head-actions`
+      - iPad 当前状态胶囊样式
+      - `auto-action-clear` 快捷按钮样式
+    - 保持自动行动区整体高度不增加，只把内部信息密度重排。
+- 本轮验证：
+  - `npm run build` 通过
+  - 11 寸横屏 iPad 自动校验：
+    - `output/ui-ipad-pass-p1c/summary.json`
+    - 结果保持：
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `errors = []`
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-p1c/shot-0.png`
+    - `output/web-game-ipad-p1c/state-0.json`
+    - 仍是标准首页状态回归，用于确认无新增 console/page error。
+  - iPad 真图复核：
+    - `output/ipad-ui-verify/holdem-hero-turn-auto-panel.png`
+    - 已确认自动行动头部压缩后仍完整可见，未遮挡选择框或控制区。
+- 下一步建议：
+  - P1 如果继续，下一轮可以开始压“翻牌后控制区特写验证 + 下注区在不同街道下的信息优先级”，尤其是 turn / river 的简化显示。
+
+2026-03-17
+- P1 第四轮：iPad 德州控制区“按街道切换信息优先级”
+  - `src/ui/components/ControlsPanel.tsx`
+    - 新增 `InfoFact` 结构，把 iPad 摘要条和右侧小统计改成动态 facts，而不是写死固定三/四项。
+    - `controls-decision-brief` 按街道切换重点：
+      - `preflop`：优先展示当前动作 / 底池 / 建议加注
+      - `flop`：优先展示当前动作 / 底池赔率或底池 / 建议加注
+      - `turn`：优先展示当前动作 / 底池赔率或有效筹码 / 建议加注或底池
+      - `river`：优先展示当前动作 / 底池赔率或底池 / 有效筹码
+    - iPad 右侧 `controls-mini-stats` 也改成按街道切换：
+      - `preflop / flop` 继续保留建议加注
+      - `turn` 改成显示底池
+      - `river` 压缩成 3 条，更偏向赔率 / SPR / 有效筹码
+  - `src/ui/styles/theme.css`
+    - `controls-mini-stats` 在出现奇数项时，让最后一张横跨两列，避免 turn / river 三项布局发散。
+- 本轮验证：
+  - `npm run build` 通过
+  - 11 寸横屏 iPad 自动校验：
+    - `output/ui-ipad-pass-p1d/summary.json`
+    - 结果保持：
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `errors = []`
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-p1d/shot-0.png`
+    - `output/web-game-ipad-p1d/state-0.json`
+    - 仍是标准首页状态回归，用于确认无新增 console/page error。
+  - iPad 真图复核：
+    - `output/ipad-ui-verify/holdem-hero-turn-auto-panel.png`
+    - 这次脚本仍停在 preflop，但已确认按街道切换逻辑没有把现有 preflop 布局打坏。
+- 下一步建议：
+  - 如果继续做 P1，最值得补的是“专门命中 flop / turn / river 的 iPad 截图验证脚本”，这样可以把这轮的动态信息优先级真正逐街验透。
+
+2026-03-17
+- P1 验证补强：逐街 iPad 德州控制区校验
+  - 新增脚本：`scripts/verify-ipad-holdem-stages.mjs`
+    - iPad 横屏上下文启动德州 1 AI 对局
+    - 自动推进并在 hero 回合抓取 `preflop / flop / turn / river`
+    - 对每个街道导出：
+      - 全页截图
+      - 当前推荐文案
+      - 摘要条 facts
+      - 右侧 mini stats
+  - 输出目录：`output/ipad-holdem-stages`
+    - `preflop.png/.json`
+    - `flop.png/.json`
+    - `turn.png/.json`
+    - `river.png/.json`
+    - `summary.json`
+- 本轮验证结果：
+  - 四个街道全部命中：
+    - `capturedStages = ["preflop", "flop", "turn", "river"]`
+    - `missingStages = []`
+  - 动态信息优先级验证通过：
+    - `preflop`
+      - 摘要条：当前动作 / 底池 / 建议加注到
+      - mini stats：底池赔率 / SPR / 有效筹码 / 建议加注到
+    - `flop`
+      - 摘要条：下注 / 底池 / 建议加注到
+      - mini stats：底池赔率 / SPR / 有效筹码 / 建议加注到
+    - `turn`
+      - 摘要条：下注 / 有效筹码 / 建议加注到
+      - mini stats：底池赔率 / SPR / 有效筹码 / 底池
+    - `river`
+      - 摘要条：下注 / 底池 / 有效筹码
+      - mini stats：底池赔率 / SPR / 有效筹码
+  - 视觉复核：
+    - `output/ipad-holdem-stages/turn.png`
+    - `output/ipad-holdem-stages/river.png`
+    - 已确认 `turn / river` 的底部信息比 preflop 更轻，没有再重复堆建议加注。
+  - 另行验证：
+    - `npm run build` 通过
+    - `output/ui-ipad-pass-p1d/summary.json` 仍为 `errors = []`
+    - `output/web-game-ipad-p1d/shot-0.png`
+    - `output/web-game-ipad-p1d/state-0.json`
+- 下一步建议：
+  - 如果按“三轮内收尾”推进，接下来可以从 P1 切到最后的收口轮：把德州底部控制区的视觉权重做一次整体清理，然后统一回归所有 iPad 主路径。
+
+2026-03-17
+- 部分完成项收口：德州 iPad 顶部栏减负 + 默认态/动效统一
+  - `src/ui/components/TopHud.tsx`
+    - iPad 顶部栏从原来的 `信息 / 暂停 / 回放 / 下手 / 菜单` 收成 `信息 / 暂停 / 菜单`。
+    - 低频动作移入信息层快捷区：
+      - `回放`
+      - `下手`
+      - `重开`
+    - 这样顶部高频入口更稳定，低频操作集中在一个地方，不再挤占主 HUD。
+  - `src/ui/styles/theme.css`
+    - 新增 `hud-sheet-quick-actions` 样式，给 iPad 信息层里的快捷动作单独一排。
+    - iPad 下明确隐藏顶部栏的 `hud-history` / `hud-next-hand`。
+  - `src/ui/components/TableScene.tsx`
+    - 补全已开始的“预判式默认态”：
+      - iPad 到你行动时，仍默认回到 `操作面板`
+      - 本手进入 `complete` 时，如果当前是空态或仍停在 `操作面板`，自动切到 `牌桌态势`
+      - 新一手回到 `preflop` 且面板为空时，再默认回到 `操作面板`
+    - 收口已开始的动效统一：
+      - 新增 `surfaceMotionDuration`
+      - 新增 `panelSlideOffset`
+      - 新增共享 `panelMotion`
+      - 统一用于：
+        - 锦标赛信息面板
+        - iPad 底部紧凑面板
+        - 桌面 focus overlay
+        - `pot-display` 的入场节奏
+- 本轮验证：
+  - `npm run build` 通过
+  - iPad 主路径自动校验：
+    - `output/ui-ipad-pass-wrapup/summary.json`
+    - 结果保持：
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount / gdInfoOverflowCount / gdOverflowCount = 0`
+      - `errors = []`
+  - 逐街德州 iPad 校验：
+    - `output/ipad-holdem-stages-wrapup/summary.json`
+    - 结果保持：
+      - `capturedStages = ["preflop", "flop", "turn", "river"]`
+      - `missingStages = []`
+  - iPad 真图复核：
+    - `output/ipad-ui-verify/holdem-hero-turn-auto-panel.png`
+      - 顶部栏已收成 `信息 / 暂停 / 菜单`
+      - 底部控制区未受影响
+    - `output/ipad-ui-verify/holdem-postflop-controls.png`
+      - 结算覆盖层仍正常
+  - `WEB_GAME_CLIENT` 回归：
+    - `output/web-game-ipad-wrapup/shot-0.png`
+    - `output/web-game-ipad-wrapup/state-0.json`
+    - 仍为标准首页状态回归，用于确认无新增 console/page error。
+- 收口结论：
+  - 之前列为“部分完成”的项里，和德州 iPad 直接相关的收尾已经基本完成：
+    - `P1-1` 德州操作易用性：收口完成
+    - `P1-4` 顶部栏减负：收口完成
+    - `P2-9` 动效统一：本轮已把德州 iPad 相关的零散过渡收成一套
+    - `P2-10` 预判式展开：德州 iPad 已补全 hero-turn / hand-complete / new-hand 三段默认态
+  - 仍未纳入这轮收口的，是此前就没有系统开做的项目，例如斗地主/掼蛋深度手牌交互、商店二次滚动体验、完整无障碍、分屏/Stage Manager 等。
+
+- 继续收尾：iPad 手牌交互 + 商店滚动筛选二次增强
+  - `src/ui/hooks/useIpadCardSweepSelection.ts`
+    - 新增 iPad 手牌扫选 hook：
+      - pointer down 记住起始牌和当前是“补选”还是“取消选择”
+      - pointer move 超过阈值后进入 sweep 模式
+      - 通过扩展后的纵向命中带，连续识别横向扫过的牌
+      - 单点时仍可走 tap toggle，避免“必须拖动才有反应”
+  - `src/ui/components/DouDizhuCard.tsx`
+    - 手牌按钮补上 `data-card-id` 和 `aria-pressed`，给 sweep 识别和状态表达提供稳定锚点。
+  - `src/ui/components/DouDizhuTable.tsx`
+    - 斗地主 iPad 英雄回合接入 `useIpadCardSweepSelection`。
+    - sweep 开启时：
+      - 手牌容器加 `sweep-enabled`
+      - 卡牌点击切换改由容器统一处理
+      - 每张牌透出 `cardId`
+  - `src/ui/components/GuandanTable.tsx`
+    - 掼蛋 iPad 英雄回合接入同一套 sweep 逻辑。
+    - 与斗地主保持同样的容器接管方式，避免后续两套手牌交互分叉。
+  - `src/ui/components/MenuShopOverlay.tsx`
+    - 商店 tabs / filters 新增横向滚动状态感知：
+      - 记录左右两侧是否仍可滚动
+      - 切 tab / 切 filter 后，当前选项自动滚动到可视区域中央附近
+    - 对应容器补 `data-shop-tab` / `data-shop-filter`，让滚动对齐和后续校验都更稳定。
+  - `src/ui/styles/theme.css`
+    - iPad 手牌 sweep 容器增加：
+      - `touch-action: none`
+      - `user-select: none`
+      - sweep 模式下卡牌 `pointer-events: none`
+    - 这样命中统一落到手牌容器，避免按钮点击与拖选事件互相打架。
+    - 商店横向列表增加：
+      - `scroll-snap`
+      - `overscroll-behavior-x: contain`
+      - 左右滚动提示阴影
+      - iPad 横向拖拽手感参数
+  - 验证脚本：
+    - 新增 `scripts/verify-ipad-hand-shop.mjs`
+      - 验证商店 tab/filter 当前项始终在可视区域
+      - 验证斗地主 sweep 一次能连续选中多张牌
+      - 验证掼蛋 sweep 一次能连续选中多张牌
+    - 更新 `./.tmp-ipad-ui-verify.mjs`
+      - 从“点击单张牌”改为“横向拖选多张牌”，适配新的 iPad 交互模型
+  - 本轮验证：
+    - `npm run build` 通过
+    - `output/ipad-hand-shop/summary.json`
+      - `errors = []`
+      - 斗地主 sweep：`selectedCount = 5`
+      - 掼蛋 sweep：`selectedCount = 5`
+      - 商店 tabs/filter 在 11 寸横屏中文下本身没有产生溢出，但 active 项可见性和自动对齐都正常
+    - `output/ipad-hand-shop/shop-scroll.png`
+    - `output/ipad-hand-shop/doudizhu-sweep.png`
+    - `output/ipad-hand-shop/guandan-sweep.png`
+    - `output/ui-ipad-pass-hand-shop/summary.json`
+      - `errors = []`
+    - `output/ipad-ui-verify/`
+      - `shop-portrait.png`
+      - `shop-card-skin.png`
+      - `shop-ai-pack.png`
+      - `ddz-selected.png`
+      - `gd-selected.png`
+    - `output/web-game-ipad-hand-shop/shot-0.png`
+    - `output/web-game-ipad-hand-shop/state-0.json`
+      - 作为 skill 要求的额外基线回归保留
+- 下一步建议：
+  - 如果继续按收尾优先级推进，下一轮可以开始做尚未系统开做的两块：
+    - 斗地主 / 掼蛋手牌交互再往深一点的容错增强（例如拖选后撤回、边缘吸附更稳）
+    - 商店筛选与浏览节奏增强（当前项强调、边缘渐隐再精修、必要时补轻量停靠感）
+
+- 发牌随机性修正：斗地主 / 掼蛋改为“每局新 seed 随机发牌 + seed 写入回放”
+  - 问题确认：
+    - 德州一直是每手 `Math.random()` 洗牌。
+    - 斗地主此前使用 `hashSeed(round * 9973 + 77)`，新开局/重开回到 `round = 1` 时会重复同一套发牌。
+    - 掼蛋此前使用 `round * 971` 作为洗牌种子，新开局/重开同样会重复同一套发牌。
+  - 实现：
+    - 新增 `src/utils/random.ts`
+      - 统一提供 `createRandomSeed()`
+      - 优先走 `crypto.getRandomValues`
+      - 无 crypto 时回退到 `Date.now() ^ Math.random()`
+    - `src/doudizhu/engine.ts`
+      - `createRound` 改成每局生成新 `dealSeed`
+      - `dealRound` 改为按 `dealSeed` 洗牌，而不是按 `round` 洗牌
+      - `createDouDizhuSession / restartDouDizhuSession / nextDouDizhuRound` 支持可选指定 `dealSeed`
+      - `DdzRoundRuntime / DdzRoundSummary` 现在都会记录 `dealSeed`
+    - `src/guandan/engine.ts`
+      - `createRuntime` 改成每局生成新 `dealSeed`
+      - `dealHands` 改为按 `dealSeed` 洗牌，而不是按 `round` 洗牌
+      - `createGuandanSession / restartGuandanSession / nextGuandanRound` 支持可选指定 `dealSeed`
+      - `GdRoundRuntime / GdRoundSummary` 现在都会记录 `dealSeed`
+    - `src/App.tsx`
+      - `render_game_to_text` 追加：
+        - 当前斗地主 `dealSeed`
+        - 当前掼蛋 `dealSeed`
+        - 两边 recent history 的 `dealSeed`
+        - 斗地主 history viewer 当前选中局的 `dealSeed`
+    - UI 透出：
+      - `src/ui/components/DouDizhuTable.tsx`
+        - 历史详情增加“发牌种子”
+      - `src/ui/components/GuandanTable.tsx`
+        - 最近战报卡片增加“发牌种子”
+  - 测试：
+    - `tests/doudizhuRules.test.ts`
+      - 新增“相同 seed 可复现同一发牌”用例
+      - 新增“结算摘要写入 dealSeed”断言
+    - `tests/guandanEngine.test.ts`
+      - 新增“相同 seed 可复现同一发牌”用例
+      - 新增“结算摘要写入 dealSeed”断言
+  - 本轮验证：
+    - `npx vitest run tests/doudizhuRules.test.ts tests/guandanEngine.test.ts`
+      - 12 / 12 通过
+    - `npm run build` 通过
+    - 浏览器实测：
+      - `output/deal-seed-verify/summary.json`
+      - 斗地主：
+        - `firstSeed = 271759158`
+        - `secondSeed = 3718915134`
+        - `changed = true`
+  - 掼蛋：
+    - `firstSeed = 1789925252`
+    - `secondSeed = 912686626`
+    - `changed = true`
+  - `WEB_GAME_CLIENT` 基线回归：
+    - `output/web-game-deal-seed/shot-0.png`
+    - `output/web-game-deal-seed/state-0.json`
+
+- iPad 动效统一 + 无障碍优化收口
+  - 动效统一：
+    - 新增 `src/ui/motionProfile.ts`
+      - 把桌面 / iPad 的 `full | soft | reduced` 动效参数统一收成一个 profile
+      - 当前接入：
+        - `src/ui/components/TableScene.tsx`
+        - `src/ui/components/ReplayViewer.tsx`
+    - `src/ui/styles/theme.css`
+      - 新增 iPad 全局 motion vars：
+        - `--ipad-motion-fast`
+        - `--ipad-motion-base`
+        - `--ipad-motion-slow`
+        - `--ipad-motion-shift-*`
+        - `--ipad-card-lift-*`
+      - 已把关键 iPad 交互接到统一变量：
+        - 首页模式卡 / 商店入口整块触控
+        - 主菜单外观资产折叠头
+        - 商店 tabs / filters / preview card
+        - 德州底部 dock 按钮
+        - 回放 summary card / focus card pulse
+        - 斗地主 / 掼蛋手牌抬起与按压反馈
+      - `reduced` 下会关闭 iPad attention pulse，只保留静态强调
+  - 无障碍：
+    - `src/ui/components/IpadInfoSheet.tsx`
+      - 补齐 `aria-labelledby / aria-describedby`
+      - 增加 `sheetId` 透传，供触发按钮 `aria-controls`
+      - 打开时自动把焦点送进弹层关闭按钮
+      - `Escape` 关闭
+      - 关闭后焦点恢复到触发按钮
+      - 增加 `Tab` 循环，避免焦点逃出弹层
+    - `src/ui/components/MainMenu.tsx`
+      - iPad 外观资产折叠头补 `aria-controls`
+    - `src/ui/components/TopHud.tsx`
+      - 信息按钮补 `aria-haspopup=\"dialog\" + aria-expanded + aria-controls`
+    - `src/ui/components/DouDizhuTable.tsx`
+      - iPad 更多按钮补 dialog 关联
+      - AI 难度下拉补 `aria-label`
+    - `src/ui/components/GuandanTable.tsx`
+      - iPad 更多按钮补 dialog 关联
+      - 顶部与信息弹层里的 AI 难度下拉补 `aria-label`
+    - `src/ui/components/ControlsPanel.tsx`
+      - 自动行动下拉补 `aria-label`
+      - 加注滑杆补 `aria-label / aria-valuetext`
+    - `src/ui/styles/theme.css`
+      - iPad 关键交互统一补高对比 `:focus-visible` outline
+  - 测试：
+    - 新增 `tests/uiMotionProfile.test.ts`
+      - 校验 iPad profile 比桌面更紧凑
+      - 校验 `reduced` 确实进一步收缩 motion
+  - 本轮验证：
+    - `npx vitest run tests/motionPreferences.test.ts tests/uiMotionProfile.test.ts`
+      - 5 / 5 通过
+    - `npm run build`
+      - 两次通过（含补完 dialog 初始焦点后的最终构建）
+    - iPad 主路径回归：
+      - `output/ui-ipad-pass-motion-a11y/summary.json`
+      - `errors = []`
+      - `holdemHud.rows = 1`
+      - 斗地主 / 掼蛋 overflow 仍为 `0`
+    - 德州逐街回归：
+      - `output/ipad-holdem-stages-motion-a11y/summary.json`
+      - `missingStages = []`
+    - iPad 无障碍专项：
+      - `output/ipad-a11y-motion/summary.json`
+      - 外观资产折叠头 `aria-controls` 正常
+      - HUD 信息按钮 `aria-haspopup=\"dialog\"` / `aria-controls` 正常
+      - dialog 焦点打开时落到“关闭”按钮
+      - 关闭后焦点恢复到触发按钮
+    - `WEB_GAME_CLIENT`：
+      - `output/web-game-ipad-motion-a11y/shot-{0,1}.png`
+      - `output/web-game-ipad-motion-a11y/state-{0,1}.json`
+      - 这轮 client 走的是桌面环境基线，已稳定点进德州菜单页
+
+- 下一步建议：
+  - 如果继续收尾 P2 / P3，优先顺序建议是：
+    - 把 `TableEffectsLayer` 也接入统一 motion profile，彻底收掉 iPad 特效节奏
+    - 做一轮 iPad 高对比 / 大字号容错检查
+    - 再决定要不要补更完整的 VoiceOver 文案
+
+- iPad 原生调试准备完成
+  - 目标：
+    - 让当前 iPad 版本可以直接进 Xcode 做真机调试
+    - 保持原生层与现有“iPad 固定横屏”产品决策一致
+  - 调整：
+    - `ios/App/App/Info.plist`
+      - 去掉 portrait / upside-down
+      - 现在原生层只保留 `LandscapeLeft / LandscapeRight`
+    - `package.json`
+      - 新增 `mobile:ios:prepare`
+      - 命令内容：`npm run build && npx cap sync ios`
+    - 新增文档：
+      - `iPad真机调试说明.md`
+      - 覆盖 build/sync、Xcode 打开、签名、iPad 信任与开发者模式
+    - 更新 `iOS上架说明.md`
+      - 改成横屏说明
+      - 把同步命令统一成 `mobile:ios:prepare`
+      - 说明 CocoaPods 在这套 Capacitor 8 + SPM 工程里是可选
+  - 本轮验证：
+    - `npm run mobile:ios:prepare` 通过
+      - `build` 成功
+      - `npx cap sync ios` 成功
+    - `xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build`
+      - `BUILD SUCCEEDED`
+    - 当前工程信息确认：
+      - Xcode 可识别 `App` scheme
+      - `TARGETED_DEVICE_FAMILY = 2`（iPad only）
+      - `PRODUCT_BUNDLE_IDENTIFIER = com.klaywei.neoncardclub`
+      - `DEVELOPMENT_TEAM = 4N4YT764RZ`
+- 下一步建议：
+  - 真机前只需在 Xcode 里确认 `Signing & Capabilities`
+  - 如果要改成你自己的 Team / Bundle ID，直接在 Xcode target 里改，不要手改 pbxproj
+
+- iPad 扑克桌面二次压缩优化（本轮）
+  - 目标：
+    - 解决斗地主 iPad 出牌区“头像 / 选择目标 / 提示 / 操作栏”相互遮挡的问题
+    - 缩小斗地主结算层，让底部明细完整显示
+    - 压缩德州 iPad 顶部双信息栏与底部操作面板，给牌桌更多空间
+    - 放大德州多人桌 AI / 玩家手牌，同时把公共牌收小一点做平衡
+  - 代码调整：
+    - `src/ui/components/TopHud.tsx`
+      - iPad HUD 改为单条信息栏
+      - 在顶栏中直接加入当前街段 / 会话 / 模式 / 盲注 / 底池 / 当前行动者信息
+    - `src/ui/components/TableScene.tsx`
+      - iPad 下公共牌尺寸从 `seat-roomy` 收到 `seat-balanced`
+      - 放大 iPad 牌桌座位缩放系数，提升多人桌 AI / 玩家手牌可读性
+    - `src/ui/components/SeatPanel.tsx`
+      - iPad 角色卡模式下改用更大的手牌尺寸档位，避免 AI 手牌过小
+    - `src/ui/styles/theme.css`
+      - iPad 顶栏改为单行横向滚动 pills，隐藏第二条 `table-stage`
+      - 德州 `ipad-holdem-compact` 收紧底部 dock / controls 面板高度，提升 `table-felt` 可用高度
+      - 调整德州底池位置与多人桌 seat card 尺寸
+      - 斗地主 `phase-playing` 人类区改成两行主布局：
+        - 第一行：头像信息 + 选择/目标摘要
+        - 第二行：提示内容 + 操作按钮
+      - 斗地主结算面板改成 iPad 可滚动、较窄的居中卡层，底部信息不再被截断
+  - 本轮验证：
+    - `npm run build` 通过
+    - `WEB_GAME_CLIENT`
+      - 首次尝试点击首页动画按钮超时
+      - 兜底 client 产物：
+        - `output/web-game-ipad-layout-check-2/shot-0.png`
+        - `output/web-game-ipad-layout-check-2/state-0.json`
+    - iPad 通用验证：
+      - `output/ipad-layout-verify/summary.json`
+      - 结果：
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+    - 关键截图：
+      - 德州单条顶栏 + 桌面：
+        - `output/app-store-ipad-layout-pass/03-holdem-table.png`
+      - 德州压缩后的操作面板：
+        - `output/app-store-ipad-layout-pass/04-holdem-focus-controls.png`
+      - 斗地主出牌中布局：
+        - `output/ddz-ipad-layout-check/ddz-playing.png`
+      - 斗地主结算层完整显示：
+        - `output/ddz-ipad-layout-check/ddz-settlement.png`
+      - 德州 9 人桌回归：
+        - `output/holdem-ipad-9p-check/holdem-9p-table.png`
+        - `output/holdem-ipad-9p-check/holdem-9p-controls.png`
+  - 额外说明：
+    - `npm run lint` 仍失败，但这轮主要是仓库已有 React Compiler / hooks 规则报错：
+      - `src/ui/components/ControlsPanel.tsx`
+      - `src/ui/components/MenuShopOverlay.tsx`
+      - `src/ui/components/TableScene.tsx`
+    - 本轮未额外清理这些历史 lint 项，避免扩大改动面
+
+- iPad / React Compiler 收尾清理（本轮）
+  - 目标：
+    - 清理上一轮遗留的 React Compiler / hooks lint 报错
+    - 保持 iPad 扑克桌与商店滚动交互行为不变
+    - 做一轮 lint / build / test / Playwright 收尾验证
+  - 代码调整：
+    - `src/ui/components/ControlsPanel.tsx`
+      - 去掉 `decisionFacts` 与 `miniStats` 上不必要的 `useMemo`
+      - 改成直接计算，避免 `react-hooks/preserve-manual-memoization` 报错
+    - `src/ui/components/MenuShopOverlay.tsx`
+      - 新增 `EMPTY_SCROLL_STATE`
+      - `tabScrollState` / `filterScrollState` 改为只在 overlay 打开且 iPad 模式下参与显示
+      - 去掉 effect 中 “关闭时立刻 setState 归零” 的同步更新，避免 `react-hooks/set-state-in-effect`
+    - `src/ui/components/TableScene.tsx`
+      - iPad `focusPanel` 自动切换改为 `requestAnimationFrame` 异步调度
+      - 保留原有“轮到你时打开 controls / 结算后切到 insights”的行为，同时通过 lint
+  - 本轮验证：
+    - `npm run lint` 通过
+    - `npm run build` 通过
+    - `npm run test` 通过（25 files / 119 tests）
+    - `WEB_GAME_CLIENT`
+      - 产物：
+        - `output/web-game-cleanup-pass/shot-0.png`
+        - `output/web-game-cleanup-pass/state-0.json`
+    - iPad 通用验证：
+      - `output/ipad-layout-cleanup-verify/summary.json`
+      - 结果：
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+      - 关键截图：
+        - `output/ipad-layout-cleanup-verify/doudizhu.png`
+        - `output/ipad-layout-cleanup-verify/holdem-settlement.png`
+  - 下一步建议：
+    - 如果还要继续做 UI 收尾，可以下一轮专门清理仓库里的 `.tmp-*` 调试脚本和截图产物，避免工作区继续膨胀
+
+- 工作区噪音收口（本轮）
+  - 目标：
+    - 把仓库根目录明显的临时调试脚本与截图清走
+    - 避免后续 `git status` 再被 `.tmp` 产物刷屏
+  - 调整：
+    - 更新 `.gitignore`
+      - 新增 `.tmp`
+      - 新增 `.tmp-*`
+    - 已删除临时产物：
+      - 根目录 `.tmp-*.png` / `.tmp-*.mjs`
+      - `.tmp/` 目录下的临时校验脚本
+  - 结果：
+    - 根目录临时截图与脚本已从磁盘移除
+    - `git status` 不再出现这批调试文件
+  - 说明：
+    - 这轮只做工作区清理，没有改动运行逻辑，因此未额外重跑构建/测试
+
+- 正式未跟踪文件归类（本轮）
+  - 归类结论：
+    - 建议纳入版本控制：
+      - `src/**` 新增源码目录与组件（多语言、斗地主、掼蛋、商店、人物立绘、牌桌效果等）
+      - `tests/**` 新增测试
+      - `scripts/*.mjs` 校验与截图脚本
+      - `public/*` 图标、PWA 资源、隐私/support 页面
+      - `app-store/*` 上架文档
+      - `ios/` Capacitor iOS 工程本体
+      - `capacitor.config.ts`
+      - `iOS上架说明.md`
+      - `iPad真机调试说明.md`
+    - 建议忽略：
+      - `release/upload/` 上传用 zip 包目录（当前约 930MB）
+    - 已有忽略且无需额外处理：
+      - `output/`
+      - `ios/App/App/public`
+      - `ios/App/Pods`
+      - `ios/App/build`
+      - `ios/DerivedData`
+      - `ios/xcuserdata`
+  - 调整：
+    - `.gitignore` 新增 `release/upload/`
+  - 结果：
+    - 未跟踪列表里剩下的基本都是正式项目文件，不再混着临时截图和上传包
+  - 说明：
+    - 本轮只做归类和 ignore 收口，没有改动业务逻辑，因此未额外重跑构建/测试
+
+- iPad 终局压缩与长手牌自适应（本轮）
+  - 目标：
+    - 继续压缩德州 iPad 底部操作区，把默认态改成摘要操作而不是整块信息堆叠
+    - 优化 9 人桌 iPad 座位卡，让外围 AI 座位更紧凑但牌面更清楚
+    - 给 斗地主 / 掼蛋 人类长手牌区加入按牌数自适应展开
+  - 代码调整：
+    - `src/ui/components/TableScene.tsx`
+      - 新增 `crowdedIpadTable` 判断
+      - iPad 9+ 人桌单独加类 `ipad-holdem-dense-table`
+      - 上调 iPad 8+/9+ 人桌 `seatScaleMultiplier`
+      - iPad 控件面板改为传入 `condensedIpad`
+    - `src/ui/components/SeatPanel.tsx`
+      - 新增 `crowdedTableMode`
+      - 9+ 人桌下改用更紧凑的 seat footer/status 呈现
+      - 2 张手牌在拥挤桌上改为更大的 `seat-balanced` 牌面
+    - `src/ui/components/ControlsPanel.tsx`
+      - 新增 iPad 压缩模式
+      - 自动行动与加注细节改为可展开
+      - 默认态保留主操作、建议摘要和简短加注概览
+    - `src/ui/components/DouDizhuTable.tsx`
+      - 人类手牌行新增 `hand-density-*` 类
+    - `src/ui/components/GuandanTable.tsx`
+      - 人类手牌行新增 `hand-density-*` 类
+    - `src/ui/seatLayout.ts`
+      - 调整 iPad 9/10 人 focus 布局坐标与 scale
+    - `src/ui/styles/theme.css`
+      - 压缩 iPad 德州 dock / panel 高度
+      - 新增 dense-table seat 样式
+      - 新增 collapsed raise/auto-action 样式
+      - 新增长手牌 `hand-density-standard/spread/fanned` 自适应卡宽、重叠和手牌行高度
+  - 验证：
+    - `npm run lint` 通过
+    - `npm run build` 通过
+    - `npm run test` 通过（25 文件 / 119 用例）
+    - iPad 通用验证：
+      - `output/ipad-pass-2-layout/summary.json`
+      - 结果：
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+    - iPad 手牌 / 商店验证：
+      - `output/ipad-pass-2-hand-shop/summary.json`
+      - 结果：
+        - 斗地主：`rowClassName = ddz-hand-row hand-density-standard sweep-enabled`
+        - 掼蛋：`rowClassName = gd-hand-row hand-density-fanned sweep-enabled`
+        - `errors = []`
+    - iPad 德州分街验证：
+      - `output/ipad-pass-2-holdem-stages/summary.json`
+      - 结果：
+        - `preflop/flop/turn/river` 全部捕获成功
+        - 默认压缩态下 `miniStats = []`（仅在展开加注细节时显示）
+    - 额外回归：
+      - Playwright skill client：
+        - `output/ipad-pass-2-client/shot-0.png`
+        - `output/ipad-pass-2-client/state-0.json`
+      - 9 人桌专项截图：
+        - `output/ipad-pass-2-9p/holdem-9p-menu.png`
+        - `output/ipad-pass-2-9p/holdem-9p-table.png`
+        - `output/ipad-pass-2-9p/holdem-9p-controls.png`
+        - `output/ipad-pass-2-9p/metrics.json`
+      - 9 人桌改善指标：
+        - `playerCount = 9`
+        - `minSeatWidth = 79.68`
+        - `maxSeatWidth = 84.37`
+        - 对比上一轮深查记录的约 `68-72px`，外围座位卡可读性明显提升
+      - 2 人桌底部交互区定量：
+        - `dockHeight = 50`
+        - `panelHeight = 152`
+        - `interactiveBottomHeight ratio = 0.169`
+  - 观察：
+    - 德州 iPad 默认态已经更像“操作摘要条”，不再把自动行动与加注细节全量塞进首屏
+    - 9 人桌外围 AI 座位卡仍然是紧凑样式，但牌面、筹码和下注信息比上一轮更容易辨认
+    - 掼蛋长手牌改进最明显；斗地主在 20+ 张时也会自动展开，但后续还可以继续做“局部放大/双行”方案
+
+2026-03-19
+- 继续优化 iPad 德州“功能栏下方空白过大”问题。
+  - 根因排查：
+    - 先补了 `.app-shell` 与 `html/body/#root` 的明确高度链，确认不是根节点未撑满导致的留白。
+    - 再用 Playwright DOM 探针量到：
+      - `.table-scene.height = 956`
+      - `.table-wrap.height = 432`
+      - `.ipad-bottom-stack.height = 508`
+    - 由此确认真正根因是 iPad 下隐藏了 `.table-stage`，但 `.table-scene` 仍保留 `grid-template-rows: auto minmax(0, 1fr) auto` 三行布局，导致 `ipad-bottom-stack` 意外占用了中间那条 `1fr` 伸展行。
+  - 修复：
+    - `src/ui/styles/theme.css`
+      - `.app-shell` 改为 `height + min-height: var(--app-height, 100dvh)`
+      - iPad `.table-scene` 改为两行：`grid-template-rows: minmax(0, 1fr) auto`
+      - iPad `.table-wrap.ipad-holdem-compact` 增加 `height: 100%` / `align-items: stretch`
+    - `src/index.css`
+      - `html, body, #root` 增加 `height: 100%`
+  - 结果：
+    - 修复后 Playwright DOM 探针：
+      - `.table-wrap.height = 898`
+      - `.table-felt.height = 862`
+      - `.ipad-bottom-stack.height = 50`
+    - 牌桌重新吃满中段视口，功能栏收回到正常 dock 高度，不再在其下方留下大块空白。
+  - 产物：
+    - 修复前截图：`output/ipad-holdem-blank-before/03-holdem-table.png`
+    - 修复后截图：`output/ipad-holdem-gap-pass-3-shots/03-holdem-table.png`
+    - 最终校验：`output/ipad-holdem-gap-final/summary.json`
+  - 验证：
+    - `npm run build` 通过
+    - `output/ipad-holdem-gap-final/summary.json`
+      - `holdemHud.rows = 1`
+      - `ddzOverflowCount = 0`
+      - `gdOverflowCount = 0`
+      - `errors = []`
+
+- 继续优化 iPad 德州人物卡与多人数座位分布。
+  - 目标：
+    - 放大 AI / 玩家人物卡
+    - 上下左右人物尽量围绕牌桌中心对称展开
+    - 覆盖 `1-10 AI`（即总人数 `2-11`）的 iPad 布局
+  - 改动：
+    - `src/ui/seatLayout.ts`
+      - 为 iPad 桌面布局补齐并重做 `2-11` 人的手工 seat positions
+      - 为 iPad crowded/focus 布局补齐 `11` 人，并整体上移顶部位、外推左右位、抬高底部弧线对称性
+    - `src/ui/components/TableScene.tsx`
+      - 提高 iPad `seatScaleMultiplier`
+      - 小桌（<=8）与大桌（9-11）都统一抬大一档
+    - `src/ui/styles/theme.css`
+      - iPad Hold'em `seat-character-card` 宽高整体增大
+      - `roomy / balanced / compact / dense` 四档都重新放大
+      - dense table（9-11 人）的人物卡与头像区也同步放大，不再沿用过小的 126px 卡片
+  - 验证：
+    - `npm run build` 通过
+    - 多人数专项截图：
+      - `output/ipad-seat-audit/holdem-ai-1.png`
+      - `output/ipad-seat-audit/holdem-ai-5.png`
+      - `output/ipad-seat-audit/holdem-ai-8.png`
+      - `output/ipad-seat-audit/holdem-ai-9.png`
+      - `output/ipad-seat-audit/holdem-ai-10.png`
+      - 以及完整 `1-10 AI` 汇总：`output/ipad-seat-audit/summary.json`
+  - 观察：
+    - 2 人桌上下中心更稳，人物卡明显更大
+    - 6-8 人桌左右与顶部的环形分布更接近围桌对称
+    - 9-11 人桌外围人物卡可读性继续提升，底部两侧与上方双点位更均衡
+
+2026-03-22
+- 优化 iPad 德州界面与牌桌皮肤，目标是恢复更完整的“会所牌桌”观感，而不是纯净到偏素的平面桌面。
+  - 发现：
+    - `theme.css` 末尾存在一组 iPad 强覆盖，把 `.table-felt::before`、`.table-felt::after` 和 `.table-skin-ambient` 全部禁用了，导致 iPad 德州牌桌虽然干净，但层次和皮肤质感明显变弱。
+  - 改动：
+    - `src/ui/styles/theme.css`
+      - 新增一组最终优先级更高的 `iPad Hold'em visual polish` 覆盖
+      - 强化 `ipad-top-hud`：更完整的玻璃感、细边框、顶部 sheen、按 pill 类型分色（stage / pot / actor）
+      - 为 iPad 德州牌桌恢复克制版皮肤：中心灯芯、环形纹理、边缘 vignette、低强度桌面光带
+      - 重新启用 `.table-felt::before` / `.table-felt::after` 与 `.table-skin-ambient`，但统一压低动效和饱和度，避免“花屏”
+      - 强化 `board-area`、`pot-display`、`seat-character-card` 的材质感与对比度
+  - 验证：
+    - `npm run build` 通过
+    - iPad 截图回看：
+      - `output/ipad-holdem-visual-pass/03-holdem-table.png`
+      - `output/ipad-holdem-visual-pass/04-holdem-focus-controls.png`
+    - Playwright skill client：
+      - `output/ipad-holdem-polish-client/shot-0.png`
+    - iPad 结构校验：
+      - `output/ipad-holdem-visual-validate/summary.json`
+      - 结果：
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+  - 观察：
+    - HUD 更像“顶部控制带”，不再只是平铺的一行按钮和标签
+    - 牌桌皮肤重新有了中心光芯、轨道感和边缘层次，但整体仍然偏克制，适合 iPad 长时间观看
+
+- 2026-03-22 19:47 CST
+  - 用户反馈：iPad 德州这版质感方向对了，但下方模块仍然偏厚，需要继续压缩，把更多高度还给牌桌。
+  - 本轮处理：
+    - 在 `src/ui/styles/theme.css` 末尾新增一组仅作用于 `html[data-ipad-like='true'][data-device-orientation='landscape']` 的覆盖
+    - 将 `ipad-bottom-stack` 的壳层高度从前序覆盖的 `174px` 再压到 `156px`
+    - 进一步收紧 `focus-dock`、`btn.action`、`auto-action-inline`、`raise-presets`、`raise-slider-shell` 与 `auto-action-select`
+    - 保留现有玻璃感与材质感，不回退此前完成的 iPad 德州皮肤优化
+  - 验证：
+    - `npm run build` 通过
+    - iPad 截图回看：
+      - `output/ipad-holdem-bottom-compress/03-holdem-table.png`
+      - `output/ipad-holdem-bottom-compress/04-holdem-focus-controls.png`
+    - Playwright skill client：
+      - `output/ipad-holdem-bottom-compress-client/shot-0.png`
+    - iPad 结构校验：
+      - `output/ipad-holdem-bottom-compress-validate/summary.json`
+      - 结果：
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+  - 观察：
+    - 底部功能栏更贴底，展开态的按钮区、自动行动区和加注区都更薄
+    - 这轮是“压缩底栏本身”，不是用底栏去填补原先的空白
+
+- 2026-03-22 20:06 CST
+  - 用户反馈：iPad 德州的人物卡仍然偏高，会遮到公共牌上方区域；带人物的扑克牌花色也偏大；牌桌整体更像抽象发光面板，不够像真实牌桌。
+  - 本轮处理：
+    - 在 `src/ui/styles/theme.css` 末尾新增一组 iPad 横屏德州桌专属覆盖
+    - 将德州人物卡改为“更宽、更矮”的比例，并同步压低头像框、状态条、底部筹码/下注指标的纵向占用
+    - 缩小 `ipad-holdem-compact` 下人物牌的角标花色与 `face-card-figure` 尺寸
+    - 重做 iPad 德州牌桌皮肤：外圈更像木质桌轨，内圈是明显的椭圆 betting line，中央社区牌托盘与底池区材质更接近实体扑克桌
+    - 在 `src/ui/components/FaceCardFigure.tsx` 中按 `compact` 状态缩小人物牌底部花色徽记与字标
+  - 验证：
+    - `npm run build` 通过
+    - iPad 截图回看：
+      - `output/ipad-holdem-table-remodel/03-holdem-table.png`
+      - `output/ipad-holdem-table-remodel/04-holdem-focus-controls.png`
+    - Playwright skill client：
+      - `output/ipad-holdem-table-remodel-client/shot-0.png`
+    - iPad 结构校验：
+      - `output/ipad-holdem-table-remodel-validate/summary.json`
+      - 结果：
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+  - 观察：
+    - 上方 AI 人物卡与公共牌之间的压迫感明显减轻
+    - 牌桌现在有更清晰的“桌轨 + 赛道线 + 中央牌区”结构，桌感比上一版强很多
+
+- 2026-03-22 20:19 CST
+  - 用户反馈：
+    - 牌桌想恢复成原来更完整的方形轮廓，当前椭圆木轨版在 iPad 上显示不完整
+    - 德州结算页仍然偏高，需要上下滑动
+    - 下一手开始时不希望默认切到牌桌态势，希望默认留在操作面板
+    - 公共牌上下的人物卡还可以再压短一点，避免显示不完全
+  - 本轮处理：
+    - 在 `src/ui/components/TableScene.tsx` 中调整 iPad `focusPanel` 自动切换逻辑
+      - 结算阶段不再自动跳到 `insights`
+      - `complete -> preflop` 时强制回到 `controls`
+    - 在 `src/ui/styles/theme.css` 末尾新增一组 iPad 横屏德州收尾覆盖
+      - 将牌桌轮廓恢复成更完整的圆角方桌外形
+      - 再压低德州人物卡高度、头像框高度和底部指标高度
+      - 收紧德州结算页的外边距、标题、portrait strip、meta grid、result card 与按钮间距
+    - 按之前约定，完成后执行 `npm run mobile:ios:prepare`，将最新版本同步到 Xcode
+  - 验证：
+    - `npm run build` 通过
+    - iPad 截图回看：
+      - `output/ipad-holdem-cleanup-pass/03-holdem-table.png`
+      - `output/ipad-holdem-cleanup-pass/04-holdem-focus-controls.png`
+      - `output/ipad-holdem-cleanup-validate/holdem-settlement.png`
+    - iPad 结构校验：
+      - `output/ipad-holdem-cleanup-validate/summary.json`
+      - 结果：
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+    - 专项探针：
+      - 结算页 `clientHeight = 716`，`scrollHeight = 716`，`needsScroll = false`
+      - 确认继续后 `activeDockButton = 操作面板`，且 `stage = preflop`
+    - iOS 同步：
+      - `npm run mobile:ios:prepare` 已完成
+
+- 2026-03-22 20:31 CST
+  - 用户反馈：
+    - iPad 德州牌桌上下还可以继续扩大
+    - 上方工作栏还可以再压缩
+    - 下方模块底部边缘不该再留空
+    - 牌桌和下方模块之间的层级关系要更清楚
+    - 牌桌特效先全部拿掉，重新做颜色、花纹和材质
+  - 本轮处理：
+    - 在 `src/ui/styles/theme.css` 末尾新增一组 iPad 横屏德州极简桌布覆盖
+    - 将 `app-shell` 顶/底 padding 继续收紧，压缩 `top-hud` 的标题、pill 和按钮尺寸
+    - 提高 `ipad-holdem-compact .table-felt` 的最小高度，并移除 `table-wrap` 额外底部留白
+    - 将 `ipad-bottom-stack` 的底部 padding 收到仅保留 safe area
+    - 彻底关闭 iPad 德州桌面的 `table-effects-layer`、ambient、pot-fx 与 felt pseudo-element 特效
+    - 用更安静的深绿桌布重新设计牌桌材质：低对比织纹、无炫光、弱金属底池壳层
+  - 验证：
+    - `npm run build` 通过
+    - iPad 截图回看：
+      - `output/ipad-holdem-material-pass/03-holdem-table.png`
+      - `output/ipad-holdem-material-pass/04-holdem-focus-controls.png`
+    - iPad 结构校验：
+      - `output/ipad-holdem-material-validate/summary.json`
+      - 结果：
+        - `holdemHud.height = 44`
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+    - iOS 同步：
+      - `npm run mobile:ios:prepare` 已完成
+
+- 2026-03-22 20:58 CST
+  - 用户反馈：
+    - iPad 德州公共牌上下的人物卡仍有遮挡
+    - 上方 AI 卡片上半边被挡，下方玩家卡片下半边被挡
+    - 人物卡右上角头像显示异常，整张人物卡需要重新整理
+  - 本轮处理：
+    - 在 `src/ui/seatLayout.ts` 重新内收 iPad `table/focus` 布局的顶部与底部座位坐标
+    - 顶部 AI 座位整体下移、底部 hero 与邻近位整体上移，减少贴边裁切
+    - 在 `src/ui/styles/theme.css` 末尾追加最终 iPad Hold'em 覆盖
+    - 显式把 `.table-felt` 设为 `overflow: visible`，避免人物卡被桌面边缘裁掉
+    - 废弃旧的“右上角绝对定位头像”方案，改回卡内静态布局
+    - 重新整理人物卡比例：更宽、更矮，头像区/徽章/状态条/底部筹码条一起压缩
+  - 验证：
+    - `npm run build` 通过
+    - iPad 截图：
+      - `output/ipad-seat-card-fix-pass/03-holdem-table.png`
+      - `output/ipad-seat-card-fix-pass/04-holdem-focus-controls.png`
+      - `output/ipad-seat-card-fix-pass/08-holdem-11p-table.png`
+    - iPad 结构校验：
+      - `output/ipad-seat-card-fix-validate/summary.json`
+      - 结果：
+        - `holdemHud.height = 44`
+        - `holdemHud.rows = 1`
+        - `ddzOverflowCount = 0`
+        - `gdOverflowCount = 0`
+        - `errors = []`
+    - 额外检查：
+      - 11 人极限桌截图确认顶部 AI 与底部 hero 都完整可见
+    - iOS 同步：
+      - `npm run mobile:ios:prepare` 已完成

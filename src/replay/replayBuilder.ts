@@ -1,4 +1,4 @@
-import type { Card } from '../types/cards';
+import type { Card, GameMode } from '../types/cards';
 import type { AIDifficulty, EvaluatedHandInfo, PayoutItem, PlayerState, PotSegment, SessionMode } from '../types/game';
 import type {
   ActionEvent,
@@ -11,9 +11,10 @@ import type {
 import { reconstructSnapshots } from './replayReconstructor';
 
 export interface HandReplayBuilderState {
+  sessionId: string;
   handId: number;
   timestamp: number;
-  gameMode: 'standard' | 'shortDeck';
+  gameMode: GameMode;
   sessionMode: SessionMode;
   aiDifficulty: AIDifficulty;
   blindInfo: { smallBlind: number; bigBlind: number };
@@ -29,9 +30,10 @@ export interface HandReplayBuilderState {
 }
 
 export interface ReplayBuilderInit {
+  sessionId: string;
   handId: number;
   timestamp: number;
-  gameMode: 'standard' | 'shortDeck';
+  gameMode: GameMode;
   sessionMode: SessionMode;
   aiDifficulty: AIDifficulty;
   blindInfo: { smallBlind: number; bigBlind: number };
@@ -57,6 +59,7 @@ export function createHandReplayBuilder(init: ReplayBuilderInit): HandReplayBuil
       name: p.name,
       seat: p.seat,
       style: p.style,
+      portraitKey: p.portraitKey,
       stack: init.startingChips[p.id] ?? p.stack,
       currentBet: 0,
       folded: false,
@@ -115,6 +118,7 @@ export function finalizeHandReplay(
   const snapshots = reconstructSnapshots(builder.initialSnapshot, builder.events);
 
   return {
+    sessionId: builder.sessionId,
     handId: builder.handId,
     timestamp: builder.timestamp,
     gameMode: builder.gameMode,

@@ -56,6 +56,8 @@ function makeTable(overrides: Partial<TableState>): TableState {
     dealerSeat: overrides.dealerSeat ?? 0,
     smallBlindSeat: overrides.smallBlindSeat ?? 0,
     bigBlindSeat: overrides.bigBlindSeat ?? 1,
+    straddleSeat: overrides.straddleSeat,
+    straddleAmount: overrides.straddleAmount ?? 0,
     betting:
       overrides.betting ?? {
         currentBet: 20,

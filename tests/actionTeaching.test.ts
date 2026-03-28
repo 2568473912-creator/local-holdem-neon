@@ -30,14 +30,15 @@ function makePlayer(overrides: Partial<PlayerState>): PlayerState {
 
 function makeTable(overrides: Partial<TableState>): TableState {
   const players = overrides.players ?? [makePlayer({ id: 'P0', isHuman: true }), makePlayer({ id: 'P1', seat: 1 })];
+  const mode = overrides.mode ?? 'standard';
 
   return {
     handId: overrides.handId ?? 1,
-    mode: overrides.mode ?? 'standard',
+    mode,
     stage: overrides.stage ?? 'flop',
     config:
       overrides.config ?? {
-        mode: 'standard',
+        mode,
         sessionMode: 'cash',
         aiCount: players.length - 1,
         startingChips: 1000,
@@ -55,6 +56,8 @@ function makeTable(overrides: Partial<TableState>): TableState {
     dealerSeat: overrides.dealerSeat ?? 0,
     smallBlindSeat: overrides.smallBlindSeat ?? 0,
     bigBlindSeat: overrides.bigBlindSeat ?? 1,
+    straddleSeat: overrides.straddleSeat,
+    straddleAmount: overrides.straddleAmount ?? 0,
     betting:
       overrides.betting ?? {
         currentBet: 40,

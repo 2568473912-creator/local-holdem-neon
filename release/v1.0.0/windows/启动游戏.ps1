@@ -7,7 +7,7 @@ if (-not (Test-Path (Join-Path $root "index.html"))) {
   exit 1
 }
 
-Write-Host "正在启动霓虹德州俱乐部 v1.0.0 ..." -ForegroundColor Cyan
+Write-Host "正在启动夜局 v1.0.0 ..." -ForegroundColor Cyan
 Write-Host "访问地址: http://127.0.0.1:$port"
 
 if (Get-Command py -ErrorAction SilentlyContinue) {

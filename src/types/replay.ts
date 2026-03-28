@@ -10,6 +10,7 @@ import type {
   PotSegment,
   SessionMode,
 } from './game';
+import type { HumanPortraitKey } from './portrait';
 
 export type ReplayEventType =
   | 'hand_start'
@@ -61,7 +62,7 @@ export interface DealHoleEvent extends ReplayEventBase {
 export interface PostBlindEvent extends ReplayEventBase {
   type: 'post_blind';
   actorId: string;
-  blindType: 'sb' | 'bb' | 'ante';
+  blindType: 'sb' | 'bb' | 'ante' | 'straddle';
   amount: number;
   stackAfter: number;
   potAfter: number;
@@ -143,6 +144,7 @@ export interface ReplayPlayerState {
   name: string;
   seat: number;
   style: PlayerStyle;
+  portraitKey?: HumanPortraitKey;
   stack: number;
   currentBet: number;
   folded: boolean;
@@ -170,9 +172,11 @@ export interface ReplayParticipant {
   name: string;
   seat: number;
   style: PlayerStyle;
+  portraitKey?: HumanPortraitKey;
 }
 
 export interface HandHistoryRecord {
+  sessionId?: string;
   handId: number;
   timestamp: number;
   gameMode: GameMode;
@@ -200,9 +204,16 @@ export interface HandHistoryRecord {
 }
 
 export interface ReplayViewerState {
+  handKey: string;
   handId: number;
+  sessionId?: string;
   step: number;
   autoplay: boolean;
+}
+
+export interface ReplayOpenOptions {
+  record?: HandHistoryRecord;
+  initialStep?: number;
 }
 
 export type ReplayEventInput =

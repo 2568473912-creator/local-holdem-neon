@@ -12,7 +12,10 @@ dist
 dist-ssr
 *.local
 output
+.tmp
+.tmp-*
 release/*.zip
+release/upload/
 release/v*/desktop
 
 # Editor directories and files

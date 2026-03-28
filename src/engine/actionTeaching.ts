@@ -2,7 +2,7 @@ import type { GameMode } from '../types/cards';
 import type { PlayerAction, PlayerState, TableState } from '../types/game';
 import type { ActionTeachingTag } from '../types/replay';
 import type { AppliedBettingAction } from './bettingRound';
-import { evaluateByMode } from './evaluators';
+import { evaluatePlayerByMode } from './evaluators';
 
 export interface ActionTeachingMeta {
   tag: ActionTeachingTag;
@@ -20,7 +20,7 @@ interface HandSignals {
   madeScore: number;
   draw: DrawProfile;
   boardWetness: number;
-  handCategory?: ReturnType<typeof evaluateByMode>['category'];
+  handCategory?: ReturnType<typeof evaluatePlayerByMode>['category'];
 }
 
 const STANDARD_STRAIGHT_PATTERNS = buildStraightPatterns('standard');
@@ -50,6 +50,31 @@ function normalizeRank(rank: number, mode: GameMode): number {
   return mode === 'shortDeck' ? (rank - 5) / 9 : (rank - 1) / 13;
 }
 
+function scorePreflopTwoCardCombo(a: PlayerState['holeCards'][number], b: PlayerState['holeCards'][number], mode: GameMode): number {
+  const high = a.rank >= b.rank ? a : b;
+  const low = a.rank >= b.rank ? b : a;
+  const isPair = high.rank === low.rank;
+  const suited = high.suit === low.suit;
+  const gap = effectiveGap(high.rank, low.rank, mode);
+
+  let score = 0;
+  if (isPair) {
+    score = 0.56 + normalizeRank(high.rank, mode) * 0.42;
+  } else {
+    score = normalizeRank(high.rank, mode) * 0.52 + normalizeRank(low.rank, mode) * 0.3;
+    if (suited) score += mode === 'shortDeck' ? 0.1 : 0.08;
+    if (gap <= 1) score += 0.08;
+    else if (gap === 2) score += 0.04;
+    else if (gap >= 4) score -= 0.08;
+  }
+
+  if (mode === 'shortDeck' && suited) {
+    score += 0.03;
+  }
+
+  return clamp(score, 0, 1);
+}
+
 function effectiveGap(a: number, b: number, mode: GameMode): number {
   const high = Math.max(a, b);
   const low = Math.min(a, b);
@@ -63,28 +88,21 @@ function effectiveGap(a: number, b: number, mode: GameMode): number {
 }
 
 function estimatePreflopMadeScore(player: PlayerState, mode: GameMode): number {
-  const [a, b] = [...player.holeCards].sort((x, y) => y.rank - x.rank);
-  const isPair = a.rank === b.rank;
-  const suited = a.suit === b.suit;
-  const gap = effectiveGap(a.rank, b.rank, mode);
-
-  let score = 0;
-
-  if (isPair) {
-    score = 0.56 + normalizeRank(a.rank, mode) * 0.42;
-  } else {
-    score = normalizeRank(a.rank, mode) * 0.52 + normalizeRank(b.rank, mode) * 0.3;
-    if (suited) score += mode === 'shortDeck' ? 0.1 : 0.08;
-    if (gap <= 1) score += 0.08;
-    else if (gap === 2) score += 0.04;
-    else if (gap >= 4) score -= 0.08;
+  if (player.holeCards.length < 2) {
+    return 0;
   }
 
-  if (mode === 'shortDeck' && suited) {
-    score += 0.03;
+  let best = 0;
+  for (let i = 0; i < player.holeCards.length - 1; i += 1) {
+    for (let j = i + 1; j < player.holeCards.length; j += 1) {
+      const score = scorePreflopTwoCardCombo(player.holeCards[i], player.holeCards[j], mode);
+      if (score > best) {
+        best = score;
+      }
+    }
   }
 
-  return clamp(score, 0, 1);
+  return best;
 }
 
 function buildStraightPatterns(mode: GameMode): number[][] {
@@ -145,7 +163,7 @@ function analyzeDraw(player: PlayerState, board: TableState['board'], mode: Game
     if (missing) {
       const edge = missing === pattern[0] || missing === pattern[pattern.length - 1];
       const wheelPattern =
-        (mode === 'standard' && pattern[0] === 14 && pattern[1] === 5) ||
+        (mode !== 'shortDeck' && pattern[0] === 14 && pattern[1] === 5) ||
         (mode === 'shortDeck' && pattern[0] === 14 && pattern[1] === 9);
       if (edge && !wheelPattern) {
         openEnded = true;
@@ -188,7 +206,14 @@ function analyzeBoardWetness(board: TableState['board']): number {
 
 function evaluateSignals(table: TableState, player: PlayerState): HandSignals {
   const cards = [...player.holeCards, ...table.board];
-  const evaluated = cards.length >= 5 ? evaluateByMode(table.mode, cards) : undefined;
+  let evaluated: ReturnType<typeof evaluatePlayerByMode> | undefined;
+  if (cards.length >= 5) {
+    try {
+      evaluated = evaluatePlayerByMode(table.mode, player.holeCards, table.board);
+    } catch {
+      evaluated = undefined;
+    }
+  }
   const madeScore = evaluated ? clamp(evaluated.categoryStrength / 9, 0, 1) : estimatePreflopMadeScore(player, table.mode);
   const draw = analyzeDraw(player, table.board, table.mode);
   const boardWetness = analyzeBoardWetness(table.board);

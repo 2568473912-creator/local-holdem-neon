@@ -6,7 +6,7 @@
 - `启动游戏.ps1`：PowerShell 启动脚本
 
 ## 启动步骤
-1. 解压 `local-holdem-neon-v1.0.0-windows.zip`
+1. 解压 `yeju-v1.0.0-windows.zip`
 2. 双击 `启动游戏.bat`
 3. 浏览器打开 `http://127.0.0.1:4175`
 

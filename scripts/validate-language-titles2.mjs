@@ -1,0 +1,16 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 1440, height: 1024 } });
+await page.goto('http://127.0.0.1:4186', { waitUntil: 'networkidle' });
+await page.selectOption('.legal-entry-dock select', 'ja');
+await page.click('.game-hub-mode-card-doudizhu .btn');
+await page.waitForFunction(() => document.querySelector('.ddz-menu-card h1')?.textContent?.includes('斗地主') || document.querySelector('.ddz-menu-card h1')?.textContent?.includes('ネオン斗地主'));
+const ddzTitle = await page.locator('.ddz-menu-card h1').innerText();
+await page.click('.ddz-menu-switch .btn');
+await page.waitForFunction(() => document.querySelector('.game-hub-card h1'));
+await page.selectOption('.legal-entry-dock select', 'de');
+await page.click('.game-hub-mode-card-guandan .btn');
+await page.waitForFunction(() => document.querySelector('.gd-menu-card h1')?.textContent?.includes('Guandan'));
+const gdTitle = await page.locator('.gd-menu-card h1').innerText();
+console.log(JSON.stringify({ ddzTitle, gdTitle }, null, 2));
+await browser.close();

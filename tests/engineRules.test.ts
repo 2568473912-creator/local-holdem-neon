@@ -5,6 +5,7 @@ import { getActionOptions, validateAction } from '../src/engine/actionValidation
 import { applyBettingAction } from '../src/engine/bettingRound';
 import { applyAction, createInitialHand, startHand } from '../src/engine/handEngine';
 import { buildPotSegments, settlePots } from '../src/engine/potSettlement';
+import { getTournamentLevel, syncTournamentConfig } from '../src/engine/tournamentStructure';
 
 function makeCard(rank: number, suit: Card['suit']): Card {
   return { rank, suit, code: `${rank}-${suit[0]}` };
@@ -32,14 +33,15 @@ function makePlayer(overrides: Partial<PlayerState>): PlayerState {
 
 function makeTable(overrides: Partial<TableState>): TableState {
   const players = overrides.players ?? [makePlayer({ id: 'P0', isHuman: true }), makePlayer({ id: 'P1', seat: 1 })];
+  const mode = overrides.mode ?? 'standard';
   return {
     handId: overrides.handId ?? 1,
-    mode: overrides.mode ?? 'standard',
+    mode,
     stage: overrides.stage ?? 'preflop',
     config:
       overrides.config ??
       {
-        mode: 'standard',
+        mode,
         sessionMode: 'cash',
         aiCount: 1,
         startingChips: 1000,
@@ -57,6 +59,8 @@ function makeTable(overrides: Partial<TableState>): TableState {
     dealerSeat: overrides.dealerSeat ?? 0,
     smallBlindSeat: overrides.smallBlindSeat ?? 0,
     bigBlindSeat: overrides.bigBlindSeat ?? 1,
+    straddleSeat: overrides.straddleSeat,
+    straddleAmount: overrides.straddleAmount ?? 0,
     betting:
       overrides.betting ?? {
         currentBet: 0,
@@ -181,23 +185,26 @@ describe('action validation and short all-in behavior', () => {
 
 describe('tournament ante behavior', () => {
   it('posts ante into pot without changing preflop current bet baseline', () => {
-    const runtime = createInitialHand({
+    const runtime = createInitialHand(
+      syncTournamentConfig({
       mode: 'standard',
       sessionMode: 'tournament',
       aiCount: 2,
       startingChips: 1000,
       smallBlind: 10,
       bigBlind: 20,
-      blindLevel: 1,
+      blindLevel: 4,
       blindUpEveryHands: 5,
       fastMode: false,
       aiDifficulty: 'standard',
-    });
+      tournamentStructureId: 'standard',
+      }),
+    );
 
     const table = runtime.table;
-    const ante = Math.max(1, Math.round(table.config.bigBlind * 0.1));
+    const ante = getTournamentLevel(table.config).ante;
 
-    expect(ante).toBe(2);
+    expect(ante).toBe(10);
     expect(table.totalPot).toBe(ante * 3 + table.config.smallBlind + table.config.bigBlind);
     expect(table.betting.currentBet).toBe(table.config.bigBlind);
 
@@ -252,5 +259,134 @@ describe('replay elimination accuracy', () => {
       .map((event) => event.actorId);
 
     expect(eliminationIds).not.toContain('P2');
+  });
+});
+
+describe('new mode rules', () => {
+  it('deals 4 hole cards in Omaha and PLO', () => {
+    const omaha = createInitialHand({
+      mode: 'omaha',
+      sessionMode: 'cash',
+      aiCount: 2,
+      startingChips: 1000,
+      smallBlind: 10,
+      bigBlind: 20,
+      blindLevel: 1,
+      blindUpEveryHands: 5,
+      fastMode: false,
+      aiDifficulty: 'standard',
+    });
+
+    const plo = createInitialHand({
+      mode: 'plo',
+      sessionMode: 'cash',
+      aiCount: 2,
+      startingChips: 1000,
+      smallBlind: 10,
+      bigBlind: 20,
+      blindLevel: 1,
+      blindUpEveryHands: 5,
+      fastMode: false,
+      aiDifficulty: 'standard',
+    });
+
+    for (const player of omaha.table.players.filter((p) => !p.eliminated)) {
+      expect(player.holeCards).toHaveLength(4);
+    }
+    for (const player of plo.table.players.filter((p) => !p.eliminated)) {
+      expect(player.holeCards).toHaveLength(4);
+    }
+  });
+
+  it('evaluates Omaha showdown with exactly two hole cards', () => {
+    const players = [
+      makePlayer({
+        id: 'P0',
+        seat: 0,
+        stack: 0,
+        committed: 100,
+        holeCards: [makeCard(14, 'hearts'), makeCard(14, 'spades'), makeCard(13, 'clubs'), makeCard(12, 'clubs')],
+      }),
+      makePlayer({
+        id: 'P1',
+        seat: 1,
+        stack: 0,
+        committed: 100,
+        holeCards: [makeCard(9, 'hearts'), makeCard(8, 'hearts'), makeCard(7, 'diamonds'), makeCard(6, 'diamonds')],
+      }),
+    ];
+
+    const board = [makeCard(12, 'hearts'), makeCard(11, 'hearts'), makeCard(10, 'hearts'), makeCard(2, 'clubs'), makeCard(3, 'diamonds')];
+    const result = settlePots('omaha', players, board, 0);
+
+    expect(result.winners).toEqual(['P1']);
+    const p1 = result.players.find((player) => player.id === 'P1');
+    expect(p1?.stack).toBe(200);
+  });
+
+  it('caps PLO raise amount by pot-limit rule', () => {
+    const actor = makePlayer({ id: 'P0', isHuman: true, seat: 0, currentBet: 40, stack: 1000, actedThisStreet: false });
+    const villain = makePlayer({ id: 'P1', seat: 1, currentBet: 100, stack: 900, actedThisStreet: true });
+
+    const table = makeTable({
+      mode: 'plo',
+      players: [actor, villain],
+      activePlayerId: 'P0',
+      totalPot: 180,
+      betting: {
+        currentBet: 100,
+        minRaise: 100,
+        actionQueue: ['P0'],
+      },
+    });
+
+    const raiseOpt = getActionOptions(table, 'P0').find((option) => option.type === 'raise');
+    expect(raiseOpt?.maxAmount).toBe(340);
+
+    expect(validateAction(table, 'P0', { type: 'raise', amount: 340 }).valid).toBe(true);
+    expect(validateAction(table, 'P0', { type: 'raise', amount: 350 }).valid).toBe(false);
+  });
+
+  it('deals stud cards street-by-street without community cards', () => {
+    let runtime = createInitialHand({
+      mode: 'stud',
+      sessionMode: 'cash',
+      aiCount: 2,
+      startingChips: 1000,
+      smallBlind: 10,
+      bigBlind: 20,
+      blindLevel: 1,
+      blindUpEveryHands: 5,
+      fastMode: false,
+      aiDifficulty: 'standard',
+    });
+
+    expect(runtime.table.board).toHaveLength(0);
+    for (const player of runtime.table.players.filter((p) => !p.eliminated)) {
+      expect(player.holeCards).toHaveLength(2);
+    }
+
+    let guard = 0;
+    while (runtime.table.stage === 'preflop' && guard < 24) {
+      guard += 1;
+      const actorId = runtime.table.activePlayerId;
+      expect(actorId).toBeDefined();
+      if (!actorId) break;
+
+      const options = getActionOptions(runtime.table, actorId);
+      const canCheck = options.some((option) => option.type === 'check' && option.enabled);
+      const canCall = options.some((option) => option.type === 'call' && option.enabled);
+      const action = canCheck ? { type: 'check' as const } : canCall ? { type: 'call' as const } : { type: 'fold' as const };
+      const result = applyAction(runtime, actorId, action);
+      expect(result.error).toBeUndefined();
+      expect(result.handCompleted).toBe(false);
+      runtime = result.runtime;
+    }
+
+    expect(runtime.table.stage).toBe('flop');
+    expect(runtime.table.board).toHaveLength(0);
+    for (const player of runtime.table.players.filter((p) => !p.eliminated && !p.folded)) {
+      expect(player.holeCards).toHaveLength(3);
+    }
   });
 });

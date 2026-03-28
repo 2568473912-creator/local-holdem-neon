@@ -9,9 +9,26 @@ export interface ActionContext {
   raiseLocked: boolean;
 }
 
+function getPotLimitMaxTotal(table: TableState, player: PlayerState, toCall: number, noLimitMaxTotal: number): number {
+  if (table.mode !== 'plo') {
+    return noLimitMaxTotal;
+  }
+
+  if (table.betting.currentBet === 0) {
+    const maxOpen = player.currentBet + Math.max(table.totalPot, table.config.bigBlind);
+    return Math.min(noLimitMaxTotal, maxOpen);
+  }
+
+  // Pot-limit raise cap: call first, then raise at most the resulting pot size.
+  const potAfterCall = table.totalPot + toCall;
+  const maxRaiseTo = player.currentBet + toCall + potAfterCall;
+  return Math.min(noLimitMaxTotal, maxRaiseTo);
+}
+
 export function getActionContext(table: TableState, player: PlayerState): ActionContext {
   const toCall = Math.max(0, table.betting.currentBet - player.currentBet);
-  const maxTotalBet = player.currentBet + player.stack;
+  const maxTotalBetNoLimit = player.currentBet + player.stack;
+  const maxTotalBet = getPotLimitMaxTotal(table, player, toCall, maxTotalBetNoLimit);
   const minOpenBet = table.config.bigBlind;
   const minRaiseTo = table.betting.currentBet + table.betting.minRaise;
   const raiseLocked = player.actedThisStreet && table.betting.currentBet > player.currentBet;
@@ -41,6 +58,8 @@ export function getActionOptions(table: TableState, playerId: string): ActionOpt
 
   const { toCall, maxTotalBet, minOpenBet, minRaiseTo, raiseLocked } = getActionContext(table, player);
   const canBet = table.betting.currentBet === 0;
+  const allInTotal = player.currentBet + player.stack;
+  const allInExceedsPotLimit = table.mode === 'plo' && allInTotal > maxTotalBet;
 
   const options: ActionOption[] = [];
 
@@ -74,7 +93,7 @@ export function getActionOptions(table: TableState, playerId: string): ActionOpt
       minAmount: minOpenBet,
       maxAmount: maxTotalBet,
       suggestedAmount: Math.min(maxTotalBet, minOpenBet * 2),
-      reason: maxTotalBet < minOpenBet ? '筹码不足最小下注，使用全下' : undefined,
+      reason: maxTotalBet < minOpenBet ? (table.mode === 'plo' ? '底池限注下当前不可达最小下注，可考虑全下' : '筹码不足最小下注，使用全下') : undefined,
     });
   } else {
     options.push({
@@ -86,7 +105,9 @@ export function getActionOptions(table: TableState, playerId: string): ActionOpt
       suggestedAmount: Math.min(maxTotalBet, minRaiseTo + table.betting.minRaise),
       reason:
         maxTotalBet < minRaiseTo
-          ? '筹码不足最小加注，使用全下'
+          ? table.mode === 'plo'
+            ? '底池限注上限不足以完成最小加注，可考虑全下/跟注'
+            : '筹码不足最小加注，使用全下'
           : raiseLocked
           ? '此前加注未达到最小加注，不可再加注，只能跟注或弃牌'
           : undefined,
@@ -96,9 +117,13 @@ export function getActionOptions(table: TableState, playerId: string): ActionOpt
   const allInIsIllegalRaise = raiseLocked && maxTotalBet > table.betting.currentBet;
   options.push({
     type: 'all-in',
-    enabled: player.stack > 0 && !allInIsIllegalRaise,
+    enabled: player.stack > 0 && !allInIsIllegalRaise && !allInExceedsPotLimit,
     label: `全下 ${player.stack}`,
-    reason: allInIsIllegalRaise ? '当前不可重新加注，全下会构成非法加注' : undefined,
+    reason: allInIsIllegalRaise
+      ? '当前不可重新加注，全下会构成非法加注'
+      : allInExceedsPotLimit
+        ? '底池限注下全下金额超出上限'
+        : undefined,
   });
 
   return options;
@@ -128,6 +153,9 @@ export function validateAction(table: TableState, playerId: string, action: Play
     case 'call':
       return toCall > 0 ? { valid: true } : { valid: false, reason: '当前无需跟注' };
     case 'all-in':
+      if (table.mode === 'plo' && player.currentBet + player.stack > maxTotalBet) {
+        return { valid: false, reason: '底池限注下全下金额超出上限' };
+      }
       if (raiseLocked && maxTotalBet > table.betting.currentBet) {
         return { valid: false, reason: '当前不可重新加注，全下会构成非法加注' };
       }
@@ -140,7 +168,7 @@ export function validateAction(table: TableState, playerId: string, action: Play
         return { valid: false, reason: '下注金额缺失' };
       }
       if (action.amount > maxTotalBet) {
-        return { valid: false, reason: '下注金额超过可用筹码' };
+        return { valid: false, reason: table.mode === 'plo' ? '下注金额超过底池限注上限' : '下注金额超过可用筹码' };
       }
       if (action.amount < minOpenBet) {
         return { valid: false, reason: '下注低于最小下注' };
@@ -158,7 +186,7 @@ export function validateAction(table: TableState, playerId: string, action: Play
         return { valid: false, reason: '加注金额缺失' };
       }
       if (action.amount > maxTotalBet) {
-        return { valid: false, reason: '加注金额超过可用筹码' };
+        return { valid: false, reason: table.mode === 'plo' ? '加注金额超过底池限注上限' : '加注金额超过可用筹码' };
       }
       if (action.amount < minRaiseTo) {
         return { valid: false, reason: '加注低于最小加注门槛' };

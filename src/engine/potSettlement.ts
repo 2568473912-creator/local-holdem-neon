@@ -1,6 +1,6 @@
 import type { Card, GameMode } from '../types/cards';
 import type { EvaluatedHandInfo, PayoutItem, PlayerState, PotSegment } from '../types/game';
-import { compareByMode, evaluateByMode, type EvaluatedHand } from './evaluators';
+import { compareByMode, evaluatePlayerByMode, type EvaluatedHand } from './evaluators';
 
 export interface SettlementResult {
   players: PlayerState[];
@@ -94,7 +94,7 @@ function evaluateShowdownHands(
   const evaluatedMap = new Map<string, EvaluatedHand>();
 
   for (const player of contenders) {
-    const evaluated = evaluateByMode(mode, [...player.holeCards, ...board]);
+    const evaluated = evaluatePlayerByMode(mode, player.holeCards, board);
     evaluatedMap.set(player.id, evaluated);
     info.push({
       playerId: player.id,

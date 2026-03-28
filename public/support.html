@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>夜局 · 支持与帮助</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-a: #07111d;
+        --bg-b: #0a1b2b;
+        --panel: rgba(13, 22, 39, 0.82);
+        --line: rgba(126, 176, 220, 0.24);
+        --text: #eaf4ff;
+        --dim: rgba(226, 237, 248, 0.72);
+        --accent: #8fefff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "PingFang SC", "Noto Sans SC", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 78% 4%, rgba(88, 219, 255, 0.18), transparent 28%),
+          radial-gradient(circle at 20% 0%, rgba(255, 206, 120, 0.11), transparent 24%),
+          linear-gradient(180deg, var(--bg-b), var(--bg-a));
+      }
+      main {
+        width: min(920px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 28px 0 48px;
+        display: grid;
+        gap: 18px;
+      }
+      .hero,
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: 0 24px 54px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(16px);
+      }
+      .hero { padding: 24px 26px; display: grid; gap: 10px; }
+      .hero strong { font-size: 28px; color: var(--text); }
+      .hero span,
+      .panel p,
+      .panel li,
+      .panel small {
+        color: var(--dim);
+        line-height: 1.7;
+      }
+      nav { display: flex; flex-wrap: wrap; gap: 10px; }
+      nav a {
+        border-radius: 999px;
+        border: 1px solid rgba(143, 239, 255, 0.24);
+        background: rgba(8, 17, 31, 0.5);
+        color: var(--text);
+        padding: 8px 12px;
+        text-decoration: none;
+        font-size: 13px;
+      }
+      .panel { padding: 20px 22px; }
+      .panel ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <nav>
+          <a href="./">返回游戏</a>
+          <a href="./privacy.html">隐私政策</a>
+        </nav>
+        <strong>夜局支持与帮助</strong>
+        <span>当前版本是本地单机牌桌合集。以下内容可直接作为 App Store 支持 URL 页面基础版本。</span>
+      </section>
+
+      <section class="panel">
+        <h2>常见问题</h2>
+        <div class="grid">
+          <div>
+            <strong>建议用什么设备方向？</strong>
+            <p>iPad 推荐横屏游玩。多人牌桌、回放与复盘面板在横屏下更完整。</p>
+          </div>
+          <div>
+            <strong>为什么会看到离线提示？</strong>
+            <p>主屏安装版本会缓存资源以支持离线启动，这属于正常行为。</p>
+          </div>
+          <div>
+            <strong>清理设备存储后会怎样？</strong>
+            <p>本地回放、战绩、继续游戏存档会随站点数据一起清除。</p>
+          </div>
+          <div>
+            <strong>是否支持真钱或联网对战？</strong>
+            <p>当前版本只提供本地单机娱乐/训练玩法，不接真人对战、充值、提现或远程博彩服务。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>提审前建议补充</h2>
+        <ul>
+          <li>把本页部署到你自己的 HTTPS 域名，并将其填写为 App Store Connect 的 Support URL。</li>
+          <li>补充真实的开发者联系邮箱、工单地址或官网支持入口。</li>
+          <li>如果后续接入联网、云存档或分析服务，需同步更新支持页和隐私页说明。</li>
+        </ul>
+        <small>当前仓库没有硬编码一个虚假的支持邮箱，这一项必须在你准备正式提交前用真实联系信息替换。</small>
+      </section>
+    </main>
+  </body>
+</html>

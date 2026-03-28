@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>夜局 · 隐私政策</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-a: #07111d;
+        --bg-b: #091d2e;
+        --panel: rgba(13, 22, 39, 0.82);
+        --line: rgba(126, 176, 220, 0.24);
+        --text: #eaf4ff;
+        --dim: rgba(226, 237, 248, 0.72);
+        --accent: #8fefff;
+        --trim: #f9cb72;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "PingFang SC", "Noto Sans SC", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 20% 18%, rgba(72, 211, 255, 0.18), transparent 30%),
+          radial-gradient(circle at 82% 0%, rgba(255, 206, 120, 0.12), transparent 26%),
+          linear-gradient(180deg, var(--bg-b), var(--bg-a));
+      }
+      main {
+        width: min(920px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 28px 0 48px;
+        display: grid;
+        gap: 18px;
+      }
+      .hero,
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: 0 24px 54px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(16px);
+      }
+      .hero {
+        padding: 24px 26px;
+        display: grid;
+        gap: 10px;
+      }
+      .hero span,
+      .panel p,
+      .panel li,
+      .panel small,
+      .footnote {
+        color: var(--dim);
+        line-height: 1.7;
+      }
+      .hero strong,
+      .panel h2 { color: var(--text); }
+      .hero strong { font-size: 28px; }
+      .hero span { font-size: 15px; }
+      .badge-row,
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .badge,
+      nav a {
+        border-radius: 999px;
+        border: 1px solid rgba(143, 239, 255, 0.24);
+        background: rgba(8, 17, 31, 0.5);
+        color: var(--text);
+        padding: 8px 12px;
+        text-decoration: none;
+        font-size: 13px;
+      }
+      .panel { padding: 20px 22px; }
+      .panel ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; }
+      .footnote { font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <nav>
+          <a href="./">返回游戏</a>
+          <a href="./support.html">支持与帮助</a>
+        </nav>
+        <strong>夜局隐私政策</strong>
+        <span>适用于当前本地单机版本：德州、斗地主、掼蛋等模式均运行在设备本地，不要求登录账号，也不依赖开发者远程后端。</span>
+        <div class="badge-row">
+          <div class="badge">不要求注册</div>
+          <div class="badge">不上传对局到开发者服务器</div>
+          <div class="badge">离线可玩</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>1. 我们处理哪些数据</h2>
+        <ul>
+          <li>当前版本不会要求你创建账号，也不会把手牌、回放、战绩发送到开发者控制的远程服务器。</li>
+          <li>为了支持继续游戏、局史、回放、生涯战绩、主题与音效偏好，应用会把必要数据写入当前设备的浏览器存储或原生容器本地存储。</li>
+          <li>当前工程未接入广告 SDK、统计 SDK、推送 SDK、第三方登录 SDK 或在线排行榜 SDK。</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>2. 本地存储与离线缓存</h2>
+        <ul>
+          <li>对局存档、历史回放、生涯战绩、皮肤与主题设置会保存在 IndexedDB 或 localStorage 中。</li>
+          <li>主屏安装版会通过 service worker 缓存外壳资源，用于离线启动和弱网访问。</li>
+          <li>清空站点数据、删除 App，或在系统中移除容器数据后，本地存档会一并删除。</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>3. 第三方服务</h2>
+        <ul>
+          <li>当前版本不集成第三方广告、埋点或远程分析服务。</li>
+          <li>如果未来接入联网功能、云存档、排行榜、账号体系或分析服务，需要同步更新此页面与 App Store 隐私标签。</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>4. 联系与更新</h2>
+        <p>如果你准备正式上架 App Store，建议把本页面放到你自己的 HTTPS 域名，并在 App Store Connect 中将“隐私政策 URL”指向该地址。</p>
+        <p class="footnote">当前页面为本地壳应用可直接打包的静态版本，可作为提审前的基础文案模板。</p>
+      </section>
+    </main>
+  </body>
+</html>

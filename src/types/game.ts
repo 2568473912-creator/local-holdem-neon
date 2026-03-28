@@ -1,4 +1,7 @@
 import type { Card, GameMode } from './cards';
+import type { AIPackKey } from './aiPack';
+import type { AppLanguage } from '../i18n';
+import type { HumanPortraitKey } from './portrait';
 
 export type Street = 'preflop' | 'flop' | 'turn' | 'river';
 export type HandStage = Street | 'showdown' | 'settlement' | 'complete';
@@ -8,10 +11,18 @@ export type PlayerStyle = 'tight' | 'loose' | 'aggressive' | 'balanced';
 export type PlayerActionType = 'fold' | 'check' | 'call' | 'bet' | 'raise' | 'all-in';
 export type SessionMode = 'cash' | 'tournament';
 export type AIDifficulty = 'conservative' | 'standard' | 'aggressive';
+export type StraddleMode = 'off' | 'utg';
+export type AutoActionMode = 'checkFold' | 'checkOnly' | 'callAny' | 'callLimit' | 'callLimitThenFold';
+export type TournamentStructureId = 'standard' | 'turbo' | 'deep';
 
 export interface PlayerAction {
   type: PlayerActionType;
   amount?: number;
+}
+
+export interface AutoActionPreset {
+  mode: AutoActionMode;
+  callLimitBb?: number;
 }
 
 export interface GameConfig {
@@ -25,6 +36,11 @@ export interface GameConfig {
   blindUpEveryHands: number;
   fastMode: boolean;
   aiDifficulty: AIDifficulty;
+  straddleMode?: StraddleMode;
+  tournamentStructureId?: TournamentStructureId;
+  humanPortraitKey?: HumanPortraitKey;
+  aiPackKey?: AIPackKey;
+  language?: AppLanguage;
 }
 
 export interface PlayerState {
@@ -32,6 +48,7 @@ export interface PlayerState {
   name: string;
   seat: number;
   isHuman: boolean;
+  portraitKey?: HumanPortraitKey;
   style: PlayerStyle;
   stack: number;
   holeCards: Card[];
@@ -93,6 +110,8 @@ export interface TableState {
   dealerSeat: number;
   smallBlindSeat: number;
   bigBlindSeat: number;
+  straddleSeat?: number;
+  straddleAmount: number;
   betting: BettingRoundState;
   aggression: AggressionTracker;
   activePlayerId?: string;
